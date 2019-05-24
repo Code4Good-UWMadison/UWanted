@@ -12,5 +12,5 @@ Current Process:
 * Navigator Bar - Danny
 
 To join this project, please Direct Message Kyle Wang on Slack to add you to this project on Github. Then you can choose which page you prefer to work on and send messages to the member(s) that is working on that. You will need to learn basic operations on Github such as creating your own branch to keep the main branch save:
-[A quick tutorial about branching by Merle](https://github.com/Code4Good-UWMadison/UWanted/blob/dev-merle/tutorials/pull%26merge.md"This is a quick tutorial about branching by Merle")
+[A quick tutorial about branching by Merle](https://github.com/Code4Good-UWMadison/UWanted/blob/dev-merle/tutorials/pull%26merge.md "This is a quick tutorial about branching by Merle")
 
