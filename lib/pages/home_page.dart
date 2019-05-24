@@ -108,13 +108,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _showTodoList() {
-      return ListView.builder(
-          shrinkWrap: true,
-          itemBuilder: (BuildContext context, int index) {
-            return Dismissible(
-              background: Container(color: Colors.red),
-            );
-          });
+      return Text("success Login!");
   }
 
   @override
