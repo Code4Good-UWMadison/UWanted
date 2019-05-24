@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/todo.dart';
 import 'dart:async';
 
 class HomePage extends StatefulWidget {
@@ -17,13 +15,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Todo> _todoList;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-
-  final _textEditingController = TextEditingController();
-
-  Query _todoQuery;
 
   bool _isEmailVerified = false;
 
@@ -32,15 +25,6 @@ class _HomePageState extends State<HomePage> {
     super.initState();
 
     _checkEmailVerification();
-
-    _todoList = new List();
-    // _todoQuery = _database
-    //     .reference()
-    //     .child("todo")
-    //     .orderByChild("userId")
-    //     .equalTo(widget.userId);
-    // _onTodoAddedSubscription = _todoQuery.onChildAdded.listen(_onEntryAdded);
-    // _onTodoChangedSubscription = _todoQuery.onChildChanged.listen(_onEntryChanged);
   }
 
   void _checkEmailVerification() async {
@@ -104,29 +88,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // @override
-  // void dispose() {
-  //   _onTodoAddedSubscription.cancel();
-  //   _onTodoChangedSubscription.cancel();
-  //   super.dispose();
-  // }
-
-  // _onEntryChanged(Event event) {
-  //   var oldEntry = _todoList.singleWhere((entry) {
-  //     return entry.key == event.snapshot.key;
-  //   });
-
-  //   setState(() {
-  //     _todoList[_todoList.indexOf(oldEntry)] = Todo.fromSnapshot(event.snapshot);
-  //   });
-  // }
-
-  // _onEntryAdded(Event event) {
-  //   setState(() {
-  //     _todoList.add(Todo.fromSnapshot(event.snapshot));
-  //   });
-  // }
-
   _signOut() async {
     try {
       await widget.auth.signOut();
@@ -137,105 +98,23 @@ class _HomePageState extends State<HomePage> {
   }
 
   _addNewTodo(String todoItem) {
-    // if (todoItem.length > 0) {
-
-    //   Todo todo = new Todo(todoItem.toString(), widget.userId, false);
-    //   _database.reference().child("todo").push().set(todo.toJson());
-    // }
-  }
-
-  _updateTodo(Todo todo){
-    // //Toggle completed
-    // todo.completed = !todo.completed;
-    // if (todo != null) {
-    //   _database.reference().child("todo").child(todo.key).set(todo.toJson());
-    // }
   }
 
   _deleteTodo(String todoId, int index) {
-    // _database.reference().child("todo").child(todoId).remove().then((_) {
-    //   print("Delete $todoId successful");
-    //   setState(() {
-    //     _todoList.removeAt(index);
-    //   });
-    // });
   }
 
   _showDialog(BuildContext context) async {
-    _textEditingController.clear();
-    await showDialog<String>(
-        context: context,
-      builder: (BuildContext context) {
-          return AlertDialog(
-            content: new Row(
-              children: <Widget>[
-                new Expanded(child: new TextField(
-                  controller: _textEditingController,
-                  autofocus: true,
-                  decoration: new InputDecoration(
-                    labelText: 'Add new todo',
-                  ),
-                ))
-              ],
-            ),
-            actions: <Widget>[
-              new FlatButton(
-                  child: const Text('Cancel'),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  }),
-              new FlatButton(
-                  child: const Text('Save'),
-                  onPressed: () {
-                    _addNewTodo(_textEditingController.text.toString());
-                    Navigator.pop(context);
-                  })
-            ],
-          );
-      }
-    );
+   
   }
 
   Widget _showTodoList() {
-    if (_todoList.length > 0) {
       return ListView.builder(
           shrinkWrap: true,
-          itemCount: _todoList.length,
           itemBuilder: (BuildContext context, int index) {
-            String todoId = _todoList[index].key;
-            String subject = _todoList[index].subject;
-            bool completed = _todoList[index].completed;
-            String userId = _todoList[index].userId;
             return Dismissible(
-              key: Key(todoId),
               background: Container(color: Colors.red),
-              onDismissed: (direction) async {
-                _deleteTodo(todoId, index);
-              },
-              child: ListTile(
-                title: Text(
-                  subject,
-                  style: TextStyle(fontSize: 20.0),
-                ),
-                trailing: IconButton(
-                    icon: (completed)
-                        ? Icon(
-                      Icons.done_outline,
-                      color: Colors.green,
-                      size: 20.0,
-                    )
-                        : Icon(Icons.done, color: Colors.grey, size: 20.0),
-                    onPressed: () {
-                      _updateTodo(_todoList[index]);
-                    }),
-              ),
             );
           });
-    } else {
-      return Center(child: Text("Welcome. Your list is empty",
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 30.0),));
-    }
   }
 
   @override
