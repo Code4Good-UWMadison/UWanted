@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "554907477941",
+    "firebase_url": "https://the-wanted-42bf1.firebaseio.com",
+    "project_id": "the-wanted-42bf1",
+    "storage_bucket": "the-wanted-42bf1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:554907477941:android:3afe1d6a0b90bc9b",
+        "android_client_info": {
+          "package_name": "com.example.thewanted"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "554907477941-tht706qocjkd3jdegvnj49c3fgb3kisj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyUk12MZOFtxUUEJuDIOGKkoLi3CYk8_U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "554907477941-tht706qocjkd3jdegvnj49c3fgb3kisj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
