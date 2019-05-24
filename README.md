@@ -1,16 +1,16 @@
-# thewanted
+# UWanted
 
-A new Flutter project.
+As coding becomes more and more widely used across academics, lots of labs and students from majors other than Computer Sciences may want to use coding as a tool to do something. For example, a biology lab may need a short script in Python to do a data analysis. It will be nice if there's a platform on campus that can let labs and students from other majors to post requests about this kind of specific technical assistance. 
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
+# Get Started:
 
-A few resources to get you started if this is your first Flutter project:
+Current Process:
+* Dashboard - Kyle
+* Profile - Merle
+* Single Request Framework/Send Request - Katherine & Helenisme
+* Navigator Bar - Danny
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+To join this project, please Direct Message Kyle Wang on Slack to add you to this project on Github. Then you can choose which page you prefer to work on and send messages to the member(s) that is working on that. You will need to learn basic operations on Github such as creating your own branch to keep the main branch save:
+[A quick tutorial about branching by Merle](https://github.com/Code4Good-UWMadison/UWanted/blob/dev-merle/tutorials/pull%26merge.md "This is a quick tutorial about branching by Merle")
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
