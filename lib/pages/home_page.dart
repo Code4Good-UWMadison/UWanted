@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
+import '../pages/card.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
 class HomePage extends StatefulWidget {
@@ -15,7 +17,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   bool _isEmailVerified = false;
@@ -34,7 +35,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void _resentVerifyEmail(){
+  void _resentVerifyEmail() {
     widget.auth.sendEmailVerification();
     _showVerifyEmailSentDialog();
   }
@@ -74,7 +75,8 @@ class _HomePageState extends State<HomePage> {
         // return object of type Dialog
         return AlertDialog(
           title: new Text("Verify your account"),
-          content: new Text("Link to verify account has been sent to your email"),
+          content:
+              new Text("Link to verify account has been sent to your email"),
           actions: <Widget>[
             new FlatButton(
               child: new Text("Dismiss"),
@@ -97,40 +99,58 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _addNewTodo(String todoItem) {
-  }
+  _newTask() async {}
 
-  _deleteTodo(String todoId, int index) {
-  }
-
-  _showDialog(BuildContext context) async {
-   
-  }
-
+  final List<String> entries = <String>['A', 'B', 'C'];
+  final List<int> colorCodes = <int>[600, 500, 100];
   Widget _showTodoList() {
-      return Text("success Login!");
+    return Center(
+      child: Container(
+          padding: const EdgeInsets.all(10.0),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: Firestore.instance.collection('tasks').snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError)
+                return new Text('Error: ${snapshot.error}');
+              switch (snapshot.connectionState) {
+                case ConnectionState.waiting:
+                  return new Text('Loading...');
+                default:
+                  return new ListView(
+                    children: snapshot.data.documents
+                        .map((DocumentSnapshot document) {
+                      return new Task(
+                        title: document['title'],
+                        description: document['description'],
+                      );
+                    }).toList(),
+                  );
+              }
+            },
+          )
+        ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Flutter login demo'),
-          actions: <Widget>[
-            new FlatButton(
-                child: new Text('Logout',
-                    style: new TextStyle(fontSize: 17.0, color: Colors.white)),
-                onPressed: _signOut)
-          ],
-        ),
-        body: _showTodoList(),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            _showDialog(context);
-          },
-          tooltip: 'Increment',
-          child: Icon(Icons.add),
-        )
+      appBar: new AppBar(
+        title: new Text('Dashboard'),
+        actions: <Widget>[
+          new FlatButton(
+              child: new Text('Logout',
+                  style: new TextStyle(fontSize: 17.0, color: Colors.white)),
+              onPressed: _signOut)
+        ],
+      ),
+      body: _showTodoList(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _newTask, // generate a new task
+        tooltip: 'Add',
+        child: Icon(Icons.add),
+      ),
     );
   }
 }
