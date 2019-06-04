@@ -1,5 +1,5 @@
-//Written By Katherine Fu
 import 'package:flutter/material.dart';
+
 
 class App extends StatelessWidget {
   // This widget is the root of your application.
@@ -27,7 +27,16 @@ class Request extends StatelessWidget {
                       BottomPart(),
                       
                     ],
-          )      
+          ),    
+
+          floatingActionButton: FloatingActionButton(
+            onPressed:(){
+            //submit and go to another page
+          },
+            backgroundColor: Colors.brown,
+            child: Text("►►",style:TextStyle(color:Colors.white ),),       
+          ),
+
       );
   }
   }
@@ -43,20 +52,13 @@ class TopPart extends StatefulWidget{
 }
 
 class _TopPartState extends State<TopPart>{
-  var isBackendSelected=true;
-  var isFrontendSelected=false;
-  var isAlMlSelected=false;
-  var isDateSelected=false;
-  var isAppSelected=false;
-  var isOtherSelected=false;
-
   @override
   Widget build(BuildContext context) {
         return  Stack(
             children:<Widget>[
                 ClipPath(clipper: CustomShapeClipper(),
                     child: Container(height:500.0,
-                      decoration:BoxDecoration(color: Colors.brown),
+                      decoration:BoxDecoration(color: firstColor),
                     child:Column(
                        mainAxisSize : MainAxisSize.max,
                        crossAxisAlignment: CrossAxisAlignment.center,
@@ -188,14 +190,14 @@ return Column(
     crossAxisAlignment: CrossAxisAlignment.center,
   children: <Widget>[
                         
-                      SizedBox(height:40.0,),
+                      SizedBox(height:20.0,),
                       Text("Labels:", style:TextStyle(fontSize:18.0,color:textColor,decoration: TextDecoration.none),textAlign:TextAlign.center,),
                        SizedBox(height:20.0),
                                  Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     new SizedBox(
-                      width: 100,
+                      width: 90,
                       height: 30,
                       child: LabelWidget(Text('Backend',style:TextStyle(color:Colors.white),)),
                     ),
@@ -205,7 +207,7 @@ return Column(
                       child: LabelWidget(Text('Frontend',style:TextStyle(color:Colors.white),)),
                     ),
                     new SizedBox(
-                      width: 100,
+                      width: 90,
                       height: 30,
                       child: LabelWidget(Text('AI&ML',style:TextStyle(color:Colors.white),)),
                     ),
@@ -217,7 +219,7 @@ return Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
                       new SizedBox(
-                        width: 100,
+                        width: 90,
                         height: 30,
                         child: LabelWidget(Text('Data',style:TextStyle(color:Colors.white),)),
                       ),
@@ -227,7 +229,7 @@ return Column(
                         child: LabelWidget(Text('App',style:TextStyle(color:Colors.white),)),
                       ),
                       new SizedBox(
-                        width: 100,
+                        width: 90,
                         height: 30,
                         child: LabelWidget(Text('Other',style:TextStyle(color:Colors.white),)),
                       ),
@@ -235,11 +237,9 @@ return Column(
                   ),
                 ),
 
-
-
-                        SizedBox(height:50.0),              
+                        SizedBox(height:30.0),              
                         Text("Contact Info:", style:TextStyle(fontSize:18.0,color:textColor,decoration: TextDecoration.none),textAlign:TextAlign.left,),
-                        SizedBox(height:20.0),
+                        SizedBox(height:10.0),
                         Padding(
                           padding:EdgeInsets.symmetric(horizontal:32.0,),       
                           child:Material(
