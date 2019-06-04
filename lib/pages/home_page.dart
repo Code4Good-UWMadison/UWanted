@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 import '../pages/card.dart';
 import '../pages/profile.dart';
-import '../pages/details.dart';
+import '../pages/send_request.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 
@@ -26,9 +26,10 @@ class _HomePageState extends State<HomePage> {
     int _selectedIndex = 0;
     final _pageOptions = [
         DashboardPage(),
-        DetailedPage(),
+        App(),
         ProfilePage(),
     ];
+    final _pageName = ["Dashboard","Send Request","Profile"];
 
   @override
   void initState() {
@@ -151,8 +152,16 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      
-      //body: _showTodoList(),
+      appBar: new AppBar(
+        title: new Text(_pageName[_selectedIndex]),
+        actions: <Widget>[
+          new FlatButton(
+              child: new Text('Logout',
+                  style: new TextStyle(fontSize: 17.0, color: Colors.white)),
+                  onPressed:_signOut,
+              )
+        ],
+      ),
       body: _pageOptions[_selectedIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: _newTask, // generate a new task
@@ -224,15 +233,6 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(
-        title: new Text('Dashboard'),
-        actions: <Widget>[
-          new FlatButton(
-              child: new Text('Logout',
-                  style: new TextStyle(fontSize: 17.0, color: Colors.white)), onPressed: () {},
-              )
-        ],
-      ),
       body: _showTodoList(),
     );
   }
