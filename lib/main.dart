@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import './services/authentication.dart';
 import './pages/root_page.dart';
 
-import './dummy_home.dart';
+// import './pages/send_request.dart';
+
+// import './dummy_home.dart';
 
 void main() {
   runApp(new MyApp());
@@ -17,7 +19,7 @@ class MyApp extends StatelessWidget {
         theme: new ThemeData(
           primarySwatch: Colors.blue,
         ),
-        // home: new RootPage(auth: new Auth()));
-        home: new HomePage());
+        home: new RootPage(auth: new Auth()));
+        // home: new App());
   }
 }
