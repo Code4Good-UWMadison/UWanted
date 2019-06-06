@@ -32,35 +32,22 @@ class ProfilePage extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
-          ListTile(
-            title: Text("Name"),
-            trailing: Text(this.userName),
-            onTap: () {},
-          ),
-          ListTile(
-            title: Text("Role"),
-            trailing: Text(this.userRole.toString().substring(9)),
-            onTap: () {},
-          ),
-          ListTile(
-            title: Text("Lab"),
-            trailing: Text(this.lab),
-            onTap: () {},
-          ),
-          ListTile(
-            title: Text("Major"),
-            trailing: Text(this.major),
-            onTap: () {},
-          ),
-          ListTile(
-            title: Text("Technical Skills"),
-            trailing: Text(this.skills.toString()),
-            onTap: () {},
-          ),
+          _buildListTile("Name", this.userName, null),
+          _buildListTile("Role", this.userRole.toString().substring(9), null),
+          _buildListTile("Lab", this.lab, null),
+          _buildListTile("Major", this.major, null),
+          _buildListTile("Technical Skills", this.skills.toString(), null),
         ],
       ),
     );
   }
+
+  ListTile _buildListTile(String title, String trailing, Function onTap) =>
+      ListTile(
+        title: Text(title),
+        trailing: Text(trailing),
+        onTap: onTap,
+      );
 }
 
 enum UserRole {
