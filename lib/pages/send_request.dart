@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // void main() =>runApp(MyApp());
 
@@ -6,6 +7,7 @@ class App extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    ScreenUtil.instance = ScreenUtil(width: 640, height: 1136)..init(context);
     return MaterialApp(
         title: 'Send Request',
         home: new Request(),
@@ -55,33 +57,33 @@ class _TopPartState extends State<TopPart> {
         ClipPath(
           clipper: CustomShapeClipper(),
           child: Container(
-            height: 500.0,
+            height: ScreenUtil.getInstance().setHeight(500),
             decoration: BoxDecoration(color: Colors.brown),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: 50.0,
+                  height: ScreenUtil.getInstance().setHeight(50),
                 ),
                 Text(
                   "SEND REQUEST",
                   style: TextStyle(
-                      fontSize: 24.0,
+                      fontSize: ScreenUtil.getInstance().setSp(24),
                       color: Colors.white,
                       decoration: TextDecoration.none),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 50.0),
+                SizedBox(height: ScreenUtil.getInstance().setHeight(50),),
                 Text(
                   "Short Description:",
                   style: TextStyle(
-                      fontSize: 18.0,
+                      fontSize: ScreenUtil.getInstance().setSp(18),
                       color: textColor,
                       decoration: TextDecoration.none),
                   textAlign: TextAlign.left,
                 ),
-                SizedBox(height: 20.0),
+                SizedBox(height: ScreenUtil.getInstance().setHeight(20)),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 32.0,
@@ -103,16 +105,16 @@ class _TopPartState extends State<TopPart> {
                   ), //Material
                 ), //padding
 
-                SizedBox(height: 30.0),
+                SizedBox(height: ScreenUtil.getInstance().setHeight(30)),
                 Text(
                   "Details:",
                   style: TextStyle(
-                      fontSize: 18.0,
+                      fontSize: ScreenUtil.getInstance().setSp(18),
                       color: textColor,
                       decoration: TextDecoration.none),
                   textAlign: TextAlign.left,
                 ),
-                SizedBox(height: 20.0),
+                SizedBox(height: ScreenUtil.getInstance().setHeight(20)),
                 Container(
                   height: 100,
                   child: Padding(
@@ -215,43 +217,41 @@ class BottomPartState extends State<BottomPart> {
   @override
   Widget build(BuildContext context) {
     return Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           SizedBox(
-            height: 20.0,
+            height: ScreenUtil.getInstance().setHeight(10),
           ),
           Text(
             "Labels:",
             style: TextStyle(
-                fontSize: 18.0,
+                fontSize: ScreenUtil.getInstance().setSp(18),
                 color: textColor,
                 decoration: TextDecoration.none),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: 20.0),
+          SizedBox(height: ScreenUtil.getInstance().setHeight(10)),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               new SizedBox(
-                width: 90,
-                height: 30,
+                width: ScreenUtil.getInstance().setWidth(100),
+                height: ScreenUtil.getInstance().setHeight(30),
                 child: LabelWidget(Text(
                   'Backend',
                   style: TextStyle(color: Colors.white),
                 )),
               ),
               new SizedBox(
-                width: 100,
-                height: 30,
+                width: ScreenUtil.getInstance().setWidth(100),
+                height: ScreenUtil.getInstance().setHeight(30),
                 child: LabelWidget(Text(
                   'Frontend',
                   style: TextStyle(color: Colors.white),
                 )),
               ),
               new SizedBox(
-                width: 90,
-                height: 30,
+               width: ScreenUtil.getInstance().setWidth(100),
+                height: ScreenUtil.getInstance().setHeight(30),
                 child: LabelWidget(Text(
                   'AI&ML',
                   style: TextStyle(color: Colors.white),
@@ -265,24 +265,24 @@ class BottomPartState extends State<BottomPart> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 new SizedBox(
-                  width: 90,
-                  height: 30,
+                  width: ScreenUtil.getInstance().setWidth(100),
+                  height: ScreenUtil.getInstance().setHeight(30),
                   child: LabelWidget(Text(
                     'Data',
                     style: TextStyle(color: Colors.white),
                   )),
                 ),
                 new SizedBox(
-                  width: 100,
-                  height: 30,
+                  width: ScreenUtil.getInstance().setWidth(100),
+                  height: ScreenUtil.getInstance().setHeight(30),
                   child: LabelWidget(Text(
                     'App',
                     style: TextStyle(color: Colors.white),
                   )),
                 ),
                 new SizedBox(
-                  width: 90,
-                  height: 30,
+                  width: ScreenUtil.getInstance().setWidth(100),
+                  height: ScreenUtil.getInstance().setHeight(30),
                   child: LabelWidget(Text(
                     'Other',
                     style: TextStyle(color: Colors.white),
@@ -292,16 +292,16 @@ class BottomPartState extends State<BottomPart> {
             ),
           ),
 
-          SizedBox(height: 30.0),
+          SizedBox(height: ScreenUtil.getInstance().setHeight(10)),
           Text(
             "Contact Info:",
             style: TextStyle(
-                fontSize: 18.0,
+                fontSize: ScreenUtil.getInstance().setSp(18),
                 color: textColor,
                 decoration: TextDecoration.none),
             textAlign: TextAlign.left,
           ),
-          SizedBox(height: 10.0),
+          SizedBox(height: ScreenUtil.getInstance().setHeight(10)),
           Padding(
             padding: EdgeInsets.symmetric(
               horizontal: 32.0,

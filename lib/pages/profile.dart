@@ -27,9 +27,6 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
       body: ListView(
         children: <Widget>[
           _buildListTile("Name", this.userName, null),
