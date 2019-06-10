@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key key}) : super(key: key) {
+  ProfilePage({Key key, this.auth, this.userId}) : super(key: key) {
 //    get user profile from server
   }
+
+  final BaseAuth auth;
+  final String userId;
+  
   @override
   _ProfilePageState createState() => _ProfilePageState();
 }
@@ -81,7 +85,7 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class EditProfilePageState extends State<EditProfilePage> {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController nameController;
   TextEditingController roleController;
   TextEditingController labController;
