@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../services/authentication.dart';
 
-// void main() =>runApp(MyApp());
 
-class App extends StatelessWidget {
-  // This widget is the root of your application.
+class SendRequest extends StatelessWidget {
+    SendRequest({Key key, this.auth, this.userId})
+      : super(key: key);
+  final BaseAuth auth;
+  final String userId;
   @override
   Widget build(BuildContext context) {
     ScreenUtil.instance = ScreenUtil(width: 640, height: 1136)..init(context);
