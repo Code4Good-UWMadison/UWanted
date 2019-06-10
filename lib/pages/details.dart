@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
 class DetailedPage extends StatelessWidget {
-  DetailedPage({@required this.title, this.description});
-
+  DetailedPage({@required this.title, @required this.id});
   final title;
-  final description;
+  final id;
 
   @override
   Widget build(BuildContext context) {
