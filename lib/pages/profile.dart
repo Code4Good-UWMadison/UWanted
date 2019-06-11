@@ -29,24 +29,46 @@ class _ProfilePageState extends State<ProfilePage> {
         .document(widget.userId)
         .get()
         .then((DocumentSnapshot document) {
-      user = User(
-        userName: document['name'],
-        userRole: document['student']
-            ? UserRole.Student
-            : (document['faculty'] ? UserRole.Faculty : null),
-        lab: document['lab'],
-        major: document['major'],
-        skills: Skills(
-          backend: document['Backend'],
-          frontend: document['Frontend'],
-          aiml: document['AI&ML'],
-          data: document['Data'],
-          app: document['App'],
-          others: document['Others'],
-        ),
-      );
-      setState(() {
-        this.user = user;
+      if (!document.exists) {
+        Firestore.instance.collection('users').document(widget.userId).setData({
+          'name': '',
+          'faculty': false,
+          'student': false,
+          'lab': '',
+          'major': '',
+          'Backend': false,
+          'Frontend': false,
+          'AI&ML': false,
+          'Data': false,
+          'App': false,
+          'Others': false,
+        });
+      }
+    }).then((_) {
+      Firestore.instance
+          .collection('users')
+          .document(widget.userId)
+          .get()
+          .then((DocumentSnapshot document) {
+        user = User(
+          userName: document['name'],
+          userRole: document['student']
+              ? UserRole.Student
+              : (document['faculty'] ? UserRole.Faculty : null),
+          lab: document['lab'],
+          major: document['major'],
+          skills: Skills(
+            backend: document['Backend'],
+            frontend: document['Frontend'],
+            aiml: document['AI&ML'],
+            data: document['Data'],
+            app: document['App'],
+            others: document['Others'],
+          ),
+        );
+        setState(() {
+          this.user = user;
+        });
       });
     });
   }
@@ -63,8 +85,8 @@ class _ProfilePageState extends State<ProfilePage> {
           context: context,
           tiles: [
             _buildListTile("Name", this.user.userName, context),
-            _buildListTile(
-                "Role", this.user.userRole.toString().substring(9), context),
+            _buildListTile("Role",
+                this.user.userRole?.toString()?.substring(9) ?? '', context),
             _buildListTile("Lab", this.user.lab, context),
             _buildListTile("Major", this.user.major, context),
             _buildListTile(
