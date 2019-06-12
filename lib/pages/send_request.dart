@@ -1,31 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../services/authentication.dart';
 
+// void main() =>runApp(MyApp());
+
+// class App extends StatelessWidget {
+//   // This widget is the root of your application.
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//         title: 'Send Request',
+//         home: new Request(),
+//         // theme: new ThemeData(primarySwatch: Colors.brown) //themeData
+//         ); //Material app
+//   }
+// }
 
 class SendRequest extends StatelessWidget {
-    SendRequest({Key key, this.auth, this.userId})
-      : super(key: key);
+  SendRequest({Key key, this.auth, this.userId}) : super(key: key);
   final BaseAuth auth;
   final String userId;
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.instance = ScreenUtil(width: 640, height: 1136)..init(context);
-    return MaterialApp(
-        title: 'Send Request',
-        home: new Request(),
-        theme: new ThemeData(primarySwatch: Colors.brown) //themeData
-        ); //Material app
-  }
-}
-
-class Request extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      body: ListView(
+        // mainAxisSize: MainAxisSize.max,
+        // crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           TopPart(),
           BottomPart(),
@@ -60,33 +59,33 @@ class _TopPartState extends State<TopPart> {
         ClipPath(
           clipper: CustomShapeClipper(),
           child: Container(
-            height: ScreenUtil.getInstance().setHeight(500),
+            height: 500.0,
             decoration: BoxDecoration(color: Colors.brown),
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 SizedBox(
-                  height: ScreenUtil.getInstance().setHeight(50),
+                  height: 50.0,
                 ),
                 Text(
                   "SEND REQUEST",
                   style: TextStyle(
-                      fontSize: ScreenUtil.getInstance().setSp(24),
+                      fontSize: 24.0,
                       color: Colors.white,
                       decoration: TextDecoration.none),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: ScreenUtil.getInstance().setHeight(50),),
+                SizedBox(height: 50.0),
                 Text(
                   "Short Description:",
                   style: TextStyle(
-                      fontSize: ScreenUtil.getInstance().setSp(18),
+                      fontSize: 18.0,
                       color: textColor,
                       decoration: TextDecoration.none),
                   textAlign: TextAlign.left,
                 ),
-                SizedBox(height: ScreenUtil.getInstance().setHeight(20)),
+                SizedBox(height: 20.0),
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: 32.0,
@@ -108,16 +107,16 @@ class _TopPartState extends State<TopPart> {
                   ), //Material
                 ), //padding
 
-                SizedBox(height: ScreenUtil.getInstance().setHeight(30)),
+                SizedBox(height: 30.0),
                 Text(
                   "Details:",
                   style: TextStyle(
-                      fontSize: ScreenUtil.getInstance().setSp(18),
+                      fontSize: 18.0,
                       color: textColor,
                       decoration: TextDecoration.none),
                   textAlign: TextAlign.left,
                 ),
-                SizedBox(height: ScreenUtil.getInstance().setHeight(20)),
+                SizedBox(height: 20.0),
                 Container(
                   height: 100,
                   child: Padding(
@@ -220,41 +219,43 @@ class BottomPartState extends State<BottomPart> {
   @override
   Widget build(BuildContext context) {
     return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           SizedBox(
-            height: ScreenUtil.getInstance().setHeight(10),
+            height: 20.0,
           ),
           Text(
             "Labels:",
             style: TextStyle(
-                fontSize: ScreenUtil.getInstance().setSp(18),
+                fontSize: 18.0,
                 color: textColor,
                 decoration: TextDecoration.none),
             textAlign: TextAlign.center,
           ),
-          SizedBox(height: ScreenUtil.getInstance().setHeight(10)),
+          SizedBox(height: 20.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               new SizedBox(
-                width: ScreenUtil.getInstance().setWidth(100),
-                height: ScreenUtil.getInstance().setHeight(30),
+                width: 90,
+                height: 30,
                 child: LabelWidget(Text(
                   'Backend',
                   style: TextStyle(color: Colors.white),
                 )),
               ),
               new SizedBox(
-                width: ScreenUtil.getInstance().setWidth(100),
-                height: ScreenUtil.getInstance().setHeight(30),
+                width: 100,
+                height: 30,
                 child: LabelWidget(Text(
                   'Frontend',
                   style: TextStyle(color: Colors.white),
                 )),
               ),
               new SizedBox(
-               width: ScreenUtil.getInstance().setWidth(100),
-                height: ScreenUtil.getInstance().setHeight(30),
+                width: 90,
+                height: 30,
                 child: LabelWidget(Text(
                   'AI&ML',
                   style: TextStyle(color: Colors.white),
@@ -268,24 +269,24 @@ class BottomPartState extends State<BottomPart> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 new SizedBox(
-                  width: ScreenUtil.getInstance().setWidth(100),
-                  height: ScreenUtil.getInstance().setHeight(30),
+                  width: 90,
+                  height: 30,
                   child: LabelWidget(Text(
                     'Data',
                     style: TextStyle(color: Colors.white),
                   )),
                 ),
                 new SizedBox(
-                  width: ScreenUtil.getInstance().setWidth(100),
-                  height: ScreenUtil.getInstance().setHeight(30),
+                  width: 100,
+                  height: 30,
                   child: LabelWidget(Text(
                     'App',
                     style: TextStyle(color: Colors.white),
                   )),
                 ),
                 new SizedBox(
-                  width: ScreenUtil.getInstance().setWidth(100),
-                  height: ScreenUtil.getInstance().setHeight(30),
+                  width: 90,
+                  height: 30,
                   child: LabelWidget(Text(
                     'Other',
                     style: TextStyle(color: Colors.white),
@@ -295,16 +296,16 @@ class BottomPartState extends State<BottomPart> {
             ),
           ),
 
-          SizedBox(height: ScreenUtil.getInstance().setHeight(10)),
+          SizedBox(height: 30.0),
           Text(
             "Contact Info:",
             style: TextStyle(
-                fontSize: ScreenUtil.getInstance().setSp(18),
+                fontSize: 18.0,
                 color: textColor,
                 decoration: TextDecoration.none),
             textAlign: TextAlign.left,
           ),
-          SizedBox(height: ScreenUtil.getInstance().setHeight(10)),
+          SizedBox(height: 10.0),
           Padding(
             padding: EdgeInsets.symmetric(
               horizontal: 32.0,
