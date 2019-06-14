@@ -56,9 +56,7 @@ class Task extends StatelessWidget {
               children: <Widget>[
                 Text(
                   title,
-                  style: TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 Padding(
@@ -67,20 +65,23 @@ class Task extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: labels.map((label) {
                       return new Container(
-                        child:Flexible(
-                        child:Container(
-                        padding: const EdgeInsets.only(left: 3.0, right:3.0),
-                        width: 140,
-                        height: 30,
-                        child: Label(new Text(
-                          label,
-                          style: TextStyle(
-                              fontSize: 20,
-                              decoration: TextDecoration.none,
+                        child: Flexible(
+                          child: Container(
+                            padding:
+                                const EdgeInsets.only(left: 3.0, right: 3.0),
+                            width: 140,
+                            height: 30,
+                            child: Label(new Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: 20,
+                                decoration: TextDecoration.none,
                               ),
-                          textAlign: TextAlign.center,
-                        )),
-                      ),),);
+                              textAlign: TextAlign.center,
+                            )),
+                          ),
+                        ),
+                      );
                     }).toList(),
                   ),
                 ),
@@ -107,17 +108,16 @@ class Label extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       child: Container(
-        padding: new EdgeInsets.only(left:5.0),
+        padding: new EdgeInsets.only(left: 5.0),
         child: DecoratedBox(
-        decoration: new BoxDecoration(
-          color: Colors.lightBlue,
-          shape: BoxShape.rectangle,
-          borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          decoration: new BoxDecoration(
+            color: Colors.lightBlue,
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.all(Radius.circular(8.0)),
+          ),
+          child: label,
         ),
-        child:label,
-      ),
       ),
     );
   }
 }
-
