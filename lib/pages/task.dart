@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import './details.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+// import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Task extends StatelessWidget {
@@ -47,7 +47,7 @@ class Task extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ScreenUtil.instance = ScreenUtil(width: 640, height: 1136)..init(context);
+    // ScreenUtil.instance = ScreenUtil(width: 640, height: 1136)..init(context);
     var labels = this._getNewList();
     return Card(
         child: Container(
@@ -57,7 +57,7 @@ class Task extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                      fontSize: ScreenUtil.getInstance().setSp(40),
+                      fontSize: 30,
                       fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
@@ -67,17 +67,20 @@ class Task extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: labels.map((label) {
                       return new Container(
-                        width: ScreenUtil.getInstance().setWidth(150),
-                        height: ScreenUtil.getInstance().setHeight(30),
+                        child:Flexible(
+                        child:Container(
+                        padding: const EdgeInsets.only(left: 3.0, right:3.0),
+                        width: 140,
+                        height: 30,
                         child: Label(new Text(
                           label,
                           style: TextStyle(
-                              fontSize: ScreenUtil.getInstance().setSp(20),
+                              fontSize: 20,
                               decoration: TextDecoration.none,
                               ),
                           textAlign: TextAlign.center,
                         )),
-                      );
+                      ),),);
                     }).toList(),
                   ),
                 ),
