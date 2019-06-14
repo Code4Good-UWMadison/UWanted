@@ -23,7 +23,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
     _checkEmailVerification();
   }
   bool _isEmailVerified = false;
@@ -116,7 +115,7 @@ class _HomePageState extends State<HomePage> {
     final _pageOptions = [
       DashboardPage(userId: widget.userId, auth: widget.auth),
       SendRequest(userId: widget.userId, auth: widget.auth),
-      ProfilePage(),
+      ProfilePage(userId: widget.userId, auth: widget.auth),
     ];
     final _pageName = ["Dashboard", "Send Request", "Profile"];
     return new Scaffold(

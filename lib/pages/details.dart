@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
+//mport 'package:firebase_database/firebase_database.dart';
 
 class DetailedPage extends StatelessWidget {
-  DetailedPage({@required this.title, this.description});
-
+  DetailedPage({@required this.title, @required this.id});
   final title;
-  final description;
+  
+  //final description;
   BoxDecoration myBoxDecoration(){
     return BoxDecoration(
         border: Border.all(),
@@ -14,6 +14,8 @@ class DetailedPage extends StatelessWidget {
         )
     );
   }
+  final id;
+
   @override
   Widget build(BuildContext context) {
     var request = Column(

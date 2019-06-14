@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/authentication.dart';
-import '../pages/card.dart';
+import '../pages/task.dart';
 
 class DashboardPage extends StatefulWidget {
   DashboardPage({Key key, this.auth, this.userId})
@@ -33,7 +33,13 @@ class _DashboardPageState extends State<DashboardPage> {
                         .map((DocumentSnapshot document) {
                       return new Task(
                         title: document['title'],
-                        description: document['description'],
+                        ai: document['AI&ML'],
+                        app: document['App'],
+                        be: document['Backend'],
+                        data: document['Data'],
+                        fe: document['Frontend'],
+                        ot: document['Other'],
+                        id:document.documentID,
                       );
                     }).toList(),
                   );
