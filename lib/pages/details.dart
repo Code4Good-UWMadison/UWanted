@@ -1,84 +1,110 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class DetailedPage extends StatelessWidget {
   DetailedPage({@required this.title, this.description});
 
   final title;
   final description;
-
+  BoxDecoration myBoxDecoration(){
+    return BoxDecoration(
+        border: Border.all(),
+        borderRadius: BorderRadius.all(
+          Radius.circular(15),
+        )
+    );
+  }
   @override
   Widget build(BuildContext context) {
-    var request = Row(
+    var request = Column(
+
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(left: 10),
-          child: Text('Request:',
+          padding: EdgeInsets.only(left: 10, top: 10),
+          child: Text('Request',
               style: new TextStyle(
                 fontSize: 20.0,
               )),
         ),
         Container(
-          padding: new EdgeInsets.all(20),
-          width: 250,
-          child: TextField(
-              decoration: InputDecoration(
-            contentPadding: EdgeInsets.all(10.0),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15.0),
-            ),
-            hintText: 'Your request in one sentence.',
-          )),
+          margin: EdgeInsets.only(top: 10, left: 10, bottom: 15),
+          decoration: myBoxDecoration(),
+          padding: new EdgeInsets.all(10),
+          width: 300,
+          height: 45,
+          child: Text(
+            'Request description....',
+            style:
+            TextStyle(fontSize: 20),
+          ),
         )
       ],
     );
 
-    var details = Row(
+    var details = Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: 10),
-          child: Text('Details:',
+          child: Text('Details',
               style: new TextStyle(
                 fontSize: 20.0,
               )),
         ),
-        SingleChildScrollView(
-          child: Container(
-            padding: EdgeInsets.only(left: 20),
-            width: 250,
-            height: 80,
-            child: TextField(
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(10.0),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15.0),
-                  ),
-                )),
-          ),
+
+
+
+        Container(
+            margin: EdgeInsets.only(top: 10, left: 10),
+            decoration: myBoxDecoration(),
+            padding: new EdgeInsets.all(10),
+            width: 280,
+            height: 150,
+            child:
+            SingleChildScrollView(
+              child:
+              Text(
+                'We need someone to help us to build ' +
+                    'a database for our lab’s website. ' +
+                    'Any database type is fine. It doesn’t' +
+                    ' need to be complicated as we only' +
+                        ' need to store subjects’ registration' +
+                        ' information.',
+                style: TextStyle(
+
+                    fontSize: 20
+                ),
+              ),
+            )
+
         ),
+
+
+
+
+
       ],
     );
 
     var labels = Row(
       mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: 10),
-          child: Text('Labels:',
-              style: new TextStyle(
-                fontSize: 20.0,
-              )),
-        ),
+
         Expanded(
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.only(left: 10, bottom: 10),
+                  child: Text('Labels',
+                      style: new TextStyle(
+                        fontSize: 20.0,
+                      )),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
@@ -127,28 +153,28 @@ class DetailedPage extends StatelessWidget {
       ],
     );
 
-    var contactInfo = Row(
+    var contactInfo = Column(
       mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(left: 10),
-          child: Text('Contact Info:',
+          padding: EdgeInsets.only(left: 10, bottom: 10),
+          child: Text('Contact Info',
               style: new TextStyle(
                 fontSize: 20.0,
               )),
         ),
         Container(
-          padding: new EdgeInsets.only(left: 20),
-          width: 200,
-          child: TextField(
-              decoration: InputDecoration(
-            contentPadding: EdgeInsets.all(10.0),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15.0),
-            ),
-            hintText: 'xxx@wisc.edu',
-          )),
+          margin: EdgeInsets.only(left: 10, bottom: 15),
+          decoration: myBoxDecoration(),
+          padding: new EdgeInsets.all(10),
+          width: 260,
+          height: 45,
+          child: Text(
+            'xxxxxx@wisc.edu',
+            style:
+            TextStyle(fontSize: 20),
+          ),
         )
       ],
     );
