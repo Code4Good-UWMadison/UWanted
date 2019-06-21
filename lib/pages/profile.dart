@@ -15,6 +15,29 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   User user;
+  @override
+  Widget build(BuildContext context) {
+    if (this.user == null)
+      return Center(
+        child: Text("loading"),
+      );
+    return Scaffold(
+      body: ListView(
+        children: ListTile.divideTiles(
+          context: context,
+          tiles: [
+            _buildListTile("Name", this.user.userName, context),
+            _buildListTile("Role",
+                this.user.userRole?.toString()?.substring(9) ?? '', context),
+            _buildListTile("Lab", this.user.lab, context),
+            _buildListTile("Major", this.user.major, context),
+            _buildListTile(
+                "Technical Skills", this.user.skills.toString(), context),
+          ],
+        ).toList(),
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -30,19 +53,10 @@ class _ProfilePageState extends State<ProfilePage> {
         .get()
         .then((DocumentSnapshot document) {
       if (!document.exists) {
-        Firestore.instance.collection('users').document(widget.userId).setData({
-          'name': '',
-          'faculty': false,
-          'student': false,
-          'lab': '',
-          'major': '',
-          'Backend': false,
-          'Frontend': false,
-          'AI&ML': false,
-          'Data': false,
-          'App': false,
-          'Others': false,
-        });
+        Firestore.instance
+            .collection('users')
+            .document(widget.userId)
+            .setData(_initialUserData);
       }
     }).then((_) {
       Firestore.instance
@@ -71,30 +85,6 @@ class _ProfilePageState extends State<ProfilePage> {
         });
       });
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (this.user == null)
-      return Center(
-        child: Text("loading"),
-      );
-    return Scaffold(
-      body: ListView(
-        children: ListTile.divideTiles(
-          context: context,
-          tiles: [
-            _buildListTile("Name", this.user.userName, context),
-            _buildListTile("Role",
-                this.user.userRole?.toString()?.substring(9) ?? '', context),
-            _buildListTile("Lab", this.user.lab, context),
-            _buildListTile("Major", this.user.major, context),
-            _buildListTile(
-                "Technical Skills", this.user.skills.toString(), context),
-          ],
-        ).toList(),
-      ),
-    );
   }
 
   ListTile _buildListTile(
@@ -159,9 +149,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () {
-              _submit();
-            },
+            onPressed: _isSubmitting ? null : _submit,
           ),
         ],
       ),
@@ -183,9 +171,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: RaisedButton(
-                onPressed: () {
-                  _submit();
-                },
+                onPressed: _isSubmitting ? null : _submit,
                 child: Text('Submit'),
               ),
             ),
@@ -296,8 +282,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ],
       );
 
+  bool _isSubmitting = false;
   void _submit() {
     if (_formKey.currentState.validate()) {
+      setState(() {
+        _isSubmitting = true;
+        print('_isSubmitting is set to $_isSubmitting');
+      });
       Firestore.instance
           .collection('users')
           .document(widget.userId)
@@ -315,11 +306,19 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       lab: _labController.text,
                       major: _majorController.text,
                       skills: widget.user.skills));
+              setState(() {
+                _isSubmitting = false;
+                print('_isSubmitting is set to $_isSubmitting');
+              });
             })
             ..catchError((e) {
               _scaffoldKey.currentState.showSnackBar(SnackBar(
                 content: Text('Please retry! $e'),
               ));
+              setState(() {
+                _isSubmitting = false;
+                print('_isSubmitting is set to $_isSubmitting');
+              });
             });
     }
   }
@@ -337,9 +336,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
       'Data': widget.user.skills.data,
       'App': widget.user.skills.app,
       'Others': widget.user.skills.others,
+      'updated': Timestamp.now(),
     };
   }
 }
+
+var _initialUserData = {
+  'name': '',
+  'faculty': false,
+  'student': false,
+  'lab': '',
+  'major': '',
+  'Backend': false,
+  'Frontend': false,
+  'AI&ML': false,
+  'Data': false,
+  'App': false,
+  'Others': false,
+  'created': Timestamp.now(),
+  'updated': Timestamp.now(),
+};
 
 class User {
   String userName;
