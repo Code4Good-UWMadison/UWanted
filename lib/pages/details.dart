@@ -1,25 +1,105 @@
-import 'package:flutter/material.dart';
-//mport 'package:firebase_database/firebase_database.dart';
 
-class DetailedPage extends StatelessWidget {
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+
+//import 'package:firebase_database/firebase_database.dart';
+class Request {
+
+  String userName;
+  String contact;
+  String description;
+
+  bool backend;
+  bool frontend;
+  bool aiml;
+  bool data;
+  bool app;
+  bool others;
+
+  Request(
+      {
+        //this.userName,
+        this.contact,
+        this.description,
+        this.aiml,
+        this.app,
+        this.backend,
+        this.data,
+        this.frontend,
+        this.others,
+        });
+
+
+}
+
+
+class DetailedPage extends StatefulWidget {
+
   DetailedPage({@required this.title, @required this.id});
   final title;
-  
+  final id;
+  // void _getRequestData() async {
+  //var requestInfo = await Firestore.instance.collection('tasks').document(id).get();
+  //   request = Request.fromSnapshot(requestInfo);
+  // }
+  @override
+  _DetailedPageState createState() => _DetailedPageState();
   //final description;
-  BoxDecoration myBoxDecoration(){
+
+}
+
+class _DetailedPageState extends State<DetailedPage>{
+  Request request;
+  @override
+  void initState() {
+    super.initState();
+    _getRequest();
+  }
+  BoxDecoration myBoxDecoration() {
     return BoxDecoration(
         border: Border.all(),
         borderRadius: BorderRadius.all(
           Radius.circular(15),
-        )
-    );
+        ));
   }
-  final id;
+
+  void _getRequest() {
+
+    Request req;
+    Firestore.instance.collection('tasks').document(
+        'L5xMayjnkh3kZxy75dpn').get().then((DocumentSnapshot document) {
+      if (document.data == null) {
+        print('failed');
+      }
+      else{
+        req = new Request(
+            contact: document.data['contact'],
+            description: document.data['description'],
+            aiml: document.data['AI&ML'],
+            backend: document.data['Backend'],
+            frontend: document.data['Frontend'],
+            data: document.data['Data'],
+            app: document.data['App'],
+            others: document.data['Other']);
+
+        setState(() {
+          this.request = req;
+        });
+        print(document.data);
+        print(req.description);
+      }
+    });
+
+  }
 
   @override
   Widget build(BuildContext context) {
-    var request = Column(
+    if (this.request == null)
+      return Center(
+        child: Text("loading"),
+      );
 
+    var request = Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
@@ -37,9 +117,8 @@ class DetailedPage extends StatelessWidget {
           width: 300,
           height: 45,
           child: Text(
-            'Request description....',
-            style:
-            TextStyle(fontSize: 20),
+           widget.title,
+            style: TextStyle(fontSize: 20),
           ),
         )
       ],
@@ -56,38 +135,18 @@ class DetailedPage extends StatelessWidget {
                 fontSize: 20.0,
               )),
         ),
-
-
-
         Container(
             margin: EdgeInsets.only(top: 10, left: 10),
             decoration: myBoxDecoration(),
             padding: new EdgeInsets.all(10),
             width: 280,
             height: 150,
-            child:
-            SingleChildScrollView(
-              child:
-              Text(
-                'We need someone to help us to build ' +
-                    'a database for our lab’s website. ' +
-                    'Any database type is fine. It doesn’t' +
-                    ' need to be complicated as we only' +
-                        ' need to store subjects’ registration' +
-                        ' information.',
-                style: TextStyle(
-
-                    fontSize: 20
-                ),
+            child: SingleChildScrollView(
+              child: Text(
+                this.request.description,
+                style: TextStyle(fontSize: 20),
               ),
-            )
-
-        ),
-
-
-
-
-
+            )),
       ],
     );
 
@@ -95,7 +154,6 @@ class DetailedPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-
         Expanded(
           child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -113,17 +171,18 @@ class DetailedPage extends StatelessWidget {
                     new SizedBox(
                       width: 90,
                       height: 30,
-                      child: LabelWidget(Text('Backend')),
+                      child: LabelWidget(Text('Backend'), this.request.backend),
                     ),
                     new SizedBox(
                       width: 90,
                       height: 30,
-                      child: LabelWidget(Text('Frontend')),
+                      child:
+                      LabelWidget(Text('Frontend'), this.request.frontend),
                     ),
                     new SizedBox(
                       width: 90,
                       height: 30,
-                      child: LabelWidget(Text('AI&ML')),
+                      child: LabelWidget(Text('AI&ML'), this.request.aiml),
                     ),
                   ],
                 ),
@@ -135,17 +194,17 @@ class DetailedPage extends StatelessWidget {
                       new SizedBox(
                         width: 90,
                         height: 30,
-                        child: LabelWidget(Text('Data')),
+                        child: LabelWidget(Text('Data'), this.request.data),
                       ),
                       new SizedBox(
                         width: 90,
                         height: 30,
-                        child: LabelWidget(Text('App')),
+                        child: LabelWidget(Text('App'), this.request.app),
                       ),
                       new SizedBox(
                         width: 90,
                         height: 30,
-                        child: LabelWidget(Text('Other')),
+                        child: LabelWidget(Text('Other'), this.request.others),
                       ),
                     ],
                   ),
@@ -173,9 +232,8 @@ class DetailedPage extends StatelessWidget {
           width: 260,
           height: 45,
           child: Text(
-            'xxxxxx@wisc.edu',
-            style:
-            TextStyle(fontSize: 20),
+            this.request.contact,
+            style: TextStyle(fontSize: 20),
           ),
         )
       ],
@@ -183,7 +241,6 @@ class DetailedPage extends StatelessWidget {
 
     return Scaffold(
         appBar: AppBar(
-          title: Text(title),
         ),
         body: Center(
           child: Column(
@@ -200,35 +257,46 @@ class DetailedPage extends StatelessWidget {
           ),
         ));
   }
+
+
+
 }
 
+
 class LabelWidget extends StatefulWidget {
-  final Text label;
-  const LabelWidget(this.label);
+  Text label;
+ bool selected;
+  LabelWidget(Text label, bool selected){
+    this.label = label;
+    this.selected = selected;
+  }
   @override
   _LabelWidgetState createState() => _LabelWidgetState();
 }
 
 class _LabelWidgetState extends State<LabelWidget> {
-  _LabelWidgetState();
   Color myColor = Colors.grey;
   @override
+  void initState(){
+    super.initState();
+  }
+  _getColor(){
+    if(widget.selected){
+      myColor = Colors.redAccent;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _getColor();
+    print(myColor);
     return RaisedButton(
+      disabledColor: myColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
       child: widget.label,
-      color: myColor,
-      onPressed: () {
-        setState(() {
-          if (myColor == Colors.grey) {
-            myColor = Colors.redAccent;
-          } else {
-            myColor = Colors.grey;
-          }
-        });
-      },
+
     );
   }
 }
