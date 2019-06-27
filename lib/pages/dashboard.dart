@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/authentication.dart';
 import '../pages/task.dart';
+import 'dart:async';
 
 class DashboardPage extends StatefulWidget {
   DashboardPage({Key key, this.auth, this.userId})
@@ -15,7 +16,16 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
 
-  Stream _sortOptions = Firestore.instance.collection('tasks').snapshots();
+  var search;
+  var _sortOptions;
+
+  @override
+  void initState() {
+    super.initState();
+    _sortOptions = Firestore.instance.collection('tasks').snapshots(); 
+  }
+
+  //Stream _sortOptions = Firestore.instance.collection('tasks').snapshots();
   Widget _show() {
     return Center(
       child: Container(
@@ -62,18 +72,27 @@ class _DashboardPageState extends State<DashboardPage> {
             padding: const EdgeInsets.all(10.0),
             child: TextField(
               onChanged: (val) {
-                //initiateSearch(val);
+                search = val;
+                setState((){
+                        _sortOptions = Firestore.instance.collection('tasks').where('title',isGreaterThanOrEqualTo:search).where('title',isLessThan:search+'z').snapshots();
+                });
               },
               decoration: InputDecoration(
-                  prefixIcon: IconButton(
-                    color: Colors.black,
-                    icon: Icon(Icons.arrow_back),
-                    iconSize: 20.0,
-                  ),
-                  contentPadding: EdgeInsets.only(left: 25.0),
+                  contentPadding: EdgeInsets.all(10.0),
                   hintText: 'Search by name',
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4.0))),
+                      borderRadius: BorderRadius.circular(4.0)),
+                  suffixIcon: IconButton(
+                    color: Colors.black,
+                    icon: Icon(Icons.search),
+                    iconSize: 20.0,
+                    onPressed: () {
+                      setState((){
+                        _sortOptions = Firestore.instance.collection('tasks').where('title',isGreaterThanOrEqualTo:search).where('title',isLessThan:search+'z').snapshots();
+                      });
+                    },
+                  ),  
+                ),             
             ),
           ),
           Expanded(child:_show(),),
