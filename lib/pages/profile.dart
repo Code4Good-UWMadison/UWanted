@@ -17,100 +17,79 @@ class _ProfilePageState extends State<ProfilePage> {
   User user;
 
   @override
-  void initState() {
-    super.initState();
-    _getUserProfileFromFirebase();
-  }
-
-  void _getUserProfileFromFirebase() {
-    User user;
-    Firestore.instance
-        .collection('users')
-        .document(widget.userId)
-        .get()
-        .then((DocumentSnapshot document) {
-      if (!document.exists) {
-        Firestore.instance.collection('users').document(widget.userId).setData({
-          'name': '',
-          'faculty': false,
-          'student': false,
-          'lab': '',
-          'major': '',
-          'Backend': false,
-          'Frontend': false,
-          'AI&ML': false,
-          'Data': false,
-          'App': false,
-          'Others': false,
-        });
-      }
-    }).then((_) {
-      Firestore.instance
-          .collection('users')
-          .document(widget.userId)
-          .get()
-          .then((DocumentSnapshot document) {
-        user = User(
-          userName: document['name'],
-          userRole: document['student']
-              ? UserRole.Student
-              : (document['faculty'] ? UserRole.Faculty : null),
-          lab: document['lab'],
-          major: document['major'],
-          skills: Skills(
-            backend: document['Backend'],
-            frontend: document['Frontend'],
-            aiml: document['AI&ML'],
-            data: document['Data'],
-            app: document['App'],
-            others: document['Others'],
-          ),
-        );
-        setState(() {
-          this.user = user;
-        });
-      });
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     if (this.user == null)
       return Center(
-        child: Text("loading"),
+        child: CircularProgressIndicator(),
       );
     return Scaffold(
       body: ListView(
         children: ListTile.divideTiles(
           context: context,
           tiles: [
-            _buildListTile("Name", this.user.userName, context),
-            _buildListTile("Role",
-                this.user.userRole?.toString()?.substring(9) ?? '', context),
-            _buildListTile("Lab", this.user.lab, context),
-            _buildListTile("Major", this.user.major, context),
-            _buildListTile(
-                "Technical Skills", this.user.skills.toString(), context),
+            _buildListTile("Name", this.user.userName),
+            _buildListTile("Role", this.user.userRoleToString()),
+            _buildListTile("Lab", this.user.lab),
+            _buildListTile("Major", this.user.major),
+            _buildListTile("Technical Skills", this.user.skills.toString()),
           ],
         ).toList(),
       ),
     );
   }
 
-  ListTile _buildListTile(
-          String title, String trailing, BuildContext context) =>
-      ListTile(
+  @override
+  void initState() {
+    super.initState();
+    _getUserProfileFromFirebase();
+  }
+
+  void _getUserProfileFromFirebase() {
+    Firestore.instance
+        .collection('users')
+        .document(widget.userId)
+        .get()
+        .then(_initializeRemoteUserDataIfNotExist)
+        .then(_getRemoteUserData);
+  }
+
+  _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
+    if (!document.exists) {
+      Firestore.instance
+          .collection('users')
+          .document(widget.userId)
+          .setData(_initialUserData);
+    }
+  }
+
+  _getRemoteUserData(_) {
+    Firestore.instance
+        .collection('users')
+        .document(widget.userId)
+        .get()
+        .then(_setLocalUserData);
+  }
+
+  _setLocalUserData(DocumentSnapshot document) {
+    setState(() {
+      this.user = User.fromDocument(document);
+    });
+  }
+
+  ListTile _buildListTile(String title, String trailing) => ListTile(
         title: Text(title),
         trailing: Text(trailing),
         onTap: _navigateToEditingPage,
       );
 
-  void _navigateToEditingPage() async {
+  _navigateToEditingPage() async {
     User user = await Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => EditProfilePage(
-              auth: widget.auth, userId: widget.userId, user: this.user)),
+              auth: widget.auth,
+              userId: widget.userId,
+              user: User.clone(this.user))),
     );
     setState(() {
       this.user = (user != null ? user : this.user);
@@ -159,9 +138,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.save),
-            onPressed: () {
-              _submit();
-            },
+            onPressed: _isSubmitting ? null : _submit,
           ),
         ],
       ),
@@ -169,23 +146,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
         key: _formKey,
         child: ListView(
           children: <Widget>[
-            _buildForm(_nameController, "Name", 'Name cannot be empty',
-                (value) {
-              if (value.isEmpty) return 'Name cannot be empty!';
-            }),
+            _buildNameForm(),
             _buildRoleCheckboxs(),
-            _buildForm(_labController, "Lab", 'Lab can be empty', null),
-            _buildForm(_majorController, "Major", 'Major cannot be empty',
-                (value) {
-              if (value.isEmpty) return 'Major cannot be empty!';
-            }),
+            _buildLabForm(),
+            _buildMajorForm(),
             _buildSkillsCheckboxs(),
+            // TODO: Considering deleting the following submit bottom
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: RaisedButton(
-                onPressed: () {
-                  _submit();
-                },
+                onPressed: _isSubmitting ? null : _submit,
                 child: Text('Submit'),
               ),
             ),
@@ -207,6 +177,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     _majorController.dispose();
   }
 
+  _buildNameForm() => _buildForm(
+      _nameController, "Name", 'Name cannot be empty', _nameValidator);
+
+  _buildLabForm() =>
+      _buildForm(_labController, "Lab", 'Lab can be empty', null);
+
+  _buildMajorForm() => _buildForm(
+      _majorController, "Major", 'Major cannot be empty', _majorValidator);
+
   Container _buildForm(TextEditingController controller, String label,
       String helper, Function validator) {
     return Container(
@@ -220,6 +199,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
         validator: validator,
       ),
     );
+  }
+
+  String _nameValidator(value) {
+    if (value.isEmpty) return 'Name cannot be empty!';
+  }
+
+  String _majorValidator(value) {
+    if (value.isEmpty) return 'Name cannot be empty!';
   }
 
   Column _buildSkillsCheckboxs() => Column(
@@ -296,12 +283,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
         ],
       );
 
+  bool _isSubmitting = false;
+
   void _submit() {
     if (_formKey.currentState.validate()) {
+      setState(() {
+        _isSubmitting = true;
+      });
       Firestore.instance
           .collection('users')
           .document(widget.userId)
-          .updateData(getData())
+          .updateData(formateEditedData())
             ..then((_) async {
               _scaffoldKey.currentState.showSnackBar(SnackBar(
                 content: Text('Success!'),
@@ -315,16 +307,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       lab: _labController.text,
                       major: _majorController.text,
                       skills: widget.user.skills));
+              setState(() {
+                _isSubmitting = false;
+              });
             })
             ..catchError((e) {
               _scaffoldKey.currentState.showSnackBar(SnackBar(
                 content: Text('Please retry! $e'),
               ));
+              setState(() {
+                _isSubmitting = false;
+              });
             });
     }
   }
 
-  Map<String, dynamic> getData() {
+  Map<String, dynamic> formateEditedData() {
     return {
       'name': _nameController.text,
       'faculty': widget.user.userRole == UserRole.Faculty ? true : false,
@@ -337,9 +335,26 @@ class _EditProfilePageState extends State<EditProfilePage> {
       'Data': widget.user.skills.data,
       'App': widget.user.skills.app,
       'Others': widget.user.skills.others,
+      'updated': Timestamp.now(),
     };
   }
 }
+
+var _initialUserData = {
+  'name': '',
+  'faculty': false,
+  'student': false,
+  'lab': '',
+  'major': '',
+  'Backend': false,
+  'Frontend': false,
+  'AI&ML': false,
+  'Data': false,
+  'App': false,
+  'Others': false,
+  'created': Timestamp.now(),
+  'updated': Timestamp.now(),
+};
 
 class User {
   String userName;
@@ -349,6 +364,33 @@ class User {
   Skills skills;
 
   User({this.userName, this.userRole, this.lab, this.major, this.skills});
+
+  User.clone(User user)
+      : this(
+            userName: user.userName,
+            userRole: user.userRole,
+            lab: user.lab,
+            major: user.major,
+            skills: Skills.clone(user.skills));
+
+  User.fromDocument(DocumentSnapshot document)
+      : userName = document['name'],
+        userRole = document['student']
+            ? UserRole.Student
+            : (document['faculty'] ? UserRole.Faculty : null),
+        lab = document['lab'],
+        major = document['major'],
+        skills = Skills(
+          backend: document['Backend'],
+          frontend: document['Frontend'],
+          aiml: document['AI&ML'],
+          data: document['Data'],
+          app: document['App'],
+          others: document['Others'],
+        );
+
+  // userRole could be null, that user haven't made a choice
+  String userRoleToString() => userRole?.toString()?.substring(9) ?? '';
 }
 
 enum UserRole {
@@ -380,6 +422,16 @@ class Skills {
       this.data = false,
       this.app = false,
       this.others = false});
+
+  Skills.clone(Skills skills)
+      : this(
+          backend: skills.backend,
+          frontend: skills.frontend,
+          aiml: skills.aiml,
+          data: skills.data,
+          app: skills.app,
+          others: skills.others,
+        );
 
   void set(String skill, bool bool) {
     switch (skill) {

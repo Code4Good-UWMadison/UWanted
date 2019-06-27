@@ -5,8 +5,7 @@ import '../pages/task.dart';
 import 'dart:async';
 
 class DashboardPage extends StatefulWidget {
-  DashboardPage({Key key, this.auth, this.userId})
-      : super(key: key);
+  DashboardPage({Key key, this.auth, this.userId}) : super(key: key);
 
   final BaseAuth auth;
   final String userId;
@@ -52,24 +51,25 @@ class _DashboardPageState extends State<DashboardPage> {
                         data: document['Data'],
                         fe: document['Frontend'],
                         ot: document['Other'],
-                        id:document.documentID,
+                        id: document.documentID,
                       );
                     }).toList(),
                   );
-                  // return new Text(widget.userId);
+                // return new Text(widget.userId);
               }
             },
-          )
-        ),
+          )),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: Container(child:Column(children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(10.0),
+        body: Container(
+            child: Column(children: <Widget>[
+      Row(
+        children: <Widget>[
+          Expanded(
             child: TextField(
               onChanged: (val) {
                 search = val;
@@ -78,25 +78,49 @@ class _DashboardPageState extends State<DashboardPage> {
                 });
               },
               decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(10.0),
-                  hintText: 'Search by name',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4.0)),
-                  suffixIcon: IconButton(
-                    color: Colors.black,
-                    icon: Icon(Icons.search),
-                    iconSize: 20.0,
-                    onPressed: () {
-                      setState((){
-                        _sortOptions = Firestore.instance.collection('tasks').where('title',isGreaterThanOrEqualTo:search).where('title',isLessThan:search+'z').snapshots();
-                      });
-                    },
-                  ),  
-                ),             
+                hintText: 'Search by name',
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4.0)),
+              ),
             ),
           ),
-          Expanded(child:_show(),),
-        ]
-    )));
+          Container(
+            child: DropdownButton<String>(
+              // value: 'Sort',
+              icon: Icon(Icons.sort),
+              onChanged: (String newValue) {
+                setState(() {
+                  switch (newValue) {
+                    case 'Time':
+                      _sortOptions = Firestore.instance
+                          .collection('tasks')
+                          .orderBy('updated', descending: true)
+                          .snapshots();
+                      break;
+                    case 'Alphabet':
+                      _sortOptions = Firestore.instance
+                          .collection('tasks')
+                          .orderBy('title')
+                          .snapshots();
+                      break;
+                    default:
+                  }
+                });
+              },
+              items: <String>['Time', 'Alphabet']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+      Expanded(
+        child: _show(),
+      ),
+    ])));
   }
 }
