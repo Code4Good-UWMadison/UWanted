@@ -14,12 +14,15 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  Widget _showTodoList() {
+
+  Stream _sortOptions = Firestore.instance.collection('tasks').snapshots();
+  Widget _show() {
     return Center(
       child: Container(
           padding: const EdgeInsets.all(10.0),
           child: StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance.collection('tasks').snapshots(),
+            stream: _sortOptions,
+            // stream: Firestore.instance.collection('tasks').snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError)
@@ -54,8 +57,27 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: _showTodoList(),
-    );
+      body: Container(child:Column(children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: TextField(
+              onChanged: (val) {
+                //initiateSearch(val);
+              },
+              decoration: InputDecoration(
+                  prefixIcon: IconButton(
+                    color: Colors.black,
+                    icon: Icon(Icons.arrow_back),
+                    iconSize: 20.0,
+                  ),
+                  contentPadding: EdgeInsets.only(left: 25.0),
+                  hintText: 'Search by name',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4.0))),
+            ),
+          ),
+          Expanded(child:_show(),),
+        ]
+    )));
   }
-  
 }
