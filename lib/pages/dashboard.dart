@@ -54,8 +54,28 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: _showTodoList(),
-    );
+      body: ListView(children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: TextField(
+              onChanged: (val) {
+                //initiateSearch(val);
+              },
+              decoration: InputDecoration(
+                  prefixIcon: IconButton(
+                    color: Colors.black,
+                    icon: Icon(Icons.arrow_back),
+                    iconSize: 20.0,
+                  ),
+                  contentPadding: EdgeInsets.only(left: 25.0),
+                  hintText: 'Search by name',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4.0))),
+            ),
+          ),
+          SizedBox(height: 10.0),
+          _showTodoList()
+        ]
+    ));
   }
-  
 }
