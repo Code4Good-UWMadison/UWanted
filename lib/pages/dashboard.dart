@@ -14,12 +14,15 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  Widget _showTodoList() {
+
+  Stream _sortOptions = Firestore.instance.collection('tasks').snapshots();
+  Widget _show() {
     return Center(
       child: Container(
           padding: const EdgeInsets.all(10.0),
           child: StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance.collection('tasks').snapshots(),
+            stream: _sortOptions,
+            // stream: Firestore.instance.collection('tasks').snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError)
@@ -54,7 +57,7 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: ListView(children: <Widget>[
+      body: Container(child:Column(children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(10.0),
             child: TextField(
@@ -73,9 +76,8 @@ class _DashboardPageState extends State<DashboardPage> {
                       borderRadius: BorderRadius.circular(4.0))),
             ),
           ),
-          SizedBox(height: 10.0),
-          _showTodoList()
+          Expanded(child:_show(),),
         ]
-    ));
+    )));
   }
 }
