@@ -340,6 +340,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 }
 
+// Call this like
+// appendListToRemotePosts([UidOfTask,], userId);
+// For appending multiple posts
+// appendListToRemotePosts([UidOfTask1, UidOfTask2], userId);
+appendListToRemotePosts(List<String> newPosts, String userId) {
+  Firestore.instance
+      .collection('users')
+      .document(userId)
+      .get()
+      .then((DocumentSnapshot document) {
+    List<String> updatedPosts =
+        List<String>.from(document['posts'], growable: true);
+    updatedPosts.addAll(newPosts);
+    Firestore.instance.collection('users').document(userId).updateData({
+      'posts': updatedPosts,
+    });
+  });
+}
+
 var _initialUserData = {
   'name': '',
   'faculty': false,
@@ -352,6 +371,9 @@ var _initialUserData = {
   'Data': false,
   'App': false,
   'Others': false,
+  'posts': [
+    '',
+  ],
   'created': Timestamp.now(),
   'updated': Timestamp.now(),
 };
