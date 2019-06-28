@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import './pages/card.dart';
+
 
 class HomePage extends StatefulWidget {
   HomePage({Key key})
