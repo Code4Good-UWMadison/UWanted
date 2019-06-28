@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // void main() =>runApp(MyApp());
 
@@ -15,6 +16,13 @@ import '../services/authentication.dart';
 //   }
 // }
 
+
+String des="";
+String details="";
+String label="";
+String contact="";
+
+
 class SendRequest extends StatelessWidget {
   SendRequest({Key key, this.auth, this.userId}) : super(key: key);
   final BaseAuth auth;
@@ -28,19 +36,37 @@ class SendRequest extends StatelessWidget {
         children: <Widget>[
           TopPart(),
           BottomPart(),
+          SizedBox(
+            height: 50.0,
+          ),
+          FloatingActionButton(
+            onPressed: () {
+              print(userId);
+              _addItem(des,details,label,contact);
+              //Navigator.of(context).pop();
+            },
+            backgroundColor: Colors.brown,
+            child: Text(
+              "Submit",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //submit and go to another page
-        },
-        backgroundColor: Colors.brown,
-        child: Text(
-          "Submit",
-          style: TextStyle(color: Colors.white),
-        ),
-      ),
     );
+  }
+
+  _addItem(String des, String details, String label, String contact) {
+    Firestore.instance
+        .collection('task').document(userId).setData({
+    'title' : des,
+    'description' : details,
+      'contact' : contact,
+
+
+    });
+
+    // .add({'description': des, 'details': details, 'label': label, 'contact':contact});
   }
 }
 
@@ -52,8 +78,27 @@ class TopPart extends StatefulWidget {
 }
 
 class _TopPartState extends State<TopPart> {
+  TextEditingController _controllerDes;
+  TextEditingController _controllerDetail;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllerDes=TextEditingController();
+    _controllerDetail = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controllerDes.dispose();
+    _controllerDetail.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    des=_controllerDes.text;
+    details=_controllerDetail.text;
     return Stack(
       children: <Widget>[
         ClipPath(
@@ -96,7 +141,7 @@ class _TopPartState extends State<TopPart> {
                       Radius.circular(30.0),
                     ),
                     child: TextField(
-                      controller: TextEditingController(),
+                      controller: _controllerDes,
                       decoration: new InputDecoration(
                         hintText: 'Type description',
                         border: InputBorder.none,
@@ -129,10 +174,10 @@ class _TopPartState extends State<TopPart> {
                         Radius.circular(30.0),
                       ),
                       child: TextField(
-                        controller: TextEditingController(),
+                        controller:_controllerDetail,
                         decoration: new InputDecoration(
                           hintText:
-                              'Be specific as much as possible, including techinical details and the purpose',
+                          'Be specific as much as possible, including techinical details and the purpose',
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 13.0),
@@ -169,6 +214,8 @@ class _LabelWidgetState extends State<LabelWidget> {
       child: widget.label,
       color: myColor,
       onPressed: () {
+        label=widget.label.toString();
+        /*TODO*/
         setState(() {
           if (myColor == Color(0xFF38220F)) {
             myColor = Color(0x967259);
@@ -214,6 +261,23 @@ class BottomPart extends StatefulWidget {
 }
 
 class BottomPartState extends State<BottomPart> {
+  TextEditingController _controllerLabel;
+  TextEditingController _controllerContact;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllerLabel=TextEditingController();
+    _controllerContact = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controllerLabel.dispose();
+    _controllerContact.dispose();
+  }
+
   Color textColor = Color(0xFF39220F);
 
   @override
@@ -316,12 +380,12 @@ class BottomPartState extends State<BottomPart> {
                 Radius.circular(30.0),
               ),
               child: TextField(
-                controller: TextEditingController(),
+                controller: _controllerContact,
                 decoration: new InputDecoration(
                   hintText: 'Email will be preferred',
                   border: InputBorder.none,
                   contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 13.0),
+                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 13.0),
                 ),
               ), //TextField
             ), //Material
@@ -329,3 +393,4 @@ class BottomPartState extends State<BottomPart> {
         ]);
   }
 }
+
