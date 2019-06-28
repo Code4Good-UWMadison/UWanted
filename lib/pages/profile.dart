@@ -33,22 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
             _buildListTile("Lab", this.user.lab),
             _buildListTile("Major", this.user.major),
             _buildListTile("Technical Skills", this.user.skills.toString()),
-            ListTile(
-              title: Text('My Posts'),
-              trailing: Text(this.user.posts.length.toString()),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => MyPostsPage(
-                          auth: widget.auth,
-                          userId: widget.userId,
-                          posts: this.user.posts,
-                        ),
-                  ),
-                );
-              },
-            ),
+            _buildMyPostsListTile(),
           ],
         ).toList(),
       ),
@@ -112,6 +97,23 @@ class _ProfilePageState extends State<ProfilePage> {
       this.user = (user != null ? user : this.user);
     });
   }
+
+  ListTile _buildMyPostsListTile() => ListTile(
+        title: Text('My Posts'),
+        trailing: Text(this.user.posts.length.toString()),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MyPostsPage(
+                    auth: widget.auth,
+                    userId: widget.userId,
+                    posts: this.user.posts,
+                  ),
+            ),
+          );
+        },
+      );
 }
 
 class EditProfilePage extends StatefulWidget {
@@ -574,28 +576,12 @@ class _MyPostsPageState extends State<MyPostsPage> {
         title: Text("My Posts"),
       ),
       body: ListView(
-        children: this.posts.entries.map((MapEntry<String, String> entry) {
-          return ListTile(
-            title: Text(entry.value),
-            trailing: Icon(Icons.arrow_forward),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DetailedPage(
-                        title: entry.value,
-                        id: entry.key,
-                      ),
-                ),
-              );
-            },
-          );
-        }).toList(),
+        children: this.posts.entries.map(_buildListTileFromPosts).toList(),
       ),
     );
   }
 
-  _getPostsFromRemote() {
+  void _getPostsFromRemote() {
     widget.posts.forEach((String uid) {
       Firestore.instance
           .collection('tasks')
@@ -607,5 +593,23 @@ class _MyPostsPageState extends State<MyPostsPage> {
         });
       });
     });
+  }
+
+  ListTile _buildListTileFromPosts(MapEntry<String, String> entry) {
+    return ListTile(
+      title: Text(entry.value),
+      trailing: Icon(Icons.arrow_forward),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailedPage(
+                  title: entry.value,
+                  id: entry.key,
+                ),
+          ),
+        );
+      },
+    );
   }
 }
