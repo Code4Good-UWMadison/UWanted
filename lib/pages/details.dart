@@ -15,10 +15,11 @@ class Request {
   bool data;
   bool app;
   bool others;
+  
 
   Request(
       {
-        //this.userName,
+        
         this.contact,
         this.description,
         this.aiml,
@@ -67,9 +68,9 @@ class _DetailedPageState extends State<DetailedPage>{
 
     Request req;
     Firestore.instance.collection('tasks').document(
-        'L5xMayjnkh3kZxy75dpn').get().then((DocumentSnapshot document) {
+        widget.id).get().then((DocumentSnapshot document) {
       if (document.data == null) {
-        print('failed');
+       
       }
       else{
         req = new Request(
@@ -85,8 +86,7 @@ class _DetailedPageState extends State<DetailedPage>{
         setState(() {
           this.request = req;
         });
-        print(document.data);
-        print(req.description);
+        
       }
     });
 
@@ -111,14 +111,17 @@ class _DetailedPageState extends State<DetailedPage>{
               )),
         ),
         Container(
+          alignment: Alignment.center,
           margin: EdgeInsets.only(top: 10, left: 10, bottom: 15),
-          decoration: myBoxDecoration(),
+          //decoration: myBoxDecoration(),
           padding: new EdgeInsets.all(10),
           width: 300,
           height: 45,
-          child: Text(
+          child: Text(    
            widget.title,
-            style: TextStyle(fontSize: 20),
+            style: TextStyle(
+              decoration: TextDecoration.underline,
+              fontSize: 20),
           ),
         )
       ],
@@ -137,14 +140,16 @@ class _DetailedPageState extends State<DetailedPage>{
         ),
         Container(
             margin: EdgeInsets.only(top: 10, left: 10),
-            decoration: myBoxDecoration(),
+            //decoration: myBoxDecoration(),
             padding: new EdgeInsets.all(10),
             width: 280,
             height: 150,
             child: SingleChildScrollView(
               child: Text(
                 this.request.description,
-                style: TextStyle(fontSize: 20),
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  fontSize: 20),
               ),
             )),
       ],
@@ -227,13 +232,16 @@ class _DetailedPageState extends State<DetailedPage>{
         ),
         Container(
           margin: EdgeInsets.only(left: 10, bottom: 15),
-          decoration: myBoxDecoration(),
+          //decoration: myBoxDecoration(),
+          alignment: Alignment.center,
           padding: new EdgeInsets.all(10),
           width: 260,
           height: 45,
           child: Text(
             this.request.contact,
-            style: TextStyle(fontSize: 20),
+            style: TextStyle(
+              decoration: TextDecoration.underline,
+              fontSize: 20),
           ),
         )
       ],
