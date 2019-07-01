@@ -73,9 +73,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   _setLocalUserData(DocumentSnapshot document) {
-    setState(() {
-      this.user = User.fromDocument(document);
-    });
+    if (this.mounted) {
+      setState(() {
+        this.user = User.fromDocument(document);
+      });
+    }
   }
 
   ListTile _buildListTile(String title, String trailing) => ListTile(
@@ -170,7 +172,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             _buildLabForm(),
             _buildMajorForm(),
             _buildSkillsCheckboxs(),
-            // TODO: Considering deleting the following submit bottom
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: RaisedButton(
@@ -222,10 +223,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   String _nameValidator(String value) {
     if (value.isEmpty) return 'Name cannot be empty!';
+    return null;
   }
 
   String _majorValidator(String value) {
     if (value.isEmpty) return 'Name cannot be empty!';
+    return null;
   }
 
   Column _buildSkillsCheckboxs() => Column(
