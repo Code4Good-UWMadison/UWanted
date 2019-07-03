@@ -1,26 +1,89 @@
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../buttonManageGlobal.dart';
 
-// void main() =>runApp(MyApp());
 
-// class App extends StatelessWidget {
-//   // This widget is the root of your application.
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//         title: 'Send Request',
-//         home: new Request(),
-//         // theme: new ThemeData(primarySwatch: Colors.brown) //themeData
-//         ); //Material app
-//   }
-// }
+class ButtonManage {
+  _initButton() {
+    backend = false;
+    others = false;
+    frontend = false;
+    app = false;
+    aiml = false;
+    data = false;
+  }
 
-class SendRequest extends StatelessWidget {
+  _buttonValue(Text label, bool selected) {
+    switch (label.data) {
+      case 'Backend':
+        backend = selected;
+        break;
+      case 'Frontend':
+        frontend = selected;
+        break;
+      case 'AI&ML':
+        aiml = selected;
+        break;
+      case 'Data':
+        data = selected;
+        break;
+      case 'App':
+        app = selected;
+        break;
+      case 'Other':
+        others = selected;
+        break;
+    }
+  }
+}
+
+var b = ButtonManage();
+
+class SendRequest extends StatefulWidget {
   SendRequest({Key key, this.auth, this.userId}) : super(key: key);
   final BaseAuth auth;
   final String userId;
+
+  _addItem() {
+    DocumentReference docRef =
+        Firestore.instance.collection('tasks').document();
+    docRef.setData({
+      'title': des,
+      'description': details,
+      'contact': contact,
+      'AI&ML': aiml,
+      'Backend': backend,
+      'Frontend': frontend,
+      'Data': data,
+      'App': app,
+      'Other': others,
+      'created': DateTime.now(),
+    });
+    String uidOfTask = docRef.documentID;
+    Firestore.instance
+        .collection('users')
+        .document(userId)
+        .get()
+        .then((DocumentSnapshot document) {
+      List<String> updatedPosts =
+          List<String>.from(document['posts'], growable: true);
+      updatedPosts.addAll([uidOfTask]);
+      Firestore.instance.collection('users').document(userId).updateData({
+        'posts': updatedPosts,
+      });
+    });
+    //print('Item added');
+  }
+
+  @override
+  State<StatefulWidget> createState() => _SendRequestState();
+}
+
+class _SendRequestState extends State<SendRequest>{
   @override
   Widget build(BuildContext context) {
+    b._initButton();
     return Scaffold(
       body: ListView(
         // mainAxisSize: MainAxisSize.max,
@@ -28,21 +91,38 @@ class SendRequest extends StatelessWidget {
         children: <Widget>[
           TopPart(),
           BottomPart(),
+          SizedBox(
+            height: 50.0,
+          ),
+          
+          FloatingActionButton(
+            onPressed: () {
+              widget._addItem(); 
+              des = "";
+              details = "";
+              contact = "";
+           showDialog(context: context,
+           builder: (_) => new AlertDialog(
+             content: new Text('Request submitted.',
+             textAlign: TextAlign.center,),
+           ));
+            // BottomPartState().clearContact();
+            // _LabelWidgetState().selected = false;
+            },
+            backgroundColor: Colors.brown,
+            child: Text(
+              "Submit",
+              style: TextStyle(color: Colors.white),
+            ),
+          
+          ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          //submit and go to another page
-        },
-        backgroundColor: Colors.brown,
-        child: Text(
-          "Submit",
-          style: TextStyle(color: Colors.white),
-        ),
       ),
     );
   }
+
 }
+
 
 Color textColor = Color(0xFFDBC1AC);
 
@@ -52,8 +132,33 @@ class TopPart extends StatefulWidget {
 }
 
 class _TopPartState extends State<TopPart> {
+  TextEditingController _controllerDes;
+  TextEditingController _controllerDetail;
+
+void clearText(){
+  setState(() {
+    _controllerDes.clear();
+    _controllerDetail.clear();
+  });
+}
+  @override
+  void initState() {
+    super.initState();
+    _controllerDes = TextEditingController();
+    _controllerDetail = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controllerDes.dispose();
+    _controllerDetail.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    // des = _controllerDes.text;
+    // details = _controllerDetail.text;
     return Stack(
       children: <Widget>[
         ClipPath(
@@ -77,6 +182,8 @@ class _TopPartState extends State<TopPart> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 50.0),
+                // FloatingActionButton(
+                //   onPressed: () {_controllerDes.text = "";}),
                 Text(
                   "Short Description:",
                   style: TextStyle(
@@ -96,7 +203,10 @@ class _TopPartState extends State<TopPart> {
                       Radius.circular(30.0),
                     ),
                     child: TextField(
-                      controller: TextEditingController(),
+                      onChanged: (text) {
+                        des = text;
+                      },
+                      controller: _controllerDes,
                       decoration: new InputDecoration(
                         hintText: 'Type description',
                         border: InputBorder.none,
@@ -129,7 +239,10 @@ class _TopPartState extends State<TopPart> {
                         Radius.circular(30.0),
                       ),
                       child: TextField(
-                        controller: TextEditingController(),
+                        onChanged: (text) {
+                          details = text;
+                        },
+                        controller: _controllerDetail,
                         decoration: new InputDecoration(
                           hintText:
                               'Be specific as much as possible, including techinical details and the purpose',
@@ -137,16 +250,16 @@ class _TopPartState extends State<TopPart> {
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 13.0),
                         ),
-                      ), //TextField
-                    ), //Material
-                  ), //padding
+                      ), 
+                    ), 
+                  ), 
                 ),
-              ], //<Widget>
+              ], 
             ),
           ),
         ),
-      ], //<widget>
-    ); //stack
+      ], 
+    ); 
   }
 }
 
@@ -159,7 +272,9 @@ class LabelWidget extends StatefulWidget {
 
 class _LabelWidgetState extends State<LabelWidget> {
   _LabelWidgetState();
-  Color myColor = Color(0xFF38220F);
+  Color myColor = Colors.grey;
+  bool selected = false;
+
   @override
   Widget build(BuildContext context) {
     return RaisedButton(
@@ -171,11 +286,15 @@ class _LabelWidgetState extends State<LabelWidget> {
       onPressed: () {
         setState(() {
           if (myColor == Color(0xFF38220F)) {
-            myColor = Color(0x967259);
+            myColor = Colors.grey; //unselected
+            selected = false;
           } else {
-            myColor = Color(0xFF38220F);
+            myColor = Color(0xFF38220F); //selected
+            selected = true;
           }
         });
+
+        b._buttonValue(widget.label, selected);
       },
     );
   }
@@ -214,6 +333,25 @@ class BottomPart extends StatefulWidget {
 }
 
 class BottomPartState extends State<BottomPart> {
+  TextEditingController _controllerLabel;
+  TextEditingController _controllerContact;
+void clearContact(){
+  _controllerContact.clear();
+}
+  @override
+  void initState() {
+    super.initState();
+    _controllerLabel = TextEditingController();
+    _controllerContact = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controllerLabel.dispose();
+    _controllerContact.dispose();
+  }
+
   Color textColor = Color(0xFF39220F);
 
   @override
@@ -316,7 +454,10 @@ class BottomPartState extends State<BottomPart> {
                 Radius.circular(30.0),
               ),
               child: TextField(
-                controller: TextEditingController(),
+                onChanged: (text) {
+                  contact = text;
+                },
+                controller: _controllerContact,
                 decoration: new InputDecoration(
                   hintText: 'Email will be preferred',
                   border: InputBorder.none,
