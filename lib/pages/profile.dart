@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import './details.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage({Key key, this.auth, this.userId}) : super(key: key);
@@ -32,6 +33,7 @@ class _ProfilePageState extends State<ProfilePage> {
             _buildListTile("Lab", this.user.lab),
             _buildListTile("Major", this.user.major),
             _buildListTile("Technical Skills", this.user.skills.toString()),
+            _buildMyPostsListTile(),
           ],
         ).toList(),
       ),
@@ -71,9 +73,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   _setLocalUserData(DocumentSnapshot document) {
-    setState(() {
-      this.user = User.fromDocument(document);
-    });
+    if (this.mounted) {
+      setState(() {
+        this.user = User.fromDocument(document);
+      });
+    }
   }
 
   ListTile _buildListTile(String title, String trailing) => ListTile(
@@ -95,6 +99,23 @@ class _ProfilePageState extends State<ProfilePage> {
       this.user = (user != null ? user : this.user);
     });
   }
+
+  ListTile _buildMyPostsListTile() => ListTile(
+        title: Text('My Posts'),
+        trailing: Text(this.user.posts.length.toString()),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MyPostsPage(
+                    auth: widget.auth,
+                    userId: widget.userId,
+                    posts: this.user.posts,
+                  ),
+            ),
+          );
+        },
+      );
 }
 
 class EditProfilePage extends StatefulWidget {
@@ -151,7 +172,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             _buildLabForm(),
             _buildMajorForm(),
             _buildSkillsCheckboxs(),
-            // TODO: Considering deleting the following submit bottom
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: RaisedButton(
@@ -201,12 +221,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  String _nameValidator(value) {
+  String _nameValidator(String value) {
     if (value.isEmpty) return 'Name cannot be empty!';
+    return null;
   }
 
-  String _majorValidator(value) {
+  String _majorValidator(String value) {
     if (value.isEmpty) return 'Name cannot be empty!';
+    return null;
   }
 
   Column _buildSkillsCheckboxs() => Column(
@@ -306,7 +328,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       userRole: widget.user.userRole,
                       lab: _labController.text,
                       major: _majorController.text,
-                      skills: widget.user.skills));
+                      skills: widget.user.skills,
+                      posts: widget.user.posts));
               setState(() {
                 _isSubmitting = false;
               });
@@ -340,6 +363,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 }
 
+// Call this like
+// appendListToRemotePosts([UidOfTask,], userId);
+// For appending multiple posts
+// appendListToRemotePosts([UidOfTask1, UidOfTask2], userId);
+appendListToRemotePosts(List<String> newPosts, String userId) {
+  Firestore.instance
+      .collection('users')
+      .document(userId)
+      .get()
+      .then((DocumentSnapshot document) {
+    List<String> updatedPosts =
+        List<String>.from(document['posts'], growable: true);
+    updatedPosts.addAll(newPosts);
+    Firestore.instance.collection('users').document(userId).updateData({
+      'posts': updatedPosts,
+    });
+  });
+}
+
 var _initialUserData = {
   'name': '',
   'faculty': false,
@@ -352,6 +394,7 @@ var _initialUserData = {
   'Data': false,
   'App': false,
   'Others': false,
+  'posts': List<String>(),
   'created': Timestamp.now(),
   'updated': Timestamp.now(),
 };
@@ -362,16 +405,25 @@ class User {
   String lab;
   String major;
   Skills skills;
+  List<String> posts;
 
-  User({this.userName, this.userRole, this.lab, this.major, this.skills});
+  User(
+      {this.userName,
+      this.userRole,
+      this.lab,
+      this.major,
+      this.skills,
+      this.posts});
 
   User.clone(User user)
       : this(
-            userName: user.userName,
-            userRole: user.userRole,
-            lab: user.lab,
-            major: user.major,
-            skills: Skills.clone(user.skills));
+          userName: user.userName,
+          userRole: user.userRole,
+          lab: user.lab,
+          major: user.major,
+          skills: Skills.clone(user.skills),
+          posts: List.from(user.posts, growable: true),
+        );
 
   User.fromDocument(DocumentSnapshot document)
       : userName = document['name'],
@@ -387,7 +439,8 @@ class User {
           data: document['Data'],
           app: document['App'],
           others: document['Others'],
-        );
+        ),
+        posts = List.from(document['posts'], growable: true);
 
   // userRole could be null, that user haven't made a choice
   String userRoleToString() => userRole?.toString()?.substring(9) ?? '';
@@ -492,5 +545,74 @@ class Skills {
         (this.app ? 'APP, ' : '') +
         (this.others ? 'Others, ' : '');
     return str.length > 0 ? str.substring(0, str.length - 2) : str;
+  }
+}
+
+class MyPostsPage extends StatefulWidget {
+  MyPostsPage({Key key, this.auth, this.userId, this.posts}) : super(key: key);
+
+  final BaseAuth auth;
+  final String userId;
+  final List<String> posts;
+
+  @override
+  _MyPostsPageState createState() => _MyPostsPageState();
+}
+
+class _MyPostsPageState extends State<MyPostsPage> {
+  Map<String, String> posts = Map<String, String>();
+
+  @override
+  void initState() {
+    super.initState();
+    _getPostsFromRemote();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (this.posts == null)
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("My Posts"),
+      ),
+      body: ListView(
+        children: this.posts.entries.map(_buildListTileFromPosts).toList(),
+      ),
+    );
+  }
+
+  void _getPostsFromRemote() {
+    widget.posts.forEach((String uid) {
+      Firestore.instance
+          .collection('tasks')
+          .document(uid)
+          .get()
+          .then((DocumentSnapshot document) {
+        setState(() {
+          this.posts[uid] = document['title'];
+        });
+      });
+    });
+  }
+
+  ListTile _buildListTileFromPosts(MapEntry<String, String> entry) {
+    return ListTile(
+      title: Text(entry.value),
+      trailing: Icon(Icons.arrow_forward),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailedPage(
+                  title: entry.value,
+                  id: entry.key,
+                ),
+          ),
+        );
+      },
+    );
   }
 }
