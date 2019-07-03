@@ -3,19 +3,6 @@ import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../buttonManageGlobal.dart';
 
-// void main() =>runApp(MyApp());
-
-// class App extends StatelessWidget {
-//   // This widget is the root of your application.
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//         title: 'Send Request',
-//         home: new Request(),
-//         // theme: new ThemeData(primarySwatch: Colors.brown) //themeData
-//         ); //Material app
-//   }
-// }
 
 class ButtonManage {
   _initButton() {
@@ -53,44 +40,12 @@ class ButtonManage {
 
 var b = ButtonManage();
 
-class SendRequest extends StatelessWidget {
+class SendRequest extends StatefulWidget {
   SendRequest({Key key, this.auth, this.userId}) : super(key: key);
   final BaseAuth auth;
   final String userId;
-  @override
-  Widget build(BuildContext context) {
-    b._initButton();
-    return Scaffold(
-      body: ListView(
-        // mainAxisSize: MainAxisSize.max,
-        // crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          TopPart(),
-          BottomPart(),
-          SizedBox(
-            height: 50.0,
-          ),
-          FloatingActionButton(
-            onPressed: () {
-              print('others: ' + others.toString());
-              print('des' + des);
-              _addItem();
-
-              //Navigator.of(context).pop();
-            },
-            backgroundColor: Colors.brown,
-            child: Text(
-              "Submit",
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   _addItem() {
-
     DocumentReference docRef =
         Firestore.instance.collection('tasks').document();
     docRef.setData({
@@ -118,9 +73,56 @@ class SendRequest extends StatelessWidget {
         'posts': updatedPosts,
       });
     });
-    print('Item added');
+    //print('Item added');
   }
+
+  @override
+  State<StatefulWidget> createState() => _SendRequestState();
 }
+
+class _SendRequestState extends State<SendRequest>{
+  @override
+  Widget build(BuildContext context) {
+    b._initButton();
+    return Scaffold(
+      body: ListView(
+        // mainAxisSize: MainAxisSize.max,
+        // crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          TopPart(),
+          BottomPart(),
+          SizedBox(
+            height: 50.0,
+          ),
+          
+          FloatingActionButton(
+            onPressed: () {
+              widget._addItem(); 
+              des = "";
+              details = "";
+              contact = "";
+           showDialog(context: context,
+           builder: (_) => new AlertDialog(
+             content: new Text('Request submitted.',
+             textAlign: TextAlign.center,),
+           ));
+            // BottomPartState().clearContact();
+            // _LabelWidgetState().selected = false;
+            },
+            backgroundColor: Colors.brown,
+            child: Text(
+              "Submit",
+              style: TextStyle(color: Colors.white),
+            ),
+          
+          ),
+        ],
+      ),
+    );
+  }
+
+}
+
 
 Color textColor = Color(0xFFDBC1AC);
 
@@ -133,6 +135,12 @@ class _TopPartState extends State<TopPart> {
   TextEditingController _controllerDes;
   TextEditingController _controllerDetail;
 
+void clearText(){
+  setState(() {
+    _controllerDes.clear();
+    _controllerDetail.clear();
+  });
+}
   @override
   void initState() {
     super.initState();
@@ -174,6 +182,8 @@ class _TopPartState extends State<TopPart> {
                   textAlign: TextAlign.center,
                 ),
                 SizedBox(height: 50.0),
+                // FloatingActionButton(
+                //   onPressed: () {_controllerDes.text = "";}),
                 Text(
                   "Short Description:",
                   style: TextStyle(
@@ -240,16 +250,16 @@ class _TopPartState extends State<TopPart> {
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 13.0),
                         ),
-                      ), //TextField
-                    ), //Material
-                  ), //padding
+                      ), 
+                    ), 
+                  ), 
                 ),
-              ], //<Widget>
+              ], 
             ),
           ),
         ),
-      ], //<widget>
-    ); //stack
+      ], 
+    ); 
   }
 }
 
@@ -325,7 +335,9 @@ class BottomPart extends StatefulWidget {
 class BottomPartState extends State<BottomPart> {
   TextEditingController _controllerLabel;
   TextEditingController _controllerContact;
-
+void clearContact(){
+  _controllerContact.clear();
+}
   @override
   void initState() {
     super.initState();
