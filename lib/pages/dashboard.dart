@@ -4,8 +4,7 @@ import '../services/authentication.dart';
 import '../pages/task.dart';
 
 class DashboardPage extends StatefulWidget {
-  DashboardPage({Key key, this.auth, this.userId})
-      : super(key: key);
+  DashboardPage({Key key, this.auth, this.userId}) : super(key: key);
 
   final BaseAuth auth;
   final String userId;
@@ -14,12 +13,14 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  Widget _showTodoList() {
+  Stream _sortOptions = Firestore.instance.collection('tasks').snapshots();
+  Widget _show() {
     return Center(
       child: Container(
           padding: const EdgeInsets.all(10.0),
           child: StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance.collection('tasks').snapshots(),
+            stream: _sortOptions,
+            // stream: Firestore.instance.collection('tasks').snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError)
@@ -39,23 +40,73 @@ class _DashboardPageState extends State<DashboardPage> {
                         data: document['Data'],
                         fe: document['Frontend'],
                         ot: document['Other'],
-                        id:document.documentID,
+                        id: document.documentID,
                       );
                     }).toList(),
                   );
-                  // return new Text(widget.userId);
+                // return new Text(widget.userId);
               }
             },
-          )
-        ),
+          )),
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: _showTodoList(),
-    );
+        body: Container(
+            child: Column(children: <Widget>[
+      Row(
+        children: <Widget>[
+          Expanded(
+            child: TextField(
+              onChanged: (val) {
+                //initiateSearch(val);
+              },
+              decoration: InputDecoration(
+                hintText: 'Search by name',
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4.0)),
+              ),
+            ),
+          ),
+          Container(
+            child: DropdownButton<String>(
+              // value: 'Sort',
+              icon: Icon(Icons.sort),
+              onChanged: (String newValue) {
+                setState(() {
+                  switch (newValue) {
+                    case 'Time':
+                      _sortOptions = Firestore.instance
+                          .collection('tasks')
+                          .orderBy('updated', descending: true)
+                          .snapshots();
+                      break;
+                    case 'Alphabet':
+                      _sortOptions = Firestore.instance
+                          .collection('tasks')
+                          .orderBy('title')
+                          .snapshots();
+                      break;
+                    default:
+                  }
+                });
+              },
+              items: <String>['Time', 'Alphabet']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+      Expanded(
+        child: _show(),
+      ),
+    ])));
   }
-  
 }
