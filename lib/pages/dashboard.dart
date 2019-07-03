@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/authentication.dart';
 import '../pages/task.dart';
+import 'dart:async';
 
 class DashboardPage extends StatefulWidget {
   DashboardPage({Key key, this.auth, this.userId}) : super(key: key);
@@ -13,7 +14,17 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  Stream _sortOptions = Firestore.instance.collection('tasks').snapshots();
+
+  var search;
+  var _sortOptions;
+
+  @override
+  void initState() {
+    super.initState();
+    _sortOptions = Firestore.instance.collection('tasks').snapshots(); 
+  }
+
+  //Stream _sortOptions = Firestore.instance.collection('tasks').snapshots();
   Widget _show() {
     return Center(
       child: Container(
@@ -61,7 +72,10 @@ class _DashboardPageState extends State<DashboardPage> {
           Expanded(
             child: TextField(
               onChanged: (val) {
-                //initiateSearch(val);
+                search = val;
+                setState((){
+                        _sortOptions = Firestore.instance.collection('tasks').where('title',isGreaterThanOrEqualTo:search).where('title',isLessThan:search+'z').snapshots();
+                });
               },
               decoration: InputDecoration(
                 hintText: 'Search by name',
