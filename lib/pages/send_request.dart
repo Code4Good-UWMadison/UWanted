@@ -97,15 +97,23 @@ class _SendRequestState extends State<SendRequest>{
           
           FloatingActionButton(
             onPressed: () {
-              widget._addItem(); 
-              des = "";
-              details = "";
-              contact = "";
-           showDialog(context: context,
-           builder: (_) => new AlertDialog(
-             content: new Text('Request submitted.',
-             textAlign: TextAlign.center,),
-           ));
+              if(_validSubmission()){
+                widget._addItem();
+                des = "";
+                details = "";
+                contact = "";
+                showDialog(context: context,
+                    builder: (_) => new AlertDialog(
+                      content: new Text('Request submitted.',
+                        textAlign: TextAlign.center,),
+                    ));
+              }else{
+                showDialog(context: context,
+                    builder: (_) => new AlertDialog(
+                      content: new Text('Request is incomplete. \nPlease finish all fields before submitting.',
+                        textAlign: TextAlign.center,),
+                    ));
+              }
             // BottomPartState().clearContact();
             // _LabelWidgetState().selected = false;
             },
@@ -121,6 +129,14 @@ class _SendRequestState extends State<SendRequest>{
     );
   }
 
+  //check if the request is empty; if empty, no submission
+  bool _validSubmission(){
+    if(backend || aiml || frontend || others || data || app){
+      if(des != "" && details != "" && contact != ""){
+        validRequest = true;
+      }
+    }return validRequest;
+  }
 }
 
 

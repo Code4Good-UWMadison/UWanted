@@ -8,4 +8,5 @@ String des="";
 String details="";
 String label="";
 String contact="";
+bool validRequest = false;
 
