@@ -3,7 +3,6 @@ import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../buttonManageGlobal.dart';
 
-
 class ButtonManage {
   _initButton() {
     backend = false;
@@ -59,6 +58,7 @@ class SendRequest extends StatefulWidget {
       'App': app,
       'Other': others,
       'created': DateTime.now(),
+      'updated': DateTime.now(),
     });
     String uidOfTask = docRef.documentID;
     Firestore.instance
@@ -80,7 +80,7 @@ class SendRequest extends StatefulWidget {
   State<StatefulWidget> createState() => _SendRequestState();
 }
 
-class _SendRequestState extends State<SendRequest>{
+class _SendRequestState extends State<SendRequest> {
   @override
   Widget build(BuildContext context) {
     b._initButton();
@@ -94,35 +94,35 @@ class _SendRequestState extends State<SendRequest>{
           SizedBox(
             height: 50.0,
           ),
-          
           FloatingActionButton(
             onPressed: () {
-              widget._addItem(); 
+              // TODO: return back to dashboard
+              widget._addItem();
               des = "";
               details = "";
               contact = "";
-           showDialog(context: context,
-           builder: (_) => new AlertDialog(
-             content: new Text('Request submitted.',
-             textAlign: TextAlign.center,),
-           ));
-            // BottomPartState().clearContact();
-            // _LabelWidgetState().selected = false;
+              showDialog(
+                  context: context,
+                  builder: (_) => new AlertDialog(
+                        content: new Text(
+                          'Request submitted.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ));
+              // BottomPartState().clearContact();
+              // _LabelWidgetState().selected = false;
             },
             backgroundColor: Colors.brown,
             child: Text(
               "Submit",
               style: TextStyle(color: Colors.white),
             ),
-          
           ),
         ],
       ),
     );
   }
-
 }
-
 
 Color textColor = Color(0xFFDBC1AC);
 
@@ -135,12 +135,13 @@ class _TopPartState extends State<TopPart> {
   TextEditingController _controllerDes;
   TextEditingController _controllerDetail;
 
-void clearText(){
-  setState(() {
-    _controllerDes.clear();
-    _controllerDetail.clear();
-  });
-}
+  void clearText() {
+    setState(() {
+      _controllerDes.clear();
+      _controllerDetail.clear();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -250,16 +251,16 @@ void clearText(){
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 13.0),
                         ),
-                      ), 
-                    ), 
-                  ), 
+                      ),
+                    ),
+                  ),
                 ),
-              ], 
+              ],
             ),
           ),
         ),
-      ], 
-    ); 
+      ],
+    );
   }
 }
 
@@ -335,9 +336,10 @@ class BottomPart extends StatefulWidget {
 class BottomPartState extends State<BottomPart> {
   TextEditingController _controllerLabel;
   TextEditingController _controllerContact;
-void clearContact(){
-  _controllerContact.clear();
-}
+  void clearContact() {
+    _controllerContact.clear();
+  }
+
   @override
   void initState() {
     super.initState();

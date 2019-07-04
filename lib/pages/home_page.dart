@@ -6,6 +6,8 @@ import '../pages/send_request.dart';
 import './dashboard.dart';
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.auth, this.userId, this.onSignedOut})
       : super(key: key);
@@ -20,13 +22,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  int _selectedIndex;
   @override
   void initState() {
     super.initState();
     _checkEmailVerification();
+    
+    _selectedIndex = 0; 
+    _getUserProfileFromFirebase();
   }
+
+// check if the user is registered or not, if not, skip to profile page instead of dashboard *changed from Profile.dart
+void _getUserProfileFromFirebase() {
+  Firestore.instance
+      .collection('users')
+      .document(widget.userId)
+      .get()
+      .then(_initializeRemoteUserDataIfNotExist);
+}
+
+_initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
+  if (!document.exists) {
+    // TODO: add a banner to warn user to create a profile
+    _selectedIndex = 2; 
+  }
+}
+
   bool _isEmailVerified = false;
-  int _selectedIndex = 0;
 
   void _checkEmailVerification() async {
     _isEmailVerified = await widget.auth.isEmailVerified();

@@ -14,14 +14,17 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-
-  var search;
   var _sortOptions;
+  var search;
+  final CollectionReference originList =
+      Firestore.instance.collection('tasks'); // Search from origin
+  var currList; // Filter from curr
 
   @override
   void initState() {
     super.initState();
-    _sortOptions = Firestore.instance.collection('tasks').snapshots(); 
+    currList = originList;
+    _sortOptions = currList.snapshots();
   }
 
   //Stream _sortOptions = Firestore.instance.collection('tasks').snapshots();
@@ -73,8 +76,18 @@ class _DashboardPageState extends State<DashboardPage> {
             child: TextField(
               onChanged: (val) {
                 search = val;
-                setState((){
-                        _sortOptions = Firestore.instance.collection('tasks').where('title',isGreaterThanOrEqualTo:search).where('title',isLessThan:search+'z').snapshots();
+                // currList = originList.where('title',isGreaterThanOrEqualTo:search).where('title',isLessThan:search+'z');
+                setState(() {
+                  //TODO: try filter after search
+                  print("start");
+                  currList = originList
+                      .where('title', isGreaterThanOrEqualTo: search)
+                      .where('title', isLessThan: search + 'z').snapshots();
+                  print("finish");
+                  _sortOptions = originList
+                      .where('title', isGreaterThanOrEqualTo: search)
+                      .where('title', isLessThan: search + 'z')
+                      .snapshots();
                 });
               },
               decoration: InputDecoration(
@@ -92,16 +105,13 @@ class _DashboardPageState extends State<DashboardPage> {
                 setState(() {
                   switch (newValue) {
                     case 'Time':
-                      _sortOptions = Firestore.instance
-                          .collection('tasks')
+                      _sortOptions = currList
+                          .orderBy('title')
                           .orderBy('updated', descending: true)
                           .snapshots();
                       break;
                     case 'Alphabet':
-                      _sortOptions = Firestore.instance
-                          .collection('tasks')
-                          .orderBy('title')
-                          .snapshots();
+                      _sortOptions = currList.orderBy('title').snapshots();
                       break;
                     default:
                   }
