@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../buttonManageGlobal.dart';
-
+import './dashboard.dart';
 
 class ButtonManage {
   _initButton() {
@@ -59,6 +59,7 @@ class SendRequest extends StatefulWidget {
       'App': app,
       'Other': others,
       'created': DateTime.now(),
+      'updated': DateTime.now(),
     });
     String uidOfTask = docRef.documentID;
     Firestore.instance
@@ -80,7 +81,7 @@ class SendRequest extends StatefulWidget {
   State<StatefulWidget> createState() => _SendRequestState();
 }
 
-class _SendRequestState extends State<SendRequest>{
+class _SendRequestState extends State<SendRequest> {
   @override
   Widget build(BuildContext context) {
     b._initButton();
@@ -94,9 +95,9 @@ class _SendRequestState extends State<SendRequest>{
           SizedBox(
             height: 50.0,
           ),
-          
           FloatingActionButton(
             onPressed: () {
+              
               if(_validSubmission()){
                 widget._addItem();
                 des = "";
@@ -107,6 +108,8 @@ class _SendRequestState extends State<SendRequest>{
                       content: new Text('Request submitted.',
                         textAlign: TextAlign.center,),
                     ));
+                // TODO: Return back to dashboard, restart a HomePage instead of DashboardPage. It's terrible rn. 
+                Navigator.push(context, new MaterialPageRoute(builder: (ctxt) => new DashboardPage(userId: widget.userId, auth: widget.auth),));
               }else{
                 showDialog(context: context,
                     builder: (_) => new AlertDialog(
@@ -122,7 +125,6 @@ class _SendRequestState extends State<SendRequest>{
               "Submit",
               style: TextStyle(color: Colors.white),
             ),
-          
           ),
         ],
       ),
@@ -139,7 +141,6 @@ class _SendRequestState extends State<SendRequest>{
   }
 }
 
-
 Color textColor = Color(0xFFDBC1AC);
 
 class TopPart extends StatefulWidget {
@@ -151,12 +152,13 @@ class _TopPartState extends State<TopPart> {
   TextEditingController _controllerDes;
   TextEditingController _controllerDetail;
 
-void clearText(){
-  setState(() {
-    _controllerDes.clear();
-    _controllerDetail.clear();
-  });
-}
+  void clearText() {
+    setState(() {
+      _controllerDes.clear();
+      _controllerDetail.clear();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -266,16 +268,16 @@ void clearText(){
                           contentPadding: EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 13.0),
                         ),
-                      ), 
-                    ), 
-                  ), 
+                      ),
+                    ),
+                  ),
                 ),
-              ], 
+              ],
             ),
           ),
         ),
-      ], 
-    ); 
+      ],
+    );
   }
 }
 
@@ -309,7 +311,6 @@ class _LabelWidgetState extends State<LabelWidget> {
             selected = true;
           }
         });
-
         b._buttonValue(widget.label, selected);
       },
     );
@@ -351,9 +352,10 @@ class BottomPart extends StatefulWidget {
 class BottomPartState extends State<BottomPart> {
   TextEditingController _controllerLabel;
   TextEditingController _controllerContact;
-void clearContact(){
-  _controllerContact.clear();
-}
+  void clearContact() {
+    _controllerContact.clear();
+  }
+
   @override
   void initState() {
     super.initState();

@@ -14,24 +14,25 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-
-  var search;
   var _sortOptions;
+  final CollectionReference originList =
+      Firestore.instance.collection('tasks'); // Search from origin
+  Stream<QuerySnapshot> currList = Firestore.instance
+      .collection('tasks')
+      .snapshots(); // current list after search
 
   @override
   void initState() {
     super.initState();
-    _sortOptions = Firestore.instance.collection('tasks').snapshots(); 
+    _sortOptions = null;
   }
 
-  //Stream _sortOptions = Firestore.instance.collection('tasks').snapshots();
   Widget _show() {
     return Center(
       child: Container(
           padding: const EdgeInsets.all(10.0),
           child: StreamBuilder<QuerySnapshot>(
-            stream: _sortOptions,
-            // stream: Firestore.instance.collection('tasks').snapshots(),
+            stream: Firestore.instance.collection('tasks').snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError)
@@ -40,9 +41,21 @@ class _DashboardPageState extends State<DashboardPage> {
                 case ConnectionState.waiting:
                   return new Text('Loading...');
                 default:
+                  List<DocumentSnapshot> list = snapshot.data.documents;
+                  if (_sortOptions != null) {
+                    switch (_sortOptions) {
+                      case 'Time':
+                        list.sort(
+                            (a, b) => a['updated'].compareTo(b['updated']));
+                        break;
+                      case 'Alphabet':
+                        list.sort((a, b) => a['title'].compareTo(b['title']));
+                        break;
+                      default:
+                    }
+                  }
                   return new ListView(
-                    children: snapshot.data.documents
-                        .map((DocumentSnapshot document) {
+                    children: list.map((DocumentSnapshot document) {
                       return new Task(
                         title: document['title'],
                         ai: document['AI&ML'],
@@ -72,9 +85,14 @@ class _DashboardPageState extends State<DashboardPage> {
           Expanded(
             child: TextField(
               onChanged: (val) {
-                search = val;
-                setState((){
-                        _sortOptions = Firestore.instance.collection('tasks').where('title',isGreaterThanOrEqualTo:search).where('title',isLessThan:search+'z').snapshots();
+                var search = val;
+                setState(() {
+                  print("start");
+                  currList = originList
+                      .where('title', isGreaterThanOrEqualTo: search)
+                      .where('title', isLessThan: search + 'z')
+                      .snapshots();
+                  print("finish");
                 });
               },
               decoration: InputDecoration(
@@ -92,16 +110,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 setState(() {
                   switch (newValue) {
                     case 'Time':
-                      _sortOptions = Firestore.instance
-                          .collection('tasks')
-                          .orderBy('updated', descending: true)
-                          .snapshots();
+                      _sortOptions = 'Time';
                       break;
                     case 'Alphabet':
-                      _sortOptions = Firestore.instance
-                          .collection('tasks')
-                          .orderBy('title')
-                          .snapshots();
+                      _sortOptions = 'Alphabet';
                       break;
                     default:
                   }

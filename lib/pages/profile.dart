@@ -227,7 +227,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   String _majorValidator(String value) {
-    if (value.isEmpty) return 'Name cannot be empty!';
+    if (value.isEmpty) return 'Major cannot be empty!';
     return null;
   }
 
