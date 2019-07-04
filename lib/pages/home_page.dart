@@ -27,26 +27,45 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _checkEmailVerification();
-    
-    _selectedIndex = 0; 
+    _selectedIndex = 0;
     _getUserProfileFromFirebase();
   }
 
 // check if the user is registered or not, if not, skip to profile page instead of dashboard *changed from Profile.dart
-void _getUserProfileFromFirebase() {
-  Firestore.instance
-      .collection('users')
-      .document(widget.userId)
-      .get()
-      .then(_initializeRemoteUserDataIfNotExist);
-}
-
-_initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
-  if (!document.exists) {
-    // TODO: add a banner to warn user to create a profile
-    _selectedIndex = 2; 
+  void _getUserProfileFromFirebase() {
+    Firestore.instance
+        .collection('users')
+        .document(widget.userId)
+        .get()
+        .then(_initializeRemoteUserDataIfNotExist);
   }
-}
+
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
+  _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
+    if (!document.exists || document.data['name'] == "") {
+      print("add Profile!");
+      setState(() {
+        _selectedIndex = 2;
+      });
+      showInSnackBar();
+    } 
+  }
+
+  void showInSnackBar() {
+    _scaffoldKey.currentState.removeCurrentSnackBar();
+    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+      content: new Text(
+          'Please fill out your information first if you want to publish requests'),
+      duration: const Duration(minutes: 5),
+      action: SnackBarAction(
+        label: 'I\'ll do that later',
+        onPressed: () {
+          _scaffoldKey.currentState.removeCurrentSnackBar();
+        },
+      ),
+    ));
+  }
 
   bool _isEmailVerified = false;
 
@@ -129,7 +148,12 @@ _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
+      if(_selectedIndex == 1){
+        _getUserProfileFromFirebase();
+      }
     });
+    // if haven't updated profile before sending request, warn this
+
   }
 
   @override
@@ -141,7 +165,9 @@ _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
     ];
     final _pageName = ["Dashboard", "Send Request", "Profile"];
     return new Scaffold(
+      key: _scaffoldKey, // used to add snackbar
       appBar: new AppBar(
+        automaticallyImplyLeading: false,
         title: new Text(_pageName[_selectedIndex]),
         actions: <Widget>[
           new FlatButton(

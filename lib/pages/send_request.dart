@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../buttonManageGlobal.dart';
+import './dashboard.dart';
 
 class ButtonManage {
   _initButton() {
@@ -96,7 +97,7 @@ class _SendRequestState extends State<SendRequest> {
           ),
           FloatingActionButton(
             onPressed: () {
-              // TODO: return back to dashboard
+              
               if(_validSubmission()){
                 widget._addItem();
                 des = "";
@@ -107,6 +108,8 @@ class _SendRequestState extends State<SendRequest> {
                       content: new Text('Request submitted.',
                         textAlign: TextAlign.center,),
                     ));
+                // TODO: Return back to dashboard, restart a HomePage instead of DashboardPage. It's terrible rn. 
+                Navigator.push(context, new MaterialPageRoute(builder: (ctxt) => new DashboardPage(userId: widget.userId, auth: widget.auth),));
               }else{
                 showDialog(context: context,
                     builder: (_) => new AlertDialog(
@@ -308,7 +311,6 @@ class _LabelWidgetState extends State<LabelWidget> {
             selected = true;
           }
         });
-
         b._buttonValue(widget.label, selected);
       },
     );
