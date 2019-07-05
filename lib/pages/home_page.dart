@@ -167,7 +167,7 @@ class _HomePageState extends State<HomePage> {
     return new Scaffold(
       key: _scaffoldKey, // used to add snackbar
       appBar: new AppBar(
-        automaticallyImplyLeading: false,
+        // automaticallyImplyLeading: false,
         title: new Text(_pageName[_selectedIndex]),
         actions: <Widget>[
           new FlatButton(
@@ -178,6 +178,9 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: _pageOptions[_selectedIndex],
+      drawer: Drawer(
+        child: ProfilePage(userId: widget.userId, auth: widget.auth, isInDrawer: true),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _newTask, // generate a new task
         tooltip: 'Add',

@@ -5,10 +5,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import './details.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key key, this.auth, this.userId}) : super(key: key);
+  ProfilePage(
+      {Key key,
+      @required this.auth,
+      @required this.userId,
+      this.isInDrawer = false})
+      : super(key: key);
 
   final BaseAuth auth;
   final String userId;
+  final bool isInDrawer;
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -25,15 +31,18 @@ class _ProfilePageState extends State<ProfilePage> {
       );
     return Scaffold(
       body: ListView(
+        padding: EdgeInsets.zero,
         children: ListTile.divideTiles(
           context: context,
           tiles: [
+            _buildDrawerHeader(),
             _buildListTile("Name", this.user.userName),
             _buildListTile("Role", this.user.userRoleToString()),
             _buildListTile("Lab", this.user.lab),
             _buildListTile("Major", this.user.major),
             _buildListTile("Technical Skills", this.user.skills.toString()),
             _buildMyPostsListTile(),
+            AboutListTile(icon: null),
           ],
         ).toList(),
       ),
@@ -80,6 +89,15 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  DrawerHeader _buildDrawerHeader() => widget.isInDrawer
+      ? DrawerHeader(
+          child: Text('Profile'),
+          decoration: BoxDecoration(
+            color: Colors.blue,
+          ),
+        )
+      : null;
+
   ListTile _buildListTile(String title, String trailing) => ListTile(
         title: Text(title),
         trailing: Text(trailing),
@@ -119,7 +137,11 @@ class _ProfilePageState extends State<ProfilePage> {
 }
 
 class EditProfilePage extends StatefulWidget {
-  EditProfilePage({Key key, this.auth, this.userId, this.user})
+  EditProfilePage(
+      {Key key,
+      @required this.auth,
+      @required this.userId,
+      @required this.user})
       : super(key: key);
 
   final BaseAuth auth;
@@ -549,7 +571,12 @@ class Skills {
 }
 
 class MyPostsPage extends StatefulWidget {
-  MyPostsPage({Key key, this.auth, this.userId, this.posts}) : super(key: key);
+  MyPostsPage(
+      {Key key,
+      @required this.auth,
+      @required this.userId,
+      @required this.posts})
+      : super(key: key);
 
   final BaseAuth auth;
   final String userId;
