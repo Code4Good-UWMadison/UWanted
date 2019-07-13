@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/services/authentication.dart';
@@ -20,9 +21,10 @@ class MyPostsPage extends StatefulWidget {
 }
 
 class _MyPostsPageState extends State<MyPostsPage> {
-  Map<String, String> posts = Map<String, String>();
-  Map postss = Map();
+  Map<String, Map<String, dynamic>> posts = Map<String, Map<String, dynamic>>();
   bool _isEditing = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final Firestore db = Firestore.instance;
 
   @override
   void initState() {
@@ -37,6 +39,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
         child: CircularProgressIndicator(),
       );
     return Scaffold(
+      key: this._scaffoldKey,
       appBar: AppBar(
         title: Text("My Posts"),
         actions: <Widget>[
@@ -44,8 +47,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
         ],
       ),
       body: ListView(
-        // children: this.posts.entries.map(_buildListTileFromPosts).toList(),
-        children: this.postss.entries.map(_buildListTileFromPostss).toList(),
+        children: this.posts.entries.map(_buildListTileFromPosts).toList(),
       ),
       bottomNavigationBar: _isEditing ? _bottomDeleteBar() : null,
     );
@@ -59,46 +61,23 @@ class _MyPostsPageState extends State<MyPostsPage> {
           .get()
           .then((DocumentSnapshot document) {
         setState(() {
-          this.postss[uid] = {
+          this.posts[uid] = {
             'uid': uid,
             'title': document['title'],
             'isChecked': false,
           };
-          this.posts[uid] = document['title'];
         });
       });
     });
   }
 
-  ListTile _buildListTileFromPosts(MapEntry<String, String> entry) => ListTile(
+  ListTile _buildListTileFromPosts(MapEntry entry) => ListTile(
         leading: _isEditing
             ? Checkbox(
-                value: null,
-                onChanged: null,
-              )
-            : null,
-        title: Text(entry.value),
-        trailing: Icon(Icons.arrow_forward),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DetailedPage(
-                title: entry.value,
-                id: entry.key,
-              ),
-            ),
-          );
-        },
-      );
-
-  ListTile _buildListTileFromPostss(MapEntry entry) => ListTile(
-        leading: _isEditing
-            ? Checkbox(
-                value: this.postss[entry.key]['isChecked'],
+                value: this.posts[entry.key]['isChecked'],
                 onChanged: (bool value) {
                   setState(() {
-                    this.postss[entry.key]['isChecked'] = value;
+                    this.posts[entry.key]['isChecked'] = value;
                   });
                 },
               )
@@ -148,10 +127,123 @@ class _MyPostsPageState extends State<MyPostsPage> {
               FlatButton(
                 child: Text('Delete',
                     style: TextStyle(color: Colors.blue, fontSize: 16.0)),
-                onPressed: () {},
+                onPressed:
+                    _getCheckedList().isNotEmpty ? _showAlertDialog : null,
               ),
             ],
           ),
         ),
       );
+
+  List<String> _getCheckedList() {
+    List<String> _checkedList = List<String>();
+    this.posts.forEach((String uid, Map<String, dynamic> details) {
+      if (details['isChecked']) {
+        _checkedList.add(uid);
+      }
+    });
+    return _checkedList;
+  }
+
+  List<String> _getUncheckedList() {
+    List<String> _uncheckedList = List<String>();
+    this.posts.forEach((String uid, Map<String, dynamic> details) {
+      if (!details['isChecked']) {
+        _uncheckedList.add(uid);
+      }
+    });
+    return _uncheckedList;
+  }
+
+  Future<void> _showAlertDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Warning'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Delete is irreversible!'),
+                Text('Permanently delete selected tasks?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                'PERMANENTLY DELETE',
+                style: TextStyle(color: Colors.red),
+              ),
+              onPressed: _updateRemoteData,
+            ),
+            FlatButton(
+              child: Text('CANCEL'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _updateRemoteData() {
+    _deleteCheckedTasksFromFirestore()
+        .then((_) => _updateRemoteUserPosts())
+        .then((_) => _updateWidgetPosts())
+        .then((_) => _updateThisPosts())
+        .then((_) => _showSnackbarThenWait1sec('Success!'))
+        .then((_) => Navigator.of(context).pop())
+        .catchError((e) => _showSnackbarThenWait1sec('Delete failed! $e'));
+  }
+
+  Future<void> _deleteCheckedTasksFromFirestore() async {
+    _getCheckedList().forEach((String uid) async {
+      await db.collection('tasks').document(uid).delete();
+    });
+  }
+
+  Future<void> _updateRemoteUserPosts() => db
+      .collection('users')
+      .document(widget.userId)
+      .updateData({'posts': _getUncheckedList()});
+
+  Future<void> _updateWidgetPosts() => db
+          .collection('users')
+          .document(widget.userId)
+          .get()
+          .then((DocumentSnapshot document) {
+        setState(() {
+          widget.posts.clear();
+          widget.posts.addAll(List.from(document['posts']));
+        });
+      });
+
+  Future<void> _updateThisPosts() async {
+    setState(() {
+      this.posts = new Map<String, Map<String, dynamic>>();
+    });
+    widget.posts.forEach((String uid) {
+      db
+          .collection('tasks')
+          .document(uid)
+          .get()
+          .then((DocumentSnapshot document) {
+        setState(() {
+          this.posts[uid] = {
+            'uid': uid,
+            'title': document['title'],
+            'isChecked': false,
+          };
+        });
+      });
+    });
+  }
+
+  Future<void> _showSnackbarThenWait1sec(String msg) async {
+    this._scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(msg)));
+  }
 }
