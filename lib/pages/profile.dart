@@ -7,16 +7,11 @@ import 'package:thewanted/pages/profile/my_posts.dart';
 import 'package:thewanted/pages/details.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage(
-      {Key key,
-      @required this.auth,
-      @required this.userId,
-      this.isInDrawer = false})
+  ProfilePage({Key key, @required this.auth, @required this.userId})
       : super(key: key);
 
   final BaseAuth auth;
   final String userId;
-  final bool isInDrawer;
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -37,7 +32,6 @@ class _ProfilePageState extends State<ProfilePage> {
         children: ListTile.divideTiles(
           context: context,
           tiles: [
-            _buildDrawerHeader(),
             ExpansionTile(
               title: Text('Profile'),
               children: <Widget>[
@@ -46,16 +40,13 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildListTile("Lab", this.user.lab),
                 _buildListTile("Major", this.user.major),
                 _buildListTile("Technical Skills", this.user.skills.toString()),
-                ListTile(
-                  title: Text('Edit Profile'),
-                  trailing: Icon(Icons.chevron_right),
-                  onTap: _navigateToEditingPage,
-                ),
+                _buildEditProfileTile(),
               ],
             ),
             ExpansionTile(
               title: Text('Posts'),
-              children: List.from(_buildPosts())..add(_buildMyPostsListTile()),
+              children: List.from(_buildPosts())
+                ..add(_buildEditPostsListTile()),
             ),
             AboutListTile(icon: null),
           ],
@@ -79,7 +70,7 @@ class _ProfilePageState extends State<ProfilePage> {
         .then(_getRemoteUserData);
   }
 
-  _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
+  void _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
     if (!document.exists) {
       Firestore.instance
           .collection('users')
@@ -88,7 +79,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  _getRemoteUserData(_) {
+  void _getRemoteUserData(_) {
     Firestore.instance
         .collection('users')
         .document(widget.userId)
@@ -96,7 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
         .then(_setLocalUserData);
   }
 
-  _setLocalUserData(DocumentSnapshot document) {
+  void _setLocalUserData(DocumentSnapshot document) {
     if (this.mounted) {
       setState(() {
         this.user = User.fromDocument(document);
@@ -104,22 +95,13 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  DrawerHeader _buildDrawerHeader() => widget.isInDrawer
-      ? DrawerHeader(
-          child: Text('Profile'),
-          decoration: BoxDecoration(
-            color: Colors.blue,
-          ),
-        )
-      : null;
-
   ListTile _buildListTile(String title, String trailing) => ListTile(
         title: Text(title),
         trailing: Text(trailing),
-        onTap: _navigateToEditingPage,
+        onTap: _navigateToProfileEditingPage,
       );
 
-  _navigateToEditingPage() async {
+  void _navigateToProfileEditingPage() async {
     User user = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -133,22 +115,30 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  ListTile _buildMyPostsListTile() => ListTile(
+  ListTile _buildEditProfileTile() => ListTile(
+        title: Text('Edit Profile'),
+        trailing: Icon(Icons.chevron_right),
+        onTap: _navigateToProfileEditingPage,
+      );
+
+  ListTile _buildEditPostsListTile() => ListTile(
         title: Text('Edit Posts'),
         trailing: Text(this.user.posts.length.toString()),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MyPostsPage(
-                auth: widget.auth,
-                userId: widget.userId,
-                posts: this.user.posts,
-              ),
-            ),
-          );
-        },
+        onTap: _navigateToPostsEditingPage,
       );
+
+  void _navigateToPostsEditingPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyPostsPage(
+          auth: widget.auth,
+          userId: widget.userId,
+          posts: this.user.posts,
+        ),
+      ),
+    );
+  }
 
   List<Widget> _buildPosts() => user.posts
       .map((String uid) => FutureBuilder<DocumentSnapshot>(
