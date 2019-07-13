@@ -4,6 +4,7 @@ import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/pages/profile/edit_profile.dart';
 import 'package:thewanted/pages/profile/my_posts.dart';
+import 'package:thewanted/pages/details.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage(
@@ -37,12 +38,25 @@ class _ProfilePageState extends State<ProfilePage> {
           context: context,
           tiles: [
             _buildDrawerHeader(),
-            _buildListTile("Name", this.user.userName),
-            _buildListTile("Role", this.user.userRoleToString()),
-            _buildListTile("Lab", this.user.lab),
-            _buildListTile("Major", this.user.major),
-            _buildListTile("Technical Skills", this.user.skills.toString()),
-            _buildMyPostsListTile(),
+            ExpansionTile(
+              title: Text('Profile'),
+              children: <Widget>[
+                _buildListTile("Name", this.user.userName),
+                _buildListTile("Role", this.user.userRoleToString()),
+                _buildListTile("Lab", this.user.lab),
+                _buildListTile("Major", this.user.major),
+                _buildListTile("Technical Skills", this.user.skills.toString()),
+                ListTile(
+                  title: Text('Edit Profile'),
+                  trailing: Icon(Icons.chevron_right),
+                  onTap: _navigateToEditingPage,
+                ),
+              ],
+            ),
+            ExpansionTile(
+              title: Text('Posts'),
+              children: List.from(_buildPosts())..add(_buildMyPostsListTile()),
+            ),
             AboutListTile(icon: null),
           ],
         ).toList(),
@@ -120,21 +134,48 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   ListTile _buildMyPostsListTile() => ListTile(
-        title: Text('My Posts'),
+        title: Text('Edit Posts'),
         trailing: Text(this.user.posts.length.toString()),
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => MyPostsPage(
-                    auth: widget.auth,
-                    userId: widget.userId,
-                    posts: this.user.posts,
-                  ),
+                auth: widget.auth,
+                userId: widget.userId,
+                posts: this.user.posts,
+              ),
             ),
           );
         },
       );
+
+  List<Widget> _buildPosts() => user.posts
+      .map((String uid) => FutureBuilder<DocumentSnapshot>(
+            future: Firestore.instance.collection('tasks').document(uid).get(),
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.data != null)
+                return ListTile(
+                  title: Text(snapshot.data['title']),
+                  trailing: Icon(Icons.arrow_forward),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailedPage(
+                          title: snapshot.data['title'],
+                          id: uid,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              else
+                return CircularProgressIndicator();
+            },
+          ))
+      .toList();
 }
 
 // Call this like
