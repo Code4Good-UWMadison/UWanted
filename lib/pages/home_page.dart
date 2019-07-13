@@ -179,7 +179,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: _pageOptions[_selectedIndex],
       drawer: Drawer(
-        child: ProfilePage(userId: widget.userId, auth: widget.auth, isInDrawer: true),
+        child: ProfilePage(userId: widget.userId, auth: widget.auth),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _newTask, // generate a new task
