@@ -270,7 +270,6 @@ class _DetailedPageState extends State<DetailedPage>{
 
 }
 
-
 class LabelWidget extends StatefulWidget {
   Text label;
  bool selected;
