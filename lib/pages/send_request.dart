@@ -97,7 +97,6 @@ class _SendRequestState extends State<SendRequest> {
           ),
           FloatingActionButton(
             onPressed: () {
-              
               if(_validSubmission()){
                 widget._addItem();
                 des = "";
