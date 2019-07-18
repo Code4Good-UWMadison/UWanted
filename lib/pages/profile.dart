@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './details.dart';
+import 'send_request.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage(
@@ -628,7 +629,25 @@ class _MyPostsPageState extends State<MyPostsPage> {
   ListTile _buildListTileFromPosts(MapEntry<String, String> entry) {
     return ListTile(
       title: Text(entry.value),
-      trailing: Icon(Icons.arrow_forward),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          FlatButton(
+            child: Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SendRequest(
+                          update: true,
+                          postId: entry.key,
+                        ),
+                  ));
+            },
+          ),
+          Icon(Icons.arrow_forward),
+        ],
+      ),
       onTap: () {
         Navigator.push(
           context,

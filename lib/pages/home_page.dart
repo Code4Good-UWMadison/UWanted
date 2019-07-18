@@ -160,7 +160,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final _pageOptions = [
       DashboardPage(userId: widget.userId, auth: widget.auth),
-      SendRequest(userId: widget.userId, auth: widget.auth),
+      SendRequest(userId: widget.userId, auth: widget.auth, update: false),
       ProfilePage(userId: widget.userId, auth: widget.auth),
     ];
     final _pageName = ["Dashboard", "Send Request", "Profile"];
