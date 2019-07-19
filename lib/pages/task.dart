@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import './details.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:thewanted/pages/status_tag.dart';
 
 class Task extends StatelessWidget {
   // Task({@required this.title, this.description});
@@ -54,10 +55,17 @@ class Task extends StatelessWidget {
             padding: const EdgeInsets.only(top: 5.0),
             child: Column(
               children: <Widget>[
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(
+                      title,
+                      style:
+                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                    StatusTag(status: Status.open),
+                  ],
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: 10.0),
