@@ -1,6 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:thewanted/pages/status_tag.dart';
 
 //import 'package:firebase_database/firebase_database.dart';
 class Request {
@@ -15,8 +16,9 @@ class Request {
   bool data;
   bool app;
   bool others;
-  
 
+  final String status;
+  
   Request(
       {
         
@@ -28,6 +30,7 @@ class Request {
         this.data,
         this.frontend,
         this.others,
+        @required this.status,
         });
 
 
@@ -81,7 +84,8 @@ class _DetailedPageState extends State<DetailedPage>{
             frontend: document.data['Frontend'],
             data: document.data['Data'],
             app: document.data['App'],
-            others: document.data['Other']);
+            others: document.data['Other'],
+            status: document['status']);
 
         setState(() {
           this.request = req;
@@ -117,11 +121,17 @@ class _DetailedPageState extends State<DetailedPage>{
           padding: new EdgeInsets.all(10),
           width: 300,
           height: 45,
-          child: Text(    
-           widget.title,
-            style: TextStyle(
-              decoration: TextDecoration.underline,
-              fontSize: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(    
+                widget.title,
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  fontSize: 20),
+              ),
+              StatusTag.fromString(this.request.status),
+            ],
           ),
         )
       ],
