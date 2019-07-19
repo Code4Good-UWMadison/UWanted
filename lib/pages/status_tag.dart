@@ -1,24 +1,11 @@
 import 'package:flutter/material.dart';
 
 class StatusTag extends StatelessWidget {
-  StatusTag({@required this.status});
   final Status status;
 
-  Color _buildColor() {
-    switch (this.status) {
-      case Status.open:
-        return Colors.green;
-        break;
-      case Status.inprogress:
-        return Colors.yellow[800];
-        break;
-      case Status.finished:
-        return Colors.red;
-        break;
-      default:
-        return Colors.lightBlue;
-    }
-  }
+  StatusTag({@required this.status});
+
+  StatusTag.fromString(String status) : status = _getStatusFromString(status);
 
   @override
   Widget build(BuildContext context) {
@@ -36,10 +23,44 @@ class StatusTag extends StatelessWidget {
       ),
     );
   }
+
+  static Status _getStatusFromString(String status) {
+    status = status.replaceAll(' ', '').toLowerCase();
+    switch (status) {
+      case 'open':
+        return Status.open;
+        break;
+      case 'inprogress':
+        return Status.inprogress;
+        break;
+      case 'finished':
+        return Status.finished;
+        break;
+      default:
+        return Status.undefined;
+    }
+  }
+
+  Color _buildColor() {
+    switch (this.status) {
+      case Status.open:
+        return Colors.green;
+        break;
+      case Status.inprogress:
+        return Colors.yellow[800];
+        break;
+      case Status.finished:
+        return Colors.red;
+        break;
+      default:
+        return Colors.lightBlue;
+    }
+  }
 }
 
 enum Status {
   open,
-  finished,
   inprogress,
+  finished,
+  undefined,
 }

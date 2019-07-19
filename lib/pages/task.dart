@@ -14,7 +14,8 @@ class Task extends StatelessWidget {
       this.data,
       this.fe,
       this.ot,
-      this.id});
+      this.id,
+      @required this.status});
   final title;
   final ai;
   final app;
@@ -23,6 +24,7 @@ class Task extends StatelessWidget {
   final fe;
   final ot;
   final id;
+  final String status;
   List _getNewList() {
     List<String> list = new List();
     if (ai) {
@@ -64,7 +66,7 @@ class Task extends StatelessWidget {
                           TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
-                    StatusTag(status: Status.open),
+                    StatusTag.fromString(this.status),
                   ],
                 ),
                 Padding(

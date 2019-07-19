@@ -60,6 +60,7 @@ class SendRequest extends StatefulWidget {
       'Other': others,
       'created': DateTime.now(),
       'updated': DateTime.now(),
+      'status': 'open',
     });
     String uidOfTask = docRef.documentID;
     Firestore.instance
