@@ -73,7 +73,7 @@ class _ProfilePageState extends State<ProfilePage> {
         .child('user')
         .child(widget.userId)
         .child('profile.jpg');
-    ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
+    ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc)).catchError((err){_imageUrl = null;});
     _getUserProfileFromFirebase();
   }
 
@@ -133,8 +133,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: (_imageUrl == null)
                       ? (Icon(
                           Icons.account_circle,
-                          size: 50.0,
-                          color: Colors.white,
+                          size: 180.0,
+                          color: Colors.blue,
                         ))
                       : (_image != null)
                           ? Image.file(
@@ -249,6 +249,7 @@ class _ProfilePageState extends State<ProfilePage> {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
     setState(() {
+      _imageUrl = null;
       _image = image;
       print('Image Path $_image');
     });
