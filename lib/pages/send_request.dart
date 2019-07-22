@@ -53,7 +53,6 @@ class SendRequest extends StatefulWidget {
   _addItem() {
     print("add item");
     if (update == true) {
-      print("post updated");
           Firestore.instance.collection('tasks').document(this.postId).updateData({
             'title': des,
             'description': details,
@@ -196,14 +195,6 @@ class _SendRequestState extends State<SendRequest> {
                 des = "";
                 details = "";
                 contact = "";
-//                showDialog(
-//                    context: context,
-//                    builder: (_) => new AlertDialog(
-//                          content: new Text(
-//                            'Request submitted.',
-//                            textAlign: TextAlign.center,
-//                          ),
-//                        ));
                 // TODO: Return back to dashboard, restart a HomePage instead of DashboardPage. It's terrible rn.
                 Navigator.push(
                     context,

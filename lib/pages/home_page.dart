@@ -4,6 +4,7 @@ import '../services/authentication.dart';
 import '../pages/profile.dart';
 import '../pages/send_request.dart';
 import './dashboard.dart';
+import '../pages/drawer.dart';
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -140,7 +141,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _newTask() async {}
+  _newTask() async {
+    setState(() {
+      _selectedIndex = 1;
+      _getUserProfileFromFirebase();
+    });
+  }
 
   final List<String> entries = <String>['A', 'B', 'C'];
   final List<int> colorCodes = <int>[600, 500, 100];
@@ -152,8 +158,6 @@ class _HomePageState extends State<HomePage> {
         _getUserProfileFromFirebase();
       }
     });
-    // if haven't updated profile before sending request, warn this
-
   }
 
   @override
@@ -179,11 +183,11 @@ class _HomePageState extends State<HomePage> {
       ),
       body: _pageOptions[_selectedIndex],
       drawer: Drawer(
-        child: ProfilePage(userId: widget.userId, auth: widget.auth, isInDrawer: true),
+        child: DrawerPage(userId: widget.userId, auth: widget.auth),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _newTask, // generate a new task
-        tooltip: 'Add',
+        tooltip: 'Request',
         child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(

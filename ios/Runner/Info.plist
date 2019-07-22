@@ -20,6 +20,12 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Upload Profile Image</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Upload Images taken by your camera</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>In case u might want to take a video with voice</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

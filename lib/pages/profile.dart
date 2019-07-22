@@ -1,21 +1,23 @@
-import 'dart:async';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import './details.dart';
-import 'send_request.dart';
+import 'package:thewanted/services/authentication.dart';
+import 'package:thewanted/models/user.dart';
+import 'package:thewanted/pages/profile/edit_profile.dart';
+import 'package:thewanted/pages/profile/my_posts.dart';
+import 'package:thewanted/pages/details.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'dart:async';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage(
-      {Key key,
-      @required this.auth,
-      @required this.userId,
-      this.isInDrawer = false})
+  ProfilePage({Key key, @required this.auth, @required this.userId})
       : super(key: key);
 
   final BaseAuth auth;
   final String userId;
-  final bool isInDrawer;
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -23,6 +25,8 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   User user;
+  File _image;
+  String _imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +40,25 @@ class _ProfilePageState extends State<ProfilePage> {
         children: ListTile.divideTiles(
           context: context,
           tiles: [
-            _buildDrawerHeader(),
-            _buildListTile("Name", this.user.userName),
-            _buildListTile("Role", this.user.userRoleToString()),
-            _buildListTile("Lab", this.user.lab),
-            _buildListTile("Major", this.user.major),
-            _buildListTile("Technical Skills", this.user.skills.toString()),
-            _buildMyPostsListTile(),
-            AboutListTile(icon: null),
+            ExpansionTile(
+              initiallyExpanded: true,
+              title: Text('Profile'),
+              children: <Widget>[
+                _buildProfile(),
+                _buildListTile("Name", this.user.userName),
+                _buildListTile("Role", this.user.userRoleToString()),
+                _buildListTile("Lab", this.user.lab),
+                _buildListTile("Major", this.user.major),
+                _buildListTile("Technical Skills", this.user.skills.toString()),
+                _buildEditProfileTile(),
+              ],
+            ),
+            ExpansionTile(
+              title: Text('Posts'),
+              children: List.from(_buildPosts())
+                ..add(_buildEditPostsListTile()),
+            ),
+            // AboutListTile(icon: null),
           ],
         ).toList(),
       ),
@@ -53,6 +68,13 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    // init profile's url
+    var ref = FirebaseStorage.instance
+        .ref()
+        .child('user')
+        .child(widget.userId)
+        .child('profile.jpg');
+    ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
     _getUserProfileFromFirebase();
   }
 
@@ -65,16 +87,16 @@ class _ProfilePageState extends State<ProfilePage> {
         .then(_getRemoteUserData);
   }
 
-  _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
+  void _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
     if (!document.exists) {
       Firestore.instance
           .collection('users')
           .document(widget.userId)
-          .setData(_initialUserData);
+          .setData(User.initialUserData);
     }
   }
 
-  _getRemoteUserData(_) {
+  void _getRemoteUserData(_) {
     Firestore.instance
         .collection('users')
         .document(widget.userId)
@@ -82,7 +104,7 @@ class _ProfilePageState extends State<ProfilePage> {
         .then(_setLocalUserData);
   }
 
-  _setLocalUserData(DocumentSnapshot document) {
+  void _setLocalUserData(DocumentSnapshot document) {
     if (this.mounted) {
       setState(() {
         this.user = User.fromDocument(document);
@@ -90,22 +112,74 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  DrawerHeader _buildDrawerHeader() => widget.isInDrawer
-      ? DrawerHeader(
-          child: Text('Profile'),
-          decoration: BoxDecoration(
-            color: Colors.blue,
-          ),
-        )
-      : null;
-
   ListTile _buildListTile(String title, String trailing) => ListTile(
         title: Text(title),
         trailing: Text(trailing),
-        onTap: _navigateToEditingPage,
+        onTap: _navigateToProfileEditingPage,
       );
 
-  _navigateToEditingPage() async {
+  Row _buildProfile() => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          new Container(width: 50, height: 0),
+          Align(
+            alignment: Alignment.center,
+            child: CircleAvatar(
+              radius: 100,
+              backgroundColor: Colors.white,
+              child: ClipOval(
+                child: new SizedBox(
+                  width: 180.0,
+                  height: 180.0,
+                  child: (_imageUrl == null)
+                      ? (Icon(
+                          Icons.account_circle,
+                          size: 50.0,
+                          color: Colors.white,
+                        ))
+                      : (_image != null)
+                          ? Image.file(
+                              _image,
+                              // fit: BoxFit.fill,
+                            )
+                          : Image.network(
+                              _imageUrl,
+                              // fit: BoxFit.fill,
+                            ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 120.0),
+            child: IconButton(
+              icon: Icon(
+                FontAwesomeIcons.camera,
+                size: 30.0,
+              ),
+              onPressed: () {
+                getImage();
+              },
+            ),
+          ),
+          (_image != null)
+              ? RaisedButton(
+                  color: Color(0xff476cfb),
+                  onPressed: () {
+                    uploadPic(context);
+                  },
+                  elevation: 4.0,
+                  splashColor: Colors.blueGrey,
+                  child: Text(
+                    'Confirm',
+                    style: TextStyle(color: Colors.white, fontSize: 16.0),
+                  ),
+                )
+              : new Container(width: 0, height: 0),
+        ],
+      );
+
+  void _navigateToProfileEditingPage() async {
     User user = await Navigator.push(
       context,
       MaterialPageRoute(
@@ -119,270 +193,88 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  ListTile _buildMyPostsListTile() => ListTile(
-        title: Text('My Posts'),
+  ListTile _buildEditProfileTile() => ListTile(
+        title: Text('Edit Profile'),
+        trailing: Icon(Icons.chevron_right),
+        onTap: _navigateToProfileEditingPage,
+      );
+
+  ListTile _buildEditPostsListTile() => ListTile(
+        title: Text('Edit Posts'),
         trailing: Text(this.user.posts.length.toString()),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MyPostsPage(
-                    auth: widget.auth,
-                    userId: widget.userId,
-                    posts: this.user.posts,
-                  ),
-            ),
-          );
-        },
+        onTap: _navigateToPostsEditingPage,
       );
-}
 
-class EditProfilePage extends StatefulWidget {
-  EditProfilePage(
-      {Key key,
-      @required this.auth,
-      @required this.userId,
-      @required this.user})
-      : super(key: key);
-
-  final BaseAuth auth;
-  final String userId;
-  final User user;
-
-  @override
-  _EditProfilePageState createState() => _EditProfilePageState();
-}
-
-class _EditProfilePageState extends State<EditProfilePage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-
-  TextEditingController _nameController;
-  TextEditingController _labController;
-  TextEditingController _majorController;
-
-  @override
-  void initState() {
-    super.initState();
-    _initControllers();
-  }
-
-  void _initControllers() {
-    _nameController = TextEditingController(text: widget.user.userName);
-    _labController = TextEditingController(text: widget.user.lab);
-    _majorController = TextEditingController(text: widget.user.major);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: Text("Edit Profile"),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: _isSubmitting ? null : _submit,
-          ),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          children: <Widget>[
-            _buildNameForm(),
-            _buildRoleCheckboxs(),
-            _buildLabForm(),
-            _buildMajorForm(),
-            _buildSkillsCheckboxs(),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: RaisedButton(
-                onPressed: _isSubmitting ? null : _submit,
-                child: Text('Submit'),
-              ),
-            ),
-          ],
+  void _navigateToPostsEditingPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyPostsPage(
+          auth: widget.auth,
+          userId: widget.userId,
+          posts: this.user.posts,
         ),
       ),
     );
   }
 
-  @override
-  void dispose() {
-    _disposeControllers();
-    super.dispose();
+  List<Widget> _buildPosts() => user.posts
+      .map((String uid) => FutureBuilder<DocumentSnapshot>(
+            future: Firestore.instance.collection('tasks').document(uid).get(),
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.data != null)
+                return ListTile(
+                  title: Text(snapshot.data['title']),
+                  trailing: Icon(Icons.arrow_forward),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailedPage(
+                          title: snapshot.data['title'],
+                          id: uid,
+                        ),
+                      ),
+                    );
+                  },
+                );
+              else
+                return CircularProgressIndicator();
+            },
+          ))
+      .toList();
+
+//////
+  Future getImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _image = image;
+      print('Image Path $_image');
+    });
   }
 
-  void _disposeControllers() {
-    _nameController.dispose();
-    _labController.dispose();
-    _majorController.dispose();
-  }
-
-  _buildNameForm() => _buildForm(
-      _nameController, "Name", 'Name cannot be empty', _nameValidator);
-
-  _buildLabForm() =>
-      _buildForm(_labController, "Lab", 'Lab can be empty', null);
-
-  _buildMajorForm() => _buildForm(
-      _majorController, "Major", 'Major cannot be empty', _majorValidator);
-
-  Container _buildForm(TextEditingController controller, String label,
-      String helper, Function validator) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
-      child: TextFormField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          helperText: helper,
-        ),
-        validator: validator,
-      ),
-    );
-  }
-
-  String _nameValidator(String value) {
-    if (value.isEmpty) return 'Name cannot be empty!';
-    return null;
-  }
-
-  String _majorValidator(String value) {
-    if (value.isEmpty) return 'Major cannot be empty!';
-    return null;
-  }
-
-  Column _buildSkillsCheckboxs() => Column(
-        children: <Widget>[
-          ListTile(
-            title: Text('Skills'),
-          ),
-          Row(
-            children: <Widget>[
-              _buildSkillsCheckbox("Backend"),
-              _buildSkillsCheckbox("Frontend"),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              _buildSkillsCheckbox("AI&ML"),
-              _buildSkillsCheckbox("Data"),
-            ],
-          ),
-          Row(
-            children: <Widget>[
-              _buildSkillsCheckbox("App"),
-              _buildSkillsCheckbox("Others"),
-            ],
-          ),
-        ],
-      );
-
-  Flexible _buildSkillsCheckbox(String title) => Flexible(
-        child: CheckboxListTile(
-          value: widget.user.skills.get(title),
-          title: Text(title),
-          onChanged: (bool) {
-            setState(() {
-              widget.user.skills.set(title, bool);
-            });
-          },
-        ),
-      );
-
-  Row _buildRoleCheckboxs() => Row(
-        children: <Widget>[
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-            child: Text(
-              'Role',
-              style: TextStyle(fontSize: 17),
-            ),
-          ),
-          Flexible(
-            child: RadioListTile<UserRole>(
-              value: UserRole.Student,
-              title: Text('Student'),
-              groupValue: widget.user.userRole,
-              onChanged: (value) {
-                setState(() {
-                  widget.user.userRole = value;
-                });
-              },
-            ),
-          ),
-          Flexible(
-            child: RadioListTile<UserRole>(
-              value: UserRole.Faculty,
-              title: Text('Faculty'),
-              groupValue: widget.user.userRole,
-              onChanged: (value) {
-                setState(() {
-                  widget.user.userRole = value;
-                });
-              },
-            ),
-          ),
-        ],
-      );
-
-  bool _isSubmitting = false;
-
-  void _submit() {
-    if (_formKey.currentState.validate()) {
-      setState(() {
-        _isSubmitting = true;
-      });
-      Firestore.instance
-          .collection('users')
-          .document(widget.userId)
-          .updateData(formateEditedData())
-            ..then((_) async {
-              _scaffoldKey.currentState.showSnackBar(SnackBar(
-                content: Text('Success!'),
-              ));
-              await new Future.delayed(const Duration(milliseconds: 1000));
-              Navigator.pop(
-                  context,
-                  User(
-                      userName: _nameController.text,
-                      userRole: widget.user.userRole,
-                      lab: _labController.text,
-                      major: _majorController.text,
-                      skills: widget.user.skills,
-                      posts: widget.user.posts));
-              setState(() {
-                _isSubmitting = false;
-              });
-            })
-            ..catchError((e) {
-              _scaffoldKey.currentState.showSnackBar(SnackBar(
-                content: Text('Please retry! $e'),
-              ));
-              setState(() {
-                _isSubmitting = false;
-              });
-            });
-    }
-  }
-
-  Map<String, dynamic> formateEditedData() {
-    return {
-      'name': _nameController.text,
-      'faculty': widget.user.userRole == UserRole.Faculty ? true : false,
-      'student': widget.user.userRole == UserRole.Student ? true : false,
-      'lab': _labController.text,
-      'major': _majorController.text,
-      'Backend': widget.user.skills.backend,
-      'Frontend': widget.user.skills.frontend,
-      'AI&ML': widget.user.skills.aiml,
-      'Data': widget.user.skills.data,
-      'App': widget.user.skills.app,
-      'Others': widget.user.skills.others,
-      'updated': Timestamp.now(),
-    };
+  Future uploadPic(BuildContext context) async {
+    StorageReference firebaseStorageRef = FirebaseStorage.instance
+        .ref()
+        .child('user')
+        .child(widget.userId)
+        .child('profile.jpg');
+    StorageUploadTask uploadTask = firebaseStorageRef.putFile(_image);
+    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+    setState(() {
+      _image = null;
+      var ref = FirebaseStorage.instance
+          .ref()
+          .child('user')
+          .child(widget.userId)
+          .child('profile.jpg');
+      ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
+      print("Profile Picture uploaded");
+      Scaffold.of(context)
+          .showSnackBar(SnackBar(content: Text('Profile Picture Uploaded')));
+    });
   }
 }
 
@@ -403,262 +295,4 @@ appendListToRemotePosts(List<String> newPosts, String userId) {
       'posts': updatedPosts,
     });
   });
-}
-
-var _initialUserData = {
-  'name': '',
-  'faculty': false,
-  'student': false,
-  'lab': '',
-  'major': '',
-  'Backend': false,
-  'Frontend': false,
-  'AI&ML': false,
-  'Data': false,
-  'App': false,
-  'Others': false,
-  'posts': List<String>(),
-  'created': Timestamp.now(),
-  'updated': Timestamp.now(),
-};
-
-class User {
-  String userName;
-  UserRole userRole;
-  String lab;
-  String major;
-  Skills skills;
-  List<String> posts;
-
-  User(
-      {this.userName,
-      this.userRole,
-      this.lab,
-      this.major,
-      this.skills,
-      this.posts});
-
-  User.clone(User user)
-      : this(
-          userName: user.userName,
-          userRole: user.userRole,
-          lab: user.lab,
-          major: user.major,
-          skills: Skills.clone(user.skills),
-          posts: List.from(user.posts, growable: true),
-        );
-
-  User.fromDocument(DocumentSnapshot document)
-      : userName = document['name'],
-        userRole = document['student']
-            ? UserRole.Student
-            : (document['faculty'] ? UserRole.Faculty : null),
-        lab = document['lab'],
-        major = document['major'],
-        skills = Skills(
-          backend: document['Backend'],
-          frontend: document['Frontend'],
-          aiml: document['AI&ML'],
-          data: document['Data'],
-          app: document['App'],
-          others: document['Others'],
-        ),
-        posts = List.from(document['posts'], growable: true);
-
-  // userRole could be null, that user haven't made a choice
-  String userRoleToString() => userRole?.toString()?.substring(9) ?? '';
-}
-
-enum UserRole {
-  Student,
-  Faculty,
-}
-
-enum Skill {
-  Backend,
-  Frontend,
-  AIML,
-  Data,
-  App,
-  Others,
-}
-
-class Skills {
-  bool backend;
-  bool frontend;
-  bool aiml;
-  bool data;
-  bool app;
-  bool others;
-
-  Skills(
-      {this.backend = false,
-      this.frontend = false,
-      this.aiml = false,
-      this.data = false,
-      this.app = false,
-      this.others = false});
-
-  Skills.clone(Skills skills)
-      : this(
-          backend: skills.backend,
-          frontend: skills.frontend,
-          aiml: skills.aiml,
-          data: skills.data,
-          app: skills.app,
-          others: skills.others,
-        );
-
-  void set(String skill, bool bool) {
-    switch (skill) {
-      case 'Backend':
-        this.backend = bool;
-        break;
-      case 'Frontend':
-        this.frontend = bool;
-        break;
-      case 'AI&ML':
-        this.aiml = bool;
-        break;
-      case 'Data':
-        this.data = bool;
-        break;
-      case 'App':
-        this.app = bool;
-        break;
-      case 'Others':
-        this.others = bool;
-        break;
-      default:
-    }
-  }
-
-  bool get(String skill) {
-    switch (skill) {
-      case 'Backend':
-        return this.backend;
-        break;
-      case 'Frontend':
-        return this.frontend;
-        break;
-      case 'AI&ML':
-        return this.aiml;
-        break;
-      case 'Data':
-        return this.data;
-        break;
-      case 'App':
-        return this.app;
-        break;
-      case 'Others':
-        return this.others;
-        break;
-      default:
-        return null;
-    }
-  }
-
-  @override
-  String toString() {
-    String str = '';
-    str += (this.backend ? 'Backend, ' : '') +
-        (this.frontend ? 'Frontend, ' : '') +
-        (this.aiml ? 'AI&ML, ' : '') +
-        (this.data ? 'Data, ' : '') +
-        (this.app ? 'APP, ' : '') +
-        (this.others ? 'Others, ' : '');
-    return str.length > 0 ? str.substring(0, str.length - 2) : str;
-  }
-}
-
-class MyPostsPage extends StatefulWidget {
-  MyPostsPage(
-      {Key key,
-      @required this.auth,
-      @required this.userId,
-      @required this.posts})
-      : super(key: key);
-
-  final BaseAuth auth;
-  final String userId;
-  final List<String> posts;
-
-  @override
-  _MyPostsPageState createState() => _MyPostsPageState();
-}
-
-class _MyPostsPageState extends State<MyPostsPage> {
-  Map<String, String> posts = Map<String, String>();
-
-  @override
-  void initState() {
-    super.initState();
-    _getPostsFromRemote();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (this.posts == null)
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("My Posts"),
-      ),
-      body: ListView(
-        children: this.posts.entries.map(_buildListTileFromPosts).toList(),
-      ),
-    );
-  }
-
-  void _getPostsFromRemote() {
-    widget.posts.forEach((String uid) {
-      Firestore.instance
-          .collection('tasks')
-          .document(uid)
-          .get()
-          .then((DocumentSnapshot document) {
-        setState(() {
-          this.posts[uid] = document['title'];
-        });
-      });
-    });
-  }
-
-  ListTile _buildListTileFromPosts(MapEntry<String, String> entry) {
-    return ListTile(
-      title: Text(entry.value),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          FlatButton(
-            child: Icon(Icons.edit),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SendRequest(
-                          update: true,
-                          postId: entry.key,
-                        ),
-                  ));
-            },
-          ),
-          Icon(Icons.arrow_forward),
-        ],
-      ),
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailedPage(
-                  title: entry.value,
-                  id: entry.key,
-                ),
-          ),
-        );
-      },
-    );
-  }
 }

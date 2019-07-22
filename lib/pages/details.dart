@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import './profile.dart';
+import 'package:thewanted/models/user.dart';
+import 'package:thewanted/models/skills.dart';
 //import '../services/authentication.dart';
 
 class Request {

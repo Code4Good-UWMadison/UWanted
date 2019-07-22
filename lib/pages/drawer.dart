@@ -1,0 +1,148 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter/material.dart';
+import '../services/authentication.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:thewanted/models/user.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
+class DrawerPage extends StatefulWidget {
+  DrawerPage(
+      {Key key,
+      @required this.auth,
+      @required this.userId,
+      this.isInDrawer = true})
+      : super(key: key);
+
+  final BaseAuth auth;
+  final String userId;
+  final bool isInDrawer;
+
+  @override
+  _DrawerPageState createState() => _DrawerPageState();
+}
+
+class _DrawerPageState extends State<DrawerPage> {
+  User user;
+  String _imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    if (this.user == null)
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    return Scaffold(
+      body: ListView(
+        padding: EdgeInsets.zero,
+        children: ListTile.divideTiles(
+          context: context,
+          tiles: [
+            _buildDrawerHeader(),
+            _buildListTile("Role", this.user.userRoleToString()),
+            _buildListTile("Lab", this.user.lab),
+            _buildListTile("Major", this.user.major),
+            _buildListTile("Technical Skills", this.user.skills.toString()),
+            AboutListTile(icon: null),
+          ],
+        ).toList(),
+      ),
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // init profile's url
+    var ref = FirebaseStorage.instance
+        .ref()
+        .child('user')
+        .child(widget.userId)
+        .child('profile.jpg');
+    ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
+    _getUserProfileFromFirebase();
+  }
+
+  void _getUserProfileFromFirebase() {
+    Firestore.instance
+        .collection('users')
+        .document(widget.userId)
+        .get()
+        .then(_initializeRemoteUserDataIfNotExist)
+        .then(_getRemoteUserData);
+  }
+
+  _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
+    if (!document.exists) {
+      Firestore.instance
+          .collection('users')
+          .document(widget.userId)
+          .setData(User.initialUserData);
+    }
+  }
+
+  _getRemoteUserData(_) {
+    Firestore.instance
+        .collection('users')
+        .document(widget.userId)
+        .get()
+        .then(_setLocalUserData);
+  }
+
+  _setLocalUserData(DocumentSnapshot document) {
+    if (this.mounted) {
+      setState(() {
+        this.user = User.fromDocument(document);
+      });
+    }
+  }
+
+  UserAccountsDrawerHeader _buildDrawerHeader() {
+    return new UserAccountsDrawerHeader(
+      decoration: BoxDecoration(color: Colors.blue),
+      // accountName: Padding(
+      //   padding: EdgeInsets.fromLTRB(10, 30, 0, 0),
+      //   child: Text(this.user.userName,
+      //   style: TextStyle(fontSize: 20.0),
+      // ),),
+      accountName: new Container(
+        child: new Text(
+          "Hi," + this.user.userName,
+          style: TextStyle(fontSize: 20.0),
+        ),
+      ),
+      accountEmail: new Container(child: new Text("Enjoy your day~ ")),
+      currentAccountPicture: new Container(
+        child: (_imageUrl == null)
+            ? (Icon(
+                Icons.account_circle,
+                size: 50.0,
+                color: Colors.white,
+              ))
+            : CircleAvatar(
+                backgroundColor: Colors.white,
+                backgroundImage: NetworkImage(
+                  _imageUrl,
+                ),
+              ),
+      ),
+      // onDetailsPressed: () {},
+    );
+  }
+
+  //  Future uploadPic(BuildContext context) async{
+  //     String fileName = "profile";
+  //      StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child(fileName);
+  //      StorageUploadTask uploadTask = firebaseStorageRef.putFile(_img);
+  //      StorageTaskSnapshot taskSnapshot=await uploadTask.onComplete;
+  //      setState(() {
+  //         print("Profile Picture uploaded");
+  //         Scaffold.of(context).showSnackBar(SnackBar(content: Text('Profile Picture Uploaded')));
+  //      });
+  //   }
+
+  ListTile _buildListTile(String title, String trailing) => ListTile(
+        title: Text(title),
+        trailing: Text(trailing),
+      );
+}
