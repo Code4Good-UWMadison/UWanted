@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/pages/details.dart';
+import 'package:thewanted/pages/status_tag.dart';
 
 class MyPostsPage extends StatefulWidget {
   MyPostsPage(
@@ -65,6 +66,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
             'uid': uid,
             'title': document['title'],
             'isChecked': false,
+            'status': document['status'],
           };
         });
       });
@@ -82,7 +84,12 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 },
               )
             : null,
-        title: Text(entry.value['title']),
+        title: Row(
+          children: <Widget>[
+            Text(entry.value['title']),
+            StatusTag.fromString(this.posts[entry.key]['status']),
+          ],
+        ),
         trailing: Icon(Icons.arrow_forward),
         onTap: () {
           Navigator.push(
