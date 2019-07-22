@@ -11,6 +11,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:thewanted/pages/status_tag.dart';
 
 class ProfilePage extends StatefulWidget {
   ProfilePage({Key key, @required this.auth, @required this.userId})
@@ -225,6 +226,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.data != null)
                 return ListTile(
+                  leading: StatusTag.fromString(snapshot.data['status']),
                   title: Text(snapshot.data['title']),
                   trailing: Icon(Icons.arrow_forward),
                   onTap: () {

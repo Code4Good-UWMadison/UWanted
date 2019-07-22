@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:thewanted/pages/status_tag.dart';
 import './profile.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
@@ -17,6 +18,7 @@ class Request {
   bool data;
   bool app;
   bool others;
+  final String status;
 
   Request({
     this.userId,
@@ -29,6 +31,7 @@ class Request {
     this.frontend,
     this.others,
     this.requestTitle,
+    @required this.status,
   });
 }
 
@@ -42,7 +45,7 @@ class DetailedPage extends StatefulWidget {
   _DetailedPageState createState() => _DetailedPageState();
 //final description;
 
-  static Request getReqInfoForUpdate(String id){
+  static Request getReqInfoForUpdate(String id) {
     Request req;
     print("id of request: " + id);
     Firestore.instance
@@ -53,9 +56,11 @@ class DetailedPage extends StatefulWidget {
       if (document.data == null) {
         return showDialog(
             builder: (_) => new AlertDialog(
-              content: new Text('Request does not exist.',
-                textAlign: TextAlign.center,),
-            ));
+                  content: new Text(
+                    'Request does not exist.',
+                    textAlign: TextAlign.center,
+                  ),
+                ));
       } else {
         print("request is valid, retrieving info");
         req = new Request(
@@ -68,14 +73,13 @@ class DetailedPage extends StatefulWidget {
           data: document.data['Data'],
           app: document.data['App'],
           others: document.data['Other'],
+          status: document['status'],
           requestTitle: document.data['title'],
         );
         return req;
       }
     });
   }
-
-
 }
 
 class _DetailedPageState extends State<DetailedPage> {
@@ -95,7 +99,6 @@ class _DetailedPageState extends State<DetailedPage> {
         ));
   }
 
-
   void _getRequest(String id) {
     Request req;
     Firestore.instance
@@ -104,23 +107,27 @@ class _DetailedPageState extends State<DetailedPage> {
         .get()
         .then((DocumentSnapshot document) {
       if (document.data == null) {
-        return showDialog(context: context,
+        return showDialog(
+            context: context,
             builder: (_) => new AlertDialog(
-              content: new Text('Request does not exist.',
-                textAlign: TextAlign.center,),
-            ));
+                  content: new Text(
+                    'Request does not exist.',
+                    textAlign: TextAlign.center,
+                  ),
+                ));
       } else {
         req = new Request(
-            userId: document.data['userId'],
-            contact: document.data['contact'],
-            description: document.data['description'],
-            aiml: document.data['AI&ML'],
-            backend: document.data['Backend'],
-            frontend: document.data['Frontend'],
-            data: document.data['Data'],
-            app: document.data['App'],
-            others: document.data['Other'],
-            requestTitle: widget.title,
+          userId: document.data['userId'],
+          contact: document.data['contact'],
+          description: document.data['description'],
+          aiml: document.data['AI&ML'],
+          backend: document.data['Backend'],
+          frontend: document.data['Frontend'],
+          data: document.data['Data'],
+          app: document.data['App'],
+          others: document.data['Other'],
+          status: document['status'],
+          requestTitle: widget.title,
         );
 
         setState(() {
@@ -155,10 +162,16 @@ class _DetailedPageState extends State<DetailedPage> {
           padding: new EdgeInsets.all(10),
           width: 300,
           height: 45,
-          child: Text(
-            widget.title,
-            style:
-                TextStyle(decoration: TextDecoration.underline, fontSize: 20),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                widget.title,
+                style: TextStyle(
+                    decoration: TextDecoration.underline, fontSize: 20),
+              ),
+              StatusTag.fromString(this.request.status),
+            ],
           ),
         )
       ],
@@ -297,8 +310,7 @@ class _DetailedPageState extends State<DetailedPage> {
     return Scaffold(
         appBar: AppBar(),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+          child: ListView(
             children: <Widget>[
               request,
               details,
@@ -307,9 +319,72 @@ class _DetailedPageState extends State<DetailedPage> {
                 child: labels,
               ),
               contactInfo,
+              _buildApplyButton(),
             ],
           ),
         ));
+  }
+
+  Widget _buildApplyButton() => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: RaisedButton(
+          color: _buildColorFromStatus(),
+          onPressed: _buildOnpressedFromStatus(),
+          child: _buildTextFromStatus(),
+        ),
+      );
+
+  Text _buildTextFromStatus() {
+    switch (StatusTag.getStatusFromString(this.request.status)) {
+      case Status.open:
+        return Text('Apply');
+        break;
+      case Status.inprogress:
+        return Text('In Progress');
+        break;
+      case Status.finished:
+        return Text('Closed');
+        break;
+      default:
+        return Text('Undefined');
+        break;
+    }
+  }
+
+  VoidCallback _buildOnpressedFromStatus() {
+    switch (StatusTag.getStatusFromString(this.request.status)) {
+      case Status.open:
+        return _apply;
+        break;
+      default:
+        return null;
+        break;
+    }
+  }
+
+  _apply() {
+    print('Apply this task!');
+    // TODO: implement apply
+    // 1. ask user to input apply message
+    // 2. add apply to firestore
+    // 3. Send owner (email) notification
+  }
+
+  Color _buildColorFromStatus() {
+    switch (StatusTag.getStatusFromString(this.request.status)) {
+      case Status.open:
+        return Colors.green;
+        break;
+      case Status.inprogress:
+        return Colors.yellow[800];
+        break;
+      case Status.finished:
+        return Colors.red;
+        break;
+      default:
+        return Colors.blue;
+        break;
+    }
   }
 }
 
@@ -366,7 +441,7 @@ class _userProfileInfoPageState extends State<userProfileInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    if(widget.user!=null){
+    if (widget.user != null) {
       return Scaffold(
         appBar: AppBar(
           title: Text("User Profile"),
@@ -385,13 +460,10 @@ class _userProfileInfoPageState extends State<userProfileInfoPage> {
           ).toList(),
         ),
       );
-    }else return
-    new Center(
-      child: CircularProgressIndicator(
-      ),
-    );
-
-
+    } else
+      return new Center(
+        child: CircularProgressIndicator(),
+      );
   }
 }
 
