@@ -1,6 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import './details.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/pages/profile/edit_profile.dart';

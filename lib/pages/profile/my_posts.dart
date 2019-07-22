@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/pages/details.dart';
+import 'package:thewanted/pages/send_request.dart';
 
 class MyPostsPage extends StatefulWidget {
   MyPostsPage(
@@ -83,7 +84,25 @@ class _MyPostsPageState extends State<MyPostsPage> {
               )
             : null,
         title: Text(entry.value['title']),
-        trailing: Icon(Icons.arrow_forward),
+        trailing: Row( //Merged here
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          FlatButton( 
+            child: Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SendRequest(
+                          update: true,
+                          postId: entry.key,
+                        ),
+                  ));
+            },
+          ),
+          Icon(Icons.arrow_forward),
+        ],
+      ), //to here
         onTap: () {
           Navigator.push(
             context,
