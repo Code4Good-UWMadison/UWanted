@@ -162,6 +162,7 @@ class _SendRequestState extends State<SendRequest> {
           data: document.data['Data'],
           app: document.data['App'],
           others: document.data['Other'],
+          status: document.data['status'],
           requestTitle: document.data["title"],
         );
 

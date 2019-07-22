@@ -20,7 +20,6 @@ class Request {
   bool others;
   final String status;
 
-
   Request({
     this.userId,
     this.contact,
@@ -72,6 +71,7 @@ class DetailedPage extends StatefulWidget {
           data: document.data['Data'],
           app: document.data['App'],
           others: document.data['Other'],
+          status: document['status'],
           requestTitle: document.data['title'],
         );
         return req;
