@@ -45,7 +45,7 @@ class DetailedPage extends StatefulWidget {
   _DetailedPageState createState() => _DetailedPageState();
 //final description;
 
-  static Request getReqInfoForUpdate(String id){
+  static Request getReqInfoForUpdate(String id) {
     Request req;
     print("id of request: " + id);
     Firestore.instance
@@ -56,9 +56,11 @@ class DetailedPage extends StatefulWidget {
       if (document.data == null) {
         return showDialog(
             builder: (_) => new AlertDialog(
-              content: new Text('Request does not exist.',
-                textAlign: TextAlign.center,),
-            ));
+                  content: new Text(
+                    'Request does not exist.',
+                    textAlign: TextAlign.center,
+                  ),
+                ));
       } else {
         print("request is valid, retrieving info");
         req = new Request(
@@ -78,8 +80,6 @@ class DetailedPage extends StatefulWidget {
       }
     });
   }
-
-
 }
 
 class _DetailedPageState extends State<DetailedPage> {
@@ -99,7 +99,6 @@ class _DetailedPageState extends State<DetailedPage> {
         ));
   }
 
-
   void _getRequest(String id) {
     Request req;
     Firestore.instance
@@ -108,24 +107,27 @@ class _DetailedPageState extends State<DetailedPage> {
         .get()
         .then((DocumentSnapshot document) {
       if (document.data == null) {
-        return showDialog(context: context,
+        return showDialog(
+            context: context,
             builder: (_) => new AlertDialog(
-              content: new Text('Request does not exist.',
-                textAlign: TextAlign.center,),
-            ));
+                  content: new Text(
+                    'Request does not exist.',
+                    textAlign: TextAlign.center,
+                  ),
+                ));
       } else {
         req = new Request(
-            userId: document.data['userId'],
-            contact: document.data['contact'],
-            description: document.data['description'],
-            aiml: document.data['AI&ML'],
-            backend: document.data['Backend'],
-            frontend: document.data['Frontend'],
-            data: document.data['Data'],
-            app: document.data['App'],
-            others: document.data['Other'],
-            status: document['status'],
-            requestTitle: widget.title,
+          userId: document.data['userId'],
+          contact: document.data['contact'],
+          description: document.data['description'],
+          aiml: document.data['AI&ML'],
+          backend: document.data['Backend'],
+          frontend: document.data['Frontend'],
+          data: document.data['Data'],
+          app: document.data['App'],
+          others: document.data['Other'],
+          status: document['status'],
+          requestTitle: widget.title,
         );
 
         setState(() {
@@ -163,11 +165,10 @@ class _DetailedPageState extends State<DetailedPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              Text(    
+              Text(
                 widget.title,
                 style: TextStyle(
-                  decoration: TextDecoration.underline,
-                  fontSize: 20),
+                    decoration: TextDecoration.underline, fontSize: 20),
               ),
               StatusTag.fromString(this.request.status),
             ],
@@ -327,7 +328,7 @@ class _DetailedPageState extends State<DetailedPage> {
   Widget _buildApplyButton() => Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: RaisedButton(
-          color: Colors.yellow,
+          color: _buildColorFromStatus(),
           onPressed: _buildOnpressedFromStatus(),
           child: _buildTextFromStatus(),
         ),
@@ -353,7 +354,7 @@ class _DetailedPageState extends State<DetailedPage> {
   VoidCallback _buildOnpressedFromStatus() {
     switch (StatusTag.getStatusFromString(this.request.status)) {
       case Status.open:
-        return _apply();
+        return _apply;
         break;
       default:
         return null;
@@ -362,10 +363,28 @@ class _DetailedPageState extends State<DetailedPage> {
   }
 
   _apply() {
+    print('Apply this task!');
     // TODO: implement apply
     // 1. ask user to input apply message
     // 2. add apply to firestore
     // 3. Send owner (email) notification
+  }
+
+  Color _buildColorFromStatus() {
+    switch (StatusTag.getStatusFromString(this.request.status)) {
+      case Status.open:
+        return Colors.green;
+        break;
+      case Status.inprogress:
+        return Colors.yellow[800];
+        break;
+      case Status.finished:
+        return Colors.red;
+        break;
+      default:
+        return Colors.blue;
+        break;
+    }
   }
 }
 
@@ -422,7 +441,7 @@ class _userProfileInfoPageState extends State<userProfileInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    if(widget.user!=null){
+    if (widget.user != null) {
       return Scaffold(
         appBar: AppBar(
           title: Text("User Profile"),
@@ -441,13 +460,10 @@ class _userProfileInfoPageState extends State<userProfileInfoPage> {
           ).toList(),
         ),
       );
-    }else return
-    new Center(
-      child: CircularProgressIndicator(
-      ),
-    );
-
-
+    } else
+      return new Center(
+        child: CircularProgressIndicator(),
+      );
   }
 }
 
