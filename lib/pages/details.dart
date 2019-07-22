@@ -309,8 +309,7 @@ class _DetailedPageState extends State<DetailedPage> {
     return Scaffold(
         appBar: AppBar(),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+          child: ListView(
             children: <Widget>[
               request,
               details,
@@ -319,9 +318,54 @@ class _DetailedPageState extends State<DetailedPage> {
                 child: labels,
               ),
               contactInfo,
+              _buildApplyButton(),
             ],
           ),
         ));
+  }
+
+  Widget _buildApplyButton() => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: RaisedButton(
+          color: Colors.yellow,
+          onPressed: _buildOnpressedFromStatus(),
+          child: _buildTextFromStatus(),
+        ),
+      );
+
+  Text _buildTextFromStatus() {
+    switch (StatusTag.getStatusFromString(this.request.status)) {
+      case Status.open:
+        return Text('Apply');
+        break;
+      case Status.inprogress:
+        return Text('In Progress');
+        break;
+      case Status.finished:
+        return Text('Closed');
+        break;
+      default:
+        return Text('Undefined');
+        break;
+    }
+  }
+
+  VoidCallback _buildOnpressedFromStatus() {
+    switch (StatusTag.getStatusFromString(this.request.status)) {
+      case Status.open:
+        return _apply();
+        break;
+      default:
+        return null;
+        break;
+    }
+  }
+
+  _apply() {
+    // TODO: implement apply
+    // 1. ask user to input apply message
+    // 2. add apply to firestore
+    // 3. Send owner (email) notification
   }
 }
 

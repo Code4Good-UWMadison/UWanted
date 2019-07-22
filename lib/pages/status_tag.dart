@@ -5,7 +5,7 @@ class StatusTag extends StatelessWidget {
 
   StatusTag({@required this.status});
 
-  StatusTag.fromString(String status) : status = _getStatusFromString(status);
+  StatusTag.fromString(String status) : status = getStatusFromString(status);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class StatusTag extends StatelessWidget {
     );
   }
 
-  static Status _getStatusFromString(String status) {
+  static Status getStatusFromString(String status) {
     status = status.replaceAll(' ', '').toLowerCase();
     switch (status) {
       case 'open':
