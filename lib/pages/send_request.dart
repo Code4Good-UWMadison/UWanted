@@ -3,6 +3,7 @@ import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../buttonManageGlobal.dart';
 import './dashboard.dart';
+import 'details.dart';
 
 class ButtonManage {
   _initButton() {
@@ -13,7 +14,6 @@ class ButtonManage {
     aiml = false;
     data = false;
   }
-
   _buttonValue(Text label, bool selected) {
     switch (label.data) {
       case 'Backend':
@@ -39,43 +39,81 @@ class ButtonManage {
 }
 
 var b = ButtonManage();
+bool state; //state of post, need update or new submission
 
 class SendRequest extends StatefulWidget {
-  SendRequest({Key key, this.auth, this.userId}) : super(key: key);
+//Todo fix this constructor
+  SendRequest({Key key, this.auth, this.userId, this.update, this.postId})
+      : super(key: key);
   final BaseAuth auth;
   final String userId;
+  final bool update;
+  final String postId;
 
   _addItem() {
-    DocumentReference docRef =
-        Firestore.instance.collection('tasks').document();
-    docRef.setData({
-      'title': des,
-      'description': details,
-      'contact': contact,
-      'AI&ML': aiml,
-      'Backend': backend,
-      'Frontend': frontend,
-      'Data': data,
-      'App': app,
-      'Other': others,
-      'created': DateTime.now(),
-      'updated': DateTime.now(),
-      'status': 'open',
-    });
-    String uidOfTask = docRef.documentID;
-    Firestore.instance
-        .collection('users')
-        .document(userId)
-        .get()
-        .then((DocumentSnapshot document) {
-      List<String> updatedPosts =
-          List<String>.from(document['posts'], growable: true);
-      updatedPosts.addAll([uidOfTask]);
-      Firestore.instance.collection('users').document(userId).updateData({
-        'posts': updatedPosts,
+    print("add item");
+    if (update == true) {
+          Firestore.instance.collection('tasks').document(this.postId).updateData({
+            'title': des,
+            'description': details,
+            'contact': contact,
+            'AI&ML': aiml,
+            'Backend': backend,
+            'Frontend': frontend,
+            'Data': data,
+            'App': app,
+            'Other': others,
+            'updated': DateTime.now(),
+          })..then((_) {
+            showDialog(
+                builder: (_) => new AlertDialog(
+                  content: new Text(
+                    'Request submitted.',
+                    textAlign: TextAlign.center,
+                  ),
+                ));
+          })
+        ..catchError((e) {
+          showDialog(
+              builder: (_) => new AlertDialog(
+                    content: new Text(
+                      'Please retry $e',
+                      textAlign: TextAlign.center,
+                    ),
+                  ));
+        });
+    }else{
+      DocumentReference docRef =
+      Firestore.instance.collection('tasks').document();
+      docRef.setData({
+        'userId': this.userId, //record id of user who posted the request
+        'title': des,
+        'description': details,
+        'contact': contact,
+        'AI&ML': aiml,
+        'Backend': backend,
+        'Frontend': frontend,
+        'Data': data,
+        'App': app,
+        'Other': others,
+        'created': DateTime.now(),
+        'updated': DateTime.now(),
+        'status': 'open',
       });
-    });
-    //print('Item added');
+      String uidOfTask = docRef.documentID;
+      Firestore.instance
+          .collection('users')
+          .document(userId)
+          .get()
+          .then((DocumentSnapshot document) {
+        List<String> updatedPosts =
+        List<String>.from(document['posts'], growable: true);
+        updatedPosts.addAll([uidOfTask]);
+        Firestore.instance.collection('users').document(userId).updateData({
+          'posts': updatedPosts,
+        });
+      });
+    }
   }
 
   @override
@@ -83,42 +121,100 @@ class SendRequest extends StatefulWidget {
 }
 
 class _SendRequestState extends State<SendRequest> {
+  Request request;
+
+  @override
+  void initState() {
+    state = widget.update;
+    if (state) {
+      print("update needed");
+      _getRequest(widget.postId);
+    }else{
+      b._initButton();
+    }
+    super.initState();
+  }
+
+  void _getRequest(String id) {
+    Request req;
+    Firestore.instance
+        .collection('tasks')
+        .document(id)
+        .get()
+        .then((DocumentSnapshot document) {
+      if (document.data == null) {
+        return showDialog(
+            context: context,
+            builder: (_) => new AlertDialog(
+                  content: new Text(
+                    'Request does not exist.',
+                    textAlign: TextAlign.center,
+                  ),
+                ));
+      } else {
+        req = new Request(
+          userId: document.data['userId'],
+          contact: document.data['contact'],
+          description: document.data['description'],
+          aiml: document.data['AI&ML'],
+          backend: document.data['Backend'],
+          frontend: document.data['Frontend'],
+          data: document.data['Data'],
+          app: document.data['App'],
+          others: document.data['Other'],
+          requestTitle: document.data["title"],
+        );
+
+        setState(() {
+          this.request = req;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    b._initButton();
+    if (this.request == null && state == true) {
+      return Center(
+        child: Text("loading"),
+      );
+    }
     return Scaffold(
       body: ListView(
         // mainAxisSize: MainAxisSize.max,
         // crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          TopPart(),
-          BottomPart(),
+          TopPart(reqTop: this.request),
+          BottomPart(reqBottom: this.request),
           SizedBox(
             height: 50.0,
           ),
           FloatingActionButton(
             onPressed: () {
-              if(_validSubmission()){
+              if (_validSubmission()) {
                 widget._addItem();
                 des = "";
                 details = "";
                 contact = "";
-                showDialog(context: context,
-                    builder: (_) => new AlertDialog(
-                      content: new Text('Request submitted.',
-                        textAlign: TextAlign.center,),
+                // TODO: Return back to dashboard, restart a HomePage instead of DashboardPage. It's terrible rn.
+                Navigator.push(
+                    context,
+                    new MaterialPageRoute(
+                      builder: (ctxt) => new DashboardPage(
+                          userId: widget.userId, auth: widget.auth),
                     ));
-                // TODO: Return back to dashboard, restart a HomePage instead of DashboardPage. It's terrible rn. 
-                Navigator.push(context, new MaterialPageRoute(builder: (ctxt) => new DashboardPage(userId: widget.userId, auth: widget.auth),));
-              }else{
-                showDialog(context: context,
+              } else {
+                showDialog(
+                    context: context,
                     builder: (_) => new AlertDialog(
-                      content: new Text('Request is incomplete. \nPlease finish all fields before submitting.',
-                        textAlign: TextAlign.center,),
-                    ));
+                          content: new Text(
+                            'Request is incomplete. \nPlease finish all fields before submitting.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ));
               }
-            // BottomPartState().clearContact();
-            // _LabelWidgetState().selected = false;
+              // BottomPartState().clearContact();
+              // _LabelWidgetState().selected = false;
             },
             backgroundColor: Colors.brown,
             child: Text(
@@ -132,18 +228,24 @@ class _SendRequestState extends State<SendRequest> {
   }
 
   //check if the request is empty; if empty, no submission
-  bool _validSubmission(){
-    if(backend || aiml || frontend || others || data || app){
-      if(des != "" && details != "" && contact != ""){
+  bool _validSubmission() {
+    if (backend || aiml || frontend || others || data || app) {
+      if (des != "" && details != "" && contact != "") {
         validRequest = true;
       }
-    }return validRequest;
+    }
+    print(des + ' ' + details + " " + contact);
+    return validRequest;
   }
 }
 
 Color textColor = Color(0xFFDBC1AC);
 
 class TopPart extends StatefulWidget {
+  final Request reqTop;
+
+  TopPart({this.reqTop});
+
   @override
   _TopPartState createState() => _TopPartState();
 }
@@ -162,8 +264,12 @@ class _TopPartState extends State<TopPart> {
   @override
   void initState() {
     super.initState();
-    _controllerDes = TextEditingController();
-    _controllerDetail = TextEditingController();
+    _controllerDes =
+        TextEditingController(text: state ? widget.reqTop.requestTitle : null);
+    des = state ? widget.reqTop.requestTitle : "";
+    _controllerDetail =
+        TextEditingController(text: state ? widget.reqTop.description : null);
+    details = state ? widget.reqTop.description : "";
   }
 
   @override
@@ -226,7 +332,7 @@ class _TopPartState extends State<TopPart> {
                       },
                       controller: _controllerDes,
                       decoration: new InputDecoration(
-                        hintText: 'Type description',
+                        hintText: state ? null : 'Type description',
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.symmetric(
                             horizontal: 16.0, vertical: 13.0),
@@ -283,15 +389,27 @@ class _TopPartState extends State<TopPart> {
 
 class LabelWidget extends StatefulWidget {
   final Text label;
-  const LabelWidget(this.label);
+  bool selectState;
+
+  LabelWidget(this.label, this.selectState);
+
   @override
   _LabelWidgetState createState() => _LabelWidgetState();
 }
 
 class _LabelWidgetState extends State<LabelWidget> {
-  _LabelWidgetState();
+  //_LabelWidgetState();
   Color myColor = Colors.grey;
   bool selected = false;
+
+  @override
+  void initState() {
+    if (widget.selectState) {
+      selected = true;
+      myColor = Color(0xFF38220F);
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -343,6 +461,10 @@ class CustomShapeClipper extends CustomClipper<Path> {
 }
 
 class BottomPart extends StatefulWidget {
+  final Request reqBottom;
+
+  BottomPart({this.reqBottom});
+
   @override
   BottomPartState createState() {
     return new BottomPartState();
@@ -350,8 +472,9 @@ class BottomPart extends StatefulWidget {
 }
 
 class BottomPartState extends State<BottomPart> {
-  TextEditingController _controllerLabel;
+  //TextEditingController _controllerLabel;
   TextEditingController _controllerContact;
+
   void clearContact() {
     _controllerContact.clear();
   }
@@ -359,14 +482,24 @@ class BottomPartState extends State<BottomPart> {
   @override
   void initState() {
     super.initState();
-    _controllerLabel = TextEditingController();
-    _controllerContact = TextEditingController();
+    // _controllerLabel = TextEditingController();
+    _controllerContact =
+        TextEditingController(text: state ? widget.reqBottom.contact : null);
+    contact = state ? widget.reqBottom.contact : "";
+    if(state){
+      backend = widget.reqBottom.backend;
+      frontend = widget.reqBottom.frontend;
+      aiml = widget.reqBottom.aiml;
+      app = widget.reqBottom.app;
+      others = widget.reqBottom.others;
+      data = widget.reqBottom.data;
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
-    _controllerLabel.dispose();
+    // _controllerLabel.dispose();
     _controllerContact.dispose();
   }
 
@@ -396,26 +529,32 @@ class BottomPartState extends State<BottomPart> {
               new SizedBox(
                 width: 90,
                 height: 30,
-                child: LabelWidget(Text(
-                  'Backend',
-                  style: TextStyle(color: Colors.white),
-                )),
+                child: LabelWidget(
+                    Text(
+                      'Backend',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    state ? widget.reqBottom.backend : false),
               ),
               new SizedBox(
                 width: 100,
                 height: 30,
-                child: LabelWidget(Text(
-                  'Frontend',
-                  style: TextStyle(color: Colors.white),
-                )),
+                child: LabelWidget(
+                    Text(
+                      'Frontend',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    state ? widget.reqBottom.frontend : false),
               ),
               new SizedBox(
                 width: 90,
                 height: 30,
-                child: LabelWidget(Text(
-                  'AI&ML',
-                  style: TextStyle(color: Colors.white),
-                )),
+                child: LabelWidget(
+                    Text(
+                      'AI&ML',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    state ? widget.reqBottom.aiml : false),
               ),
             ],
           ),
@@ -427,26 +566,32 @@ class BottomPartState extends State<BottomPart> {
                 new SizedBox(
                   width: 90,
                   height: 30,
-                  child: LabelWidget(Text(
-                    'Data',
-                    style: TextStyle(color: Colors.white),
-                  )),
+                  child: LabelWidget(
+                      Text(
+                        'Data',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      state ? widget.reqBottom.data : false),
                 ),
                 new SizedBox(
                   width: 100,
                   height: 30,
-                  child: LabelWidget(Text(
-                    'App',
-                    style: TextStyle(color: Colors.white),
-                  )),
+                  child: LabelWidget(
+                      Text(
+                        'App',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      state ? widget.reqBottom.app : false),
                 ),
                 new SizedBox(
                   width: 90,
                   height: 30,
-                  child: LabelWidget(Text(
-                    'Other',
-                    style: TextStyle(color: Colors.white),
-                  )),
+                  child: LabelWidget(
+                      Text(
+                        'Other',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      state ? widget.reqBottom.others : false),
                 ),
               ],
             ),

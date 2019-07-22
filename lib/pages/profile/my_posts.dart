@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/pages/details.dart';
 import 'package:thewanted/pages/status_tag.dart';
+import 'package:thewanted/pages/send_request.dart';
 
 class MyPostsPage extends StatefulWidget {
   MyPostsPage(
@@ -90,7 +91,25 @@ class _MyPostsPageState extends State<MyPostsPage> {
             StatusTag.fromString(this.posts[entry.key]['status']),
           ],
         ),
-        trailing: Icon(Icons.arrow_forward),
+        trailing: Row( //Merged here
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          FlatButton( 
+            child: Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SendRequest(
+                          update: true,
+                          postId: entry.key,
+                        ),
+                  ));
+            },
+          ),
+          Icon(Icons.arrow_forward),
+        ],
+      ), //to here
         onTap: () {
           Navigator.push(
             context,
