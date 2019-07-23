@@ -14,6 +14,7 @@ class ButtonManage {
     aiml = false;
     data = false;
   }
+
   _buttonValue(Text label, bool selected) {
     switch (label.data) {
       case 'Backend':
@@ -53,26 +54,27 @@ class SendRequest extends StatefulWidget {
   _addItem() {
     print("add item");
     if (update == true) {
-          Firestore.instance.collection('tasks').document(this.postId).updateData({
-            'title': des,
-            'description': details,
-            'contact': contact,
-            'AI&ML': aiml,
-            'Backend': backend,
-            'Frontend': frontend,
-            'Data': data,
-            'App': app,
-            'Other': others,
-            'updated': DateTime.now(),
-          })..then((_) {
-            showDialog(
-                builder: (_) => new AlertDialog(
-                  content: new Text(
-                    'Request submitted.',
-                    textAlign: TextAlign.center,
-                  ),
-                ));
-          })
+      Firestore.instance.collection('tasks').document(this.postId).updateData({
+        'title': des,
+        'description': details,
+        'contact': contact,
+        'AI&ML': aiml,
+        'Backend': backend,
+        'Frontend': frontend,
+        'Data': data,
+        'App': app,
+        'Other': others,
+        'updated': DateTime.now(),
+      })
+        ..then((_) {
+          showDialog(
+              builder: (_) => new AlertDialog(
+                    content: new Text(
+                      'Request submitted.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ));
+        })
         ..catchError((e) {
           showDialog(
               builder: (_) => new AlertDialog(
@@ -82,9 +84,9 @@ class SendRequest extends StatefulWidget {
                     ),
                   ));
         });
-    }else{
+    } else {
       DocumentReference docRef =
-      Firestore.instance.collection('tasks').document();
+          Firestore.instance.collection('tasks').document();
       docRef.setData({
         'userId': this.userId, //record id of user who posted the request
         'title': des,
@@ -107,7 +109,7 @@ class SendRequest extends StatefulWidget {
           .get()
           .then((DocumentSnapshot document) {
         List<String> updatedPosts =
-        List<String>.from(document['posts'], growable: true);
+            List<String>.from(document['posts'], growable: true);
         updatedPosts.addAll([uidOfTask]);
         Firestore.instance.collection('users').document(userId).updateData({
           'posts': updatedPosts,
@@ -129,7 +131,7 @@ class _SendRequestState extends State<SendRequest> {
     if (state) {
       print("update needed");
       _getRequest(widget.postId);
-    }else{
+    } else {
       b._initButton();
     }
     super.initState();
@@ -309,6 +311,7 @@ class _TopPartState extends State<TopPart> {
                 SizedBox(height: 50.0),
                 // FloatingActionButton(
                 //   onPressed: () {_controllerDes.text = "";}),
+
                 Text(
                   "Short Description:",
                   style: TextStyle(
@@ -487,7 +490,7 @@ class BottomPartState extends State<BottomPart> {
     _controllerContact =
         TextEditingController(text: state ? widget.reqBottom.contact : null);
     contact = state ? widget.reqBottom.contact : "";
-    if(state){
+    if (state) {
       backend = widget.reqBottom.backend;
       frontend = widget.reqBottom.frontend;
       aiml = widget.reqBottom.aiml;
