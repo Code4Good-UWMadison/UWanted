@@ -65,6 +65,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         fe: document['Frontend'],
                         ot: document['Other'],
                         id: document.documentID,
+                        status: document['status'],
                       );
                     }).toList(),
                   );

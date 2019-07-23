@@ -1,6 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import './details.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/pages/profile/edit_profile.dart';
@@ -10,6 +11,7 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:thewanted/pages/status_tag.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 bool _isLoading = false;
@@ -284,6 +286,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.data != null)
                 return ListTile(
+                  leading: StatusTag.fromString(snapshot.data['status']),
                   title: Text(snapshot.data['title']),
                   trailing: Icon(Icons.arrow_forward),
                   onTap: () {
