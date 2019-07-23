@@ -1,6 +1,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 //import 'package:firebase_database/firebase_database.dart';
 class Request {
@@ -51,11 +53,46 @@ class DetailedPage extends StatefulWidget {
 
 class _DetailedPageState extends State<DetailedPage>{
   Request request;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
   @override
   void initState() {
     super.initState();
     _getRequest();
+    FCMListeners();
   }
+
+void FCMListeners() {
+  if (Platform.isIOS) iOS_Permission();
+
+  _firebaseMessaging.getToken().then((token){
+    print(token);
+  });
+
+  _firebaseMessaging.configure(
+    onMessage: (Map<String, dynamic> message) async {
+      print('on message $message');
+    },
+    onResume: (Map<String, dynamic> message) async {
+      print('on resume $message');
+    },
+    onLaunch: (Map<String, dynamic> message) async {
+      print('on launch $message');
+    },
+  );
+}
+
+void iOS_Permission() {
+  _firebaseMessaging.requestNotificationPermissions(
+      IosNotificationSettings(sound: true, badge: true, alert: true)
+  );
+  _firebaseMessaging.onIosSettingsRegistered
+      .listen((IosNotificationSettings settings)
+  {
+    print("Settings registered: $settings");
+  });
+}
+
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(
         border: Border.all(),
