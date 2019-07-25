@@ -228,6 +228,9 @@ class _MyPostsPageState extends State<MyPostsPage> {
     _getCheckedList().forEach((String uid) {
       db.collection('tasks').document(uid).updateData({'status': 'finished'});
     });
+    setState(() {
+      _getPostsFromRemote();
+    });
   }
 
   _updateRemoteData() {
