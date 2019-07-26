@@ -91,33 +91,34 @@ class _MyPostsPageState extends State<MyPostsPage> {
             StatusTag.fromString(this.posts[entry.key]['status']),
           ],
         ),
-        trailing: Row( //Merged here
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          FlatButton( 
-            child: Icon(Icons.edit),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SendRequest(
-                          update: true,
-                          postId: entry.key,
-                        ),
-                  ));
-            },
-          ),
-          Icon(Icons.arrow_forward),
-        ],
-      ), //to here
+        trailing: Row(
+          //Merged here
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            FlatButton(
+              child: Icon(Icons.edit),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SendRequest(
+                            update: true,
+                            postId: entry.key,
+                          ),
+                    ));
+              },
+            ),
+            Icon(Icons.arrow_forward),
+          ],
+        ), //to here
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => DetailedPage(
-                title: entry.value['title'],
-                id: entry.key,
-              ),
+                    title: entry.value['title'],
+                    id: entry.key,
+                  ),
             ),
           );
         },
@@ -127,16 +128,16 @@ class _MyPostsPageState extends State<MyPostsPage> {
         child:
             Text('Edit', style: TextStyle(color: Colors.white, fontSize: 18.0)),
         onPressed: () => setState(() {
-          _isEditing = true;
-        }),
+              _isEditing = true;
+            }),
       );
 
   FlatButton _doneButton() => FlatButton(
         child:
             Text('Done', style: TextStyle(color: Colors.white, fontSize: 18.0)),
         onPressed: () => setState(() {
-          _isEditing = false;
-        }),
+              _isEditing = false;
+            }),
       );
 
   BottomAppBar _bottomDeleteBar() => BottomAppBar(
@@ -156,6 +157,12 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 onPressed:
                     _getCheckedList().isNotEmpty ? _showAlertDialog : null,
               ),
+              FlatButton(
+                child: Text('Archive',
+                    style: TextStyle(color: Colors.blue, fontSize: 16.0)),
+                onPressed:
+                    _getCheckedList().isNotEmpty ? _archiveRequest : null,
+              )
             ],
           ),
         ),
@@ -214,6 +221,16 @@ class _MyPostsPageState extends State<MyPostsPage> {
         );
       },
     );
+  }
+
+  //change status to finished
+  _archiveRequest() {
+    _getCheckedList().forEach((String uid) {
+      db.collection('tasks').document(uid).updateData({'status': 'finished'});
+    });
+    setState(() {
+      _getPostsFromRemote();
+    });
   }
 
   _updateRemoteData() {

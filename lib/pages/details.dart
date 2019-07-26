@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:thewanted/pages/status_tag.dart';
-import './profile.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
-//import '../services/authentication.dart';
+
 
 class Request {
   //String userName;
@@ -141,7 +140,7 @@ class _DetailedPageState extends State<DetailedPage> {
   Widget build(BuildContext context) {
     if (this.request == null)
       return Center(
-        child: Text("loading"),
+        child: CircularProgressIndicator(),
       );
 
     var request = Column(
