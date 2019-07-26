@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thewanted/pages/status_tag.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
-
 
 class Request {
   //String userName;
@@ -350,25 +350,6 @@ class _DetailedPageState extends State<DetailedPage> {
     }
   }
 
-  VoidCallback _buildOnpressedFromStatus() {
-    switch (StatusTag.getStatusFromString(this.request.status)) {
-      case Status.open:
-        return _apply;
-        break;
-      default:
-        return null;
-        break;
-    }
-  }
-
-  _apply() {
-    print('Apply this task!');
-    // TODO: implement apply
-    // 1. ask user to input apply message
-    // 2. add apply to firestore
-    // 3. Send owner (email) notification
-  }
-
   Color _buildColorFromStatus() {
     switch (StatusTag.getStatusFromString(this.request.status)) {
       case Status.open:
@@ -385,6 +366,53 @@ class _DetailedPageState extends State<DetailedPage> {
         break;
     }
   }
+
+  VoidCallback _buildOnpressedFromStatus() {
+    switch (StatusTag.getStatusFromString(this.request.status)) {
+      case Status.open:
+        return _apply;
+        break;
+      default:
+        return null;
+        break;
+    }
+  }
+
+  _apply() {
+    print('Apply this task!');
+    // TODO: implement apply
+    // 1. ask user to input apply message
+    // 2. add apply to firestore
+    _updateTaskdataAndProfiledata();
+    // 3. Send owner (email) notification
+  }
+
+  Future<void> _updateTaskdataAndProfiledata() =>
+      _getCurrentUserId().then((FirebaseUser user) {
+        _updateTaskApplicants(user.uid);
+        _updateProfileApplied(user.uid);
+      }).catchError((e) {
+        print(e);
+      });
+
+  Future<void> _updateTaskApplicants(String uid) => Firestore.instance
+          .collection('tasks')
+          .document(widget.id)
+          .collection('applicants')
+          .document(uid)
+          .setData({
+        'des': 'sdfasdfaefasd',
+      });
+
+  Future<void> _updateProfileApplied(String uid) =>
+      Firestore.instance.collection('users').document(uid).updateData({
+        'applied': FieldValue.arrayUnion([
+          widget.id,
+        ])
+      });
+
+  Future<FirebaseUser> _getCurrentUserId() =>
+      FirebaseAuth.instance.currentUser();
 }
 
 class userProfileInfoPage extends StatefulWidget {
