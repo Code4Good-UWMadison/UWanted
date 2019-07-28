@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:thewanted/pages/status_tag.dart';
+import 'package:thewanted/services/authentication.dart';
 import './profile.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
@@ -38,10 +40,12 @@ class Request {
 }
 
 class DetailedPage extends StatefulWidget {
-  DetailedPage({@required this.title, @required this.id});
+  DetailedPage({@required this.title, @required this.id, @required this.currUserId, @required this.auth});
 
   final title;
   final id;
+  final String currUserId;
+  final BaseAuth auth;
 
   @override
   _DetailedPageState createState() => _DetailedPageState();
@@ -86,45 +90,12 @@ class DetailedPage extends StatefulWidget {
 
 class _DetailedPageState extends State<DetailedPage> {
   Request request;
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
 
   @override
   void initState() {
     super.initState();
     _getRequest(widget.id);
-    FCMListeners();
   }
-
-void FCMListeners() {
-  if (Platform.isIOS) iOS_Permission();
-
-  _firebaseMessaging.getToken().then((token){
-    print(token);
-  });
-
-  _firebaseMessaging.configure(
-    onMessage: (Map<String, dynamic> message) async {
-      print('on message $message');
-    },
-    onResume: (Map<String, dynamic> message) async {
-      print('on resume $message');
-    },
-    onLaunch: (Map<String, dynamic> message) async {
-      print('on launch $message');
-    },
-  );
-}
-
-void iOS_Permission() {
-  _firebaseMessaging.requestNotificationPermissions(
-      IosNotificationSettings(sound: true, badge: true, alert: true)
-  );
-  _firebaseMessaging.onIosSettingsRegistered
-      .listen((IosNotificationSettings settings)
-  {
-    print("Settings registered: $settings");
-  });
-}
 
   BoxDecoration myBoxDecoration() {
     return BoxDecoration(

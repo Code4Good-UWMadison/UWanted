@@ -38,86 +38,79 @@ class _ProfilePageState extends State<ProfilePage> {
       return Center(
         child: CircularProgressIndicator(),
       );
-      var list = ListView(
-        padding: EdgeInsets.zero,
-        children: ListTile.divideTiles(
-          context: context,
-          tiles: [
-            ExpansionTile(
-              initiallyExpanded: true,
-              title: Text('Profile'),
-              children: <Widget>[
-                _buildProfile(),
-                _buildListTile("Name", this.user.userName),
-                _buildListTile("Role", this.user.userRoleToString()),
-                _buildListTile("Lab", this.user.lab),
-                _buildListTile("Major", this.user.major),
-                _buildListTile("Technical Skills", this.user.skills.toString()),
-                _buildEditProfileTile(),
-              ],
-            ),
-            ExpansionTile(
-              title: Text('Posts'),
-              children: List.from(_buildPosts())
-                ..add(_buildEditPostsListTile()),
-            ),
-            // AboutListTile(icon: null),
-          ],
-        ).toList(),
-      );
-              var bodyProgress = new Container(
-            child: new Stack(
-              children: <Widget>[
-                list,
-                new Container(
-                  alignment: AlignmentDirectional.center,
-                  decoration: new BoxDecoration(
-                    color: Colors.white70,
-                  ),
-                  child: new Container(
-                    decoration: new BoxDecoration(
-                      color: Colors.blue[200],
-                      borderRadius: new BorderRadius.circular(10.0)
-                    ),
-                    width: 300.0,
-                    height: 200.0,
-                    alignment: AlignmentDirectional.center,
-                    child: new Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        new Center(
-                          child: new SizedBox(
-                            height: 50.0,
-                            width: 50.0,
-                            child: new CircularProgressIndicator(
-                              value: null,
-                              strokeWidth: 7.0,
-                            ),
-                          ),
-                        ),
-                        new Container(
-                          margin: const EdgeInsets.only(top: 25.0),
-                          child: new Center(
-                            child: new Text(
-                              "loading.. wait...",
-                              style: new TextStyle(
-                                color: Colors.white
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          );
-    return Scaffold(
-      key: _scaffoldKey,
-      body: _isLoading ? bodyProgress :list
+    var list = ListView(
+      padding: EdgeInsets.zero,
+      children: ListTile.divideTiles(
+        context: context,
+        tiles: [
+          ExpansionTile(
+            initiallyExpanded: true,
+            title: Text('Profile'),
+            children: <Widget>[
+              _buildProfile(),
+              _buildListTile("Name", this.user.userName),
+              _buildListTile("Role", this.user.userRoleToString()),
+              _buildListTile("Lab", this.user.lab),
+              _buildListTile("Major", this.user.major),
+              _buildListTile("Technical Skills", this.user.skills.toString()),
+              _buildEditProfileTile(),
+            ],
+          ),
+          ExpansionTile(
+            title: Text('Posts'),
+            children: List.from(_buildPosts())..add(_buildEditPostsListTile()),
+          ),
+          // AboutListTile(icon: null),
+        ],
+      ).toList(),
     );
+    var bodyProgress = new Container(
+      child: new Stack(
+        children: <Widget>[
+          list,
+          new Container(
+            alignment: AlignmentDirectional.center,
+            decoration: new BoxDecoration(
+              color: Colors.white70,
+            ),
+            child: new Container(
+              decoration: new BoxDecoration(
+                  color: Colors.blue[200],
+                  borderRadius: new BorderRadius.circular(10.0)),
+              width: 300.0,
+              height: 200.0,
+              alignment: AlignmentDirectional.center,
+              child: new Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  new Center(
+                    child: new SizedBox(
+                      height: 50.0,
+                      width: 50.0,
+                      child: new CircularProgressIndicator(
+                        value: null,
+                        strokeWidth: 7.0,
+                      ),
+                    ),
+                  ),
+                  new Container(
+                    margin: const EdgeInsets.only(top: 25.0),
+                    child: new Center(
+                      child: new Text(
+                        "loading.. wait...",
+                        style: new TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    return Scaffold(key: _scaffoldKey, body: _isLoading ? bodyProgress : list);
   }
 
   @override
