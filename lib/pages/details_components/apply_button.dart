@@ -3,7 +3,7 @@ import 'package:thewanted/pages/status_tag.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class ApplyButton extends StatelessWidget {
+class ApplyButton extends StatefulWidget {
   ApplyButton({
     @required this.taskId,
     @required String status,
@@ -19,17 +19,23 @@ class ApplyButton extends StatelessWidget {
   final BuildContext context;
 
   @override
+  _ApplyButtonState createState() => _ApplyButtonState();
+}
+
+class _ApplyButtonState extends State<ApplyButton> {
+  bool pressed = false;
+  @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: RaisedButton(
           color: _buildColorFromStatus(),
-          onPressed: _buildOnpressedFromStatus(),
+          onPressed: this.pressed ? null : _buildOnpressedFromStatus(),
           child: _buildTextFromStatus(),
         ),
       );
 
   Text _buildTextFromStatus() {
-    switch (this.status) {
+    switch (widget.status) {
       case Status.open:
         return Text('Apply');
         break;
@@ -46,7 +52,7 @@ class ApplyButton extends StatelessWidget {
   }
 
   Color _buildColorFromStatus() {
-    switch (this.status) {
+    switch (widget.status) {
       case Status.open:
         return Colors.green;
         break;
@@ -63,7 +69,7 @@ class ApplyButton extends StatelessWidget {
   }
 
   VoidCallback _buildOnpressedFromStatus() {
-    switch (this.status) {
+    switch (widget.status) {
       case Status.open:
         return _apply;
         break;
@@ -74,16 +80,23 @@ class ApplyButton extends StatelessWidget {
   }
 
   _apply() {
+    setState(() {
+      this.pressed = true;
+    });
     print('Apply this task!');
     // TODO: implement apply
     // 1. ask user to input apply message
     // 2. add apply to firestore
-    _updateTaskdataAndProfiledata();
+    _updateTaskdataAndProfiledata().then((_) {
+      setState(() {
+        this.pressed = false;
+      });
+    });
     // 3. Send owner (email) notification
   }
 
   Future<void> _updateTaskdataAndProfiledata() =>
-      this.userId.then((String uid) async {
+      widget.userId.then((String uid) async {
         if (await _checkIfApplied(uid)) {
           print('Already applied!');
           _showNotifyAppliedDialog();
@@ -100,7 +113,7 @@ class ApplyButton extends StatelessWidget {
 
   Future<bool> _checkIfAppliedInTask(String uid) => Firestore.instance
       .collection('tasks')
-      .document(this.taskId)
+      .document(widget.taskId)
       .collection('applicants')
       .document(uid)
       .get()
@@ -111,11 +124,11 @@ class ApplyButton extends StatelessWidget {
       .document(uid)
       .get()
       .then((DocumentSnapshot document) =>
-          (document['applied'] as List).contains(this.taskId));
+          (document['applied'] as List).contains(widget.taskId));
 
   Future<void> _updateTaskApplicants(String uid) => Firestore.instance
           .collection('tasks')
-          .document(this.taskId)
+          .document(widget.taskId)
           .collection('applicants')
           .document(uid)
           .setData({
@@ -127,13 +140,13 @@ class ApplyButton extends StatelessWidget {
   Future<void> _updateProfileApplied(String uid) =>
       Firestore.instance.collection('users').document(uid).updateData({
         'applied': FieldValue.arrayUnion([
-          this.taskId,
+          widget.taskId,
         ])
       });
 
   Future<void> _showNotifyAppliedDialog() async {
     return showDialog<void>(
-      context: this.context,
+      context: widget.context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
