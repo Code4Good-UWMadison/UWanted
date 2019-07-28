@@ -66,6 +66,8 @@ class _DashboardPageState extends State<DashboardPage> {
                         ot: document['Other'],
                         id: document.documentID,
                         status: document['status'],
+                        userId: widget.userId,
+                        auth: widget.auth,
                       );
                     }).where((task) => task.status != 'finished').toList(),
                   );

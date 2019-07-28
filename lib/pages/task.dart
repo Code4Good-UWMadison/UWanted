@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thewanted/services/authentication.dart';
 import './details.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,7 +16,10 @@ class Task extends StatelessWidget {
       this.fe,
       this.ot,
       this.id,
-      @required this.status});
+      @required this.status,
+      @required this.userId,
+      @required this.auth,
+      });
   final title;
   final ai;
   final app;
@@ -25,6 +29,8 @@ class Task extends StatelessWidget {
   final ot;
   final id;
   final String status;
+  final String userId;
+  final BaseAuth auth;
   List _getNewList() {
     List<String> list = new List();
     if (ai) {
@@ -104,6 +110,8 @@ class Task extends StatelessWidget {
                               builder: (context) => DetailedPage(
                                     title: title,
                                     id: id,
+                                    currUserId: userId,
+                                    auth: auth,
                                   )));
                     }),
               ],
