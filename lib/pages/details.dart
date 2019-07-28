@@ -1,14 +1,10 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:thewanted/pages/status_tag.dart';
 import 'package:thewanted/services/authentication.dart';
-import './profile.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
-
+import 'package:thewanted/pages/details_components/apply_button.dart';
 
 class Request {
   //String userName;
@@ -325,72 +321,13 @@ class _DetailedPageState extends State<DetailedPage> {
                 child: labels,
               ),
               contactInfo,
-              _buildApplyButton(),
+              ApplyButton(
+                  taskId: widget.id,
+                  status: this.request.status,
+                  context: context),
             ],
           ),
         ));
-  }
-
-  Widget _buildApplyButton() => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: RaisedButton(
-          color: _buildColorFromStatus(),
-          onPressed: _buildOnpressedFromStatus(),
-          child: _buildTextFromStatus(),
-        ),
-      );
-
-  Text _buildTextFromStatus() {
-    switch (StatusTag.getStatusFromString(this.request.status)) {
-      case Status.open:
-        return Text('Apply');
-        break;
-      case Status.inprogress:
-        return Text('In Progress');
-        break;
-      case Status.finished:
-        return Text('Closed');
-        break;
-      default:
-        return Text('Undefined');
-        break;
-    }
-  }
-
-  VoidCallback _buildOnpressedFromStatus() {
-    switch (StatusTag.getStatusFromString(this.request.status)) {
-      case Status.open:
-        return _apply;
-        break;
-      default:
-        return null;
-        break;
-    }
-  }
-
-  _apply() {
-    print('Apply this task!');
-    // TODO: implement apply
-    // 1. ask user to input apply message
-    // 2. add apply to firestore
-    // 3. Send owner (email) notification
-  }
-
-  Color _buildColorFromStatus() {
-    switch (StatusTag.getStatusFromString(this.request.status)) {
-      case Status.open:
-        return Colors.green;
-        break;
-      case Status.inprogress:
-        return Colors.yellow[800];
-        break;
-      case Status.finished:
-        return Colors.red;
-        break;
-      default:
-        return Colors.blue;
-        break;
-    }
   }
 }
 

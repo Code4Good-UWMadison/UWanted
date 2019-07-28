@@ -102,9 +102,9 @@ class _MyPostsPageState extends State<MyPostsPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => SendRequest(
-                            update: true,
-                            postId: entry.key,
-                          ),
+                        update: true,
+                        postId: entry.key,
+                      ),
                     ));
               },
             ),
@@ -116,9 +116,11 @@ class _MyPostsPageState extends State<MyPostsPage> {
             context,
             MaterialPageRoute(
               builder: (context) => DetailedPage(
-                    title: entry.value['title'],
-                    id: entry.key,
-                  ),
+                title: entry.value['title'],
+                id: entry.key,
+                currUserId: widget.userId,
+                auth: widget.auth,
+              ),
             ),
           );
         },
@@ -128,16 +130,16 @@ class _MyPostsPageState extends State<MyPostsPage> {
         child:
             Text('Edit', style: TextStyle(color: Colors.white, fontSize: 18.0)),
         onPressed: () => setState(() {
-              _isEditing = true;
-            }),
+          _isEditing = true;
+        }),
       );
 
   FlatButton _doneButton() => FlatButton(
         child:
             Text('Done', style: TextStyle(color: Colors.white, fontSize: 18.0)),
         onPressed: () => setState(() {
-              _isEditing = false;
-            }),
+          _isEditing = false;
+        }),
       );
 
   BottomAppBar _bottomDeleteBar() => BottomAppBar(
