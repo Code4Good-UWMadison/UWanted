@@ -92,7 +92,6 @@ class _ApplyButtonState extends State<ApplyButton> {
         this.pressed = false;
       });
     });
-    // 3. Send owner (email) notification
   }
 
   Future<void> _updateTaskdataAndProfiledata() =>

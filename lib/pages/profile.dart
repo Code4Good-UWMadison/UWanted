@@ -289,6 +289,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         builder: (context) => DetailedPage(
                           title: snapshot.data['title'],
                           id: uid,
+                          currUserId: widget.userId,
+                          auth: widget.auth,
                         ),
                       ),
                     );

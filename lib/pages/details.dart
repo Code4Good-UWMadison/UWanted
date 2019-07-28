@@ -1,11 +1,7 @@
-import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:thewanted/pages/status_tag.dart';
 import 'package:thewanted/services/authentication.dart';
-import './profile.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
 import 'package:thewanted/pages/details_components/apply_button.dart';
