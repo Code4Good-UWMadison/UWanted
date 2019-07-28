@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:thewanted/pages/send_request.dart';
 import '../services/authentication.dart';
@@ -22,6 +25,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final Firestore _db = Firestore.instance;
+  final FirebaseMessaging _fcm = FirebaseMessaging();
+  StreamSubscription iosSubscription;
+
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   int _selectedIndex;
   @override
@@ -30,7 +37,95 @@ class _HomePageState extends State<HomePage> {
     _checkEmailVerification();
     _selectedIndex = 0;
     _getUserProfileFromFirebase();
+    if (Platform.isIOS) {
+      iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
+        print(data);
+        _saveDeviceToken();
+      });
+
+      _fcm.requestNotificationPermissions(IosNotificationSettings());
+    } else {
+      _saveDeviceToken();
+    }
+
+    _fcm.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print("onMessage: $message");
+        // final snackbar = SnackBar(
+        //   content: Text(message['notification']['title']),
+        //   action: SnackBarAction(
+        //     label: 'Go',
+        //     onPressed: () => null,
+        //   ),
+        // );
+
+        // Scaffold.of(context).showSnackBar(snackbar);
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            content: ListTile(
+              title: Text(message['notification']['title']),
+              subtitle: Text(message['notification']['body']),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.amber,
+                child: Text('Ok'),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+        );
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print("onLaunch: $message");
+        // TODO optional
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print("onResume: $message");
+        // TODO optional
+      },
+    );
   }
+
+  @override
+  void dispose() {
+    if (iosSubscription != null) iosSubscription.cancel();
+    super.dispose();
+  }
+
+  /// Get the token, save it to the database for current user
+  _saveDeviceToken() async {
+    // Get the current user
+    String uid = widget.userId;
+    // FirebaseUser user = await _auth.currentUser();
+
+    // Get the token for this device
+    _fcm.getToken().then((String fcmToken) {
+      if (fcmToken != null) {
+        print(fcmToken);
+        DocumentReference tokens = _db
+            .collection('users')
+            .document(uid)
+            .collection('tokens')
+            .document(fcmToken);
+
+        tokens.setData({
+          'token': fcmToken,
+          'createdAt': DateTime.now(), // optional
+          'platform': Platform.operatingSystem // optional
+        });
+      }
+    });
+    // Save it to Firestore
+  }
+
+  // /// Subscribe the user to a topic
+// _subscribeToTopic() async {
+//     // Subscribe the user to a topic
+//     _fcm.subscribeToTopic('puppies');
+//   }
+// }
 
 // check if the user is registered or not, if not, skip to profile page instead of dashboard *changed from Profile.dart
   void _getUserProfileFromFirebase() {
@@ -50,7 +145,7 @@ class _HomePageState extends State<HomePage> {
         _selectedIndex = 2;
       });
       showInSnackBar();
-    } 
+    }
   }
 
   void showInSnackBar() {
@@ -154,7 +249,7 @@ class _HomePageState extends State<HomePage> {
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
-      if(_selectedIndex == 1){
+      if (_selectedIndex == 1) {
         _getUserProfileFromFirebase();
       }
     });
