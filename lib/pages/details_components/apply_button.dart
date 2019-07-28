@@ -7,10 +7,16 @@ class ApplyButton extends StatelessWidget {
   ApplyButton({
     @required this.taskId,
     @required String status,
-  }): status = StatusTag.getStatusFromString(status);
+    @required this.context,
+  })  : status = StatusTag.getStatusFromString(status),
+        userId = FirebaseAuth.instance
+            .currentUser()
+            .then((FirebaseUser user) => user.uid);
 
   final String taskId;
   final Status status;
+  final Future<String> userId;
+  final BuildContext context;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -77,12 +83,35 @@ class ApplyButton extends StatelessWidget {
   }
 
   Future<void> _updateTaskdataAndProfiledata() =>
-      _getCurrentUserId().then((FirebaseUser user) {
-        _updateTaskApplicants(user.uid);
-        _updateProfileApplied(user.uid);
+      this.userId.then((String uid) async {
+        if (await _checkIfApplied(uid)) {
+          print('Already applied!');
+          _showNotifyAppliedDialog();
+        } else {
+          _updateTaskApplicants(uid);
+          _updateProfileApplied(uid);
+        }
       }).catchError((e) {
         print(e);
       });
+
+  Future<bool> _checkIfApplied(String uid) async =>
+      await _checkIfAppliedInTask(uid) && await _checkIfAppliedInUser(uid);
+
+  Future<bool> _checkIfAppliedInTask(String uid) => Firestore.instance
+      .collection('tasks')
+      .document(this.taskId)
+      .collection('applicants')
+      .document(uid)
+      .get()
+      .then((DocumentSnapshot document) => document.exists);
+
+  Future<bool> _checkIfAppliedInUser(String uid) => Firestore.instance
+      .collection('users')
+      .document(uid)
+      .get()
+      .then((DocumentSnapshot document) =>
+          (document['applied'] as List).contains(this.taskId));
 
   Future<void> _updateTaskApplicants(String uid) => Firestore.instance
           .collection('tasks')
@@ -102,6 +131,38 @@ class ApplyButton extends StatelessWidget {
         ])
       });
 
-  Future<FirebaseUser> _getCurrentUserId() =>
-      FirebaseAuth.instance.currentUser();
+  Future<void> _showNotifyAppliedDialog() async {
+    return showDialog<void>(
+      context: this.context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Whoops'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('You\'ve applid this task.'),
+                Text('Are you trying to modify your application?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text(
+                'Modify',
+                // style: TextStyle(color: Colors.red),
+              ),
+              onPressed: null,
+            ),
+            FlatButton(
+              child: Text('CANCEL'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

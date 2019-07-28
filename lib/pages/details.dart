@@ -318,7 +318,10 @@ class _DetailedPageState extends State<DetailedPage> {
                 child: labels,
               ),
               contactInfo,
-              ApplyButton(taskId: widget.id, status: this.request.status),
+              ApplyButton(
+                  taskId: widget.id,
+                  status: this.request.status,
+                  context: context),
             ],
           ),
         ));
