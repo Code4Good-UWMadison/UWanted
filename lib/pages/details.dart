@@ -8,7 +8,7 @@ import 'package:thewanted/services/authentication.dart';
 import './profile.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
-//import '../services/authentication.dart';
+
 
 class Request {
   //String userName;
@@ -147,7 +147,7 @@ class _DetailedPageState extends State<DetailedPage> {
   Widget build(BuildContext context) {
     if (this.request == null)
       return Center(
-        child: Text("loading"),
+        child: CircularProgressIndicator(),
       );
 
     var request = Column(

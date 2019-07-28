@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../buttonManageGlobal.dart';
+import '../requestAttributes.dart';
 import './dashboard.dart';
 import 'details.dart';
 
@@ -179,7 +179,7 @@ class _SendRequestState extends State<SendRequest> {
   Widget build(BuildContext context) {
     if (this.request == null && state == true) {
       return Center(
-        child: Text("loading"),
+        child: CircularProgressIndicator(),
       );
     }
     return Scaffold(
@@ -270,6 +270,7 @@ class _TopPartState extends State<TopPart> {
     _controllerDes =
         TextEditingController(text: state ? widget.reqTop.requestTitle : null);
     des = state ? widget.reqTop.requestTitle : "";
+    //_controllerDes.addListener()
     _controllerDetail =
         TextEditingController(text: state ? widget.reqTop.description : null);
     details = state ? widget.reqTop.description : "";
@@ -331,9 +332,9 @@ class _TopPartState extends State<TopPart> {
                       Radius.circular(30.0),
                     ),
                     child: TextField(
-                      onChanged: (text) {
-                        des = text;
-                      },
+//                      onChanged: (text) {
+//                        des = text;
+//                      },
                       controller: _controllerDes,
                       decoration: new InputDecoration(
                         hintText: state ? null : 'Type description',
