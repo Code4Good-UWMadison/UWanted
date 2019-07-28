@@ -33,19 +33,17 @@ export const sendToDevice = functions.firestore
       .doc(userId)
       .collection('tokens')
       .get();
+    const nameQuery = await db
+      .collection('users')
+      .doc(userId)
+      .get();
     console.log("finish find token");
-    var applicantName;
-    const secondQuerySnap = await db.collection('users').doc(userId).onSnapshot(appSnap => {
-      var data = appSnap.data();
-      applicantName = data['name'];
-      console.log("success get the id.", applicantName);
-    });
     const tokens = querySnapshot.docs.map(snap => snap.id);
 
     const payload: admin.messaging.MessagingPayload = {
       notification: {
         title: 'New Person Comes',
-        body: `Your request got a response from ${applicantName}`,
+        body: `Your request got a response from ${nameQuery.data()['name']}`,
         // icon: '',
         click_action: 'FLUTTER_NOTIFICATION_CLICK'
       }
