@@ -62,6 +62,7 @@ class User {
     'posts': List<String>(),
     'created': Timestamp.now(),
     'updated': Timestamp.now(),
+    'applied': List<String>(),
   };
 }
 
