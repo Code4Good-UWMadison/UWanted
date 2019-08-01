@@ -125,17 +125,20 @@ class _ApplyButtonState extends State<ApplyButton> {
       .then((DocumentSnapshot document) =>
           (document['applied'] as List).contains(widget.taskId));
 
-  Future<void> _updateTaskApplicants(String uid) => Firestore.instance
-          .collection('tasks')
-          .document(widget.taskId)
-          .collection('applicants')
-          .document(uid)
-          .setData({
-        'msg': 'I am good at this kind of job, please let me do this',
-        'created': Timestamp.now(),
-        'updated': Timestamp.now(),
-        'accepted': false,
-      }, merge: true);
+  Future<void> _updateTaskApplicants(String uid) => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ApplicationMessagePage()),
+      ).then((msg) => Firestore.instance
+              .collection('tasks')
+              .document(widget.taskId)
+              .collection('applicants')
+              .document(uid)
+              .setData({
+            'msg': msg,
+            'created': Timestamp.now(),
+            'updated': Timestamp.now(),
+            'accepted': false,
+          }, merge: true));
 
   Future<void> _updateProfileApplied(String uid) =>
       Firestore.instance.collection('users').document(uid).updateData({
@@ -176,6 +179,50 @@ class _ApplyButtonState extends State<ApplyButton> {
           ],
         );
       },
+    );
+  }
+}
+
+class ApplicationMessagePage extends StatefulWidget {
+  ApplicationMessagePage();
+
+  @override
+  _ApplicationMessagePageState createState() => _ApplicationMessagePageState();
+}
+
+class _ApplicationMessagePageState extends State<ApplicationMessagePage> {
+  final myController = TextEditingController();
+
+  @override
+  void dispose() {
+    myController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Application Message'),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.save),
+            onPressed: () {
+              Navigator.pop(context, myController.text);
+            },
+          ),
+        ],
+      ),
+      body: ListView(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: TextField(
+              controller: myController,
+            ),
+          )
+        ],
+      ),
     );
   }
 }
