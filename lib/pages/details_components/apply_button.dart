@@ -134,6 +134,7 @@ class _ApplyButtonState extends State<ApplyButton> {
         'msg': 'I am good at this kind of job, please let me do this',
         'created': Timestamp.now(),
         'updated': Timestamp.now(),
+        'accepted': false,
       }, merge: true);
 
   Future<void> _updateProfileApplied(String uid) =>

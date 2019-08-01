@@ -5,6 +5,7 @@ import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/pages/details.dart';
 import 'package:thewanted/pages/status_tag.dart';
 import 'package:thewanted/pages/send_request.dart';
+import 'package:thewanted/pages/profile/applicants_list.dart';
 
 class MyPostsPage extends StatefulWidget {
   MyPostsPage(
@@ -95,6 +96,16 @@ class _MyPostsPageState extends State<MyPostsPage> {
           //Merged here
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
+            FlatButton(
+              child: Icon(Icons.list),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ApplicantsList(taskId: entry.key),
+                    ));
+              },
+            ),
             FlatButton(
               child: Icon(Icons.edit),
               onPressed: () {
