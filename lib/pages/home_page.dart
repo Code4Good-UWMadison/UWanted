@@ -6,6 +6,7 @@ import 'package:thewanted/pages/send_request.dart';
 import '../services/authentication.dart';
 import '../pages/profile.dart';
 import '../pages/send_request.dart';
+import 'send_request_page/send_request_refactored.dart';
 import './dashboard.dart';
 import '../pages/drawer.dart';
 import 'dart:async';
@@ -259,7 +260,8 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final _pageOptions = [
       DashboardPage(userId: widget.userId, auth: widget.auth),
-      SendRequest(userId: widget.userId, auth: widget.auth, update: false),
+      //SendRequest(userId: widget.userId, auth: widget.auth, update: false),
+      RequestForm(userId: widget.userId, auth: widget.auth, needUpdate: false,),
       ProfilePage(userId: widget.userId, auth: widget.auth),
     ];
     final _pageName = ["Dashboard", "Send Request", "Profile"];

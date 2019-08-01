@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../requestAttributes.dart';
 import './dashboard.dart';
 import 'details.dart';
+import 'send_request_page/requestAttributes.dart';
 
 class ButtonManage {
   _initButton() {
@@ -50,6 +50,7 @@ class SendRequest extends StatefulWidget {
   final String userId;
   final bool update;
   final String postId;
+  Request myRequest;
 
   _addItem() {
     print("add item");
@@ -187,7 +188,7 @@ class _SendRequestState extends State<SendRequest> {
         // mainAxisSize: MainAxisSize.max,
         // crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          TopPart(reqTop: this.request),
+          TopPart(myReq: widget.myRequest, reqTop: this.request),
           BottomPart(reqBottom: this.request),
           SizedBox(
             height: 50.0,
@@ -233,9 +234,9 @@ class _SendRequestState extends State<SendRequest> {
   //check if the request is empty; if empty, no submission
   bool _validSubmission() {
     if (backend || aiml || frontend || others || data || app) {
-      if (des != "" && details != "" && contact != "") {
+      if (details != "" && contact != "") {
         validRequest = true;
-      }
+      }//des != "" &&
     }
     print(des + ' ' + details + " " + contact);
     return validRequest;
@@ -246,8 +247,9 @@ Color textColor = Color(0xFFDBC1AC);
 
 class TopPart extends StatefulWidget {
   final Request reqTop;
+  final Request myReq;
 
-  TopPart({this.reqTop});
+  TopPart({this.myReq, this.reqTop});
 
   @override
   _TopPartState createState() => _TopPartState();
@@ -269,8 +271,8 @@ class _TopPartState extends State<TopPart> {
     super.initState();
     _controllerDes =
         TextEditingController(text: state ? widget.reqTop.requestTitle : null);
+
     des = state ? widget.reqTop.requestTitle : "";
-    //_controllerDes.addListener()
     _controllerDetail =
         TextEditingController(text: state ? widget.reqTop.description : null);
     details = state ? widget.reqTop.description : "";
@@ -285,6 +287,9 @@ class _TopPartState extends State<TopPart> {
 
   @override
   Widget build(BuildContext context) {
+    _controllerDes.addListener(() {
+      widget.myReq.description = _controllerDes.text;
+    });
     // des = _controllerDes.text;
     // details = _controllerDetail.text;
     return Stack(
@@ -332,9 +337,7 @@ class _TopPartState extends State<TopPart> {
                       Radius.circular(30.0),
                     ),
                     child: TextField(
-//                      onChanged: (text) {
-//                        des = text;
-//                      },
+                      onChanged: (text) {des = text;},
                       controller: _controllerDes,
                       decoration: new InputDecoration(
                         hintText: state ? null : 'Type description',
