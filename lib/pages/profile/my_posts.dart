@@ -5,6 +5,7 @@ import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/pages/details.dart';
 import 'package:thewanted/pages/status_tag.dart';
 import 'package:thewanted/pages/send_request.dart';
+import 'package:thewanted/pages/profile/applicants_list.dart';
 
 class MyPostsPage extends StatefulWidget {
   MyPostsPage(
@@ -95,20 +96,39 @@ class _MyPostsPageState extends State<MyPostsPage> {
           //Merged here
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            FlatButton(
-              child: Icon(Icons.edit),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SendRequest(
-                        update: true,
-                        postId: entry.key,
-                      ),
-                    ));
-              },
+            Container(
+              width: 50,
+              child: FlatButton(
+                child: Icon(Icons.list),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ApplicantsList(taskId: entry.key),
+                      )).then((_) {
+                    setState(() {
+                      this._getPostsFromRemote();
+                    });
+                  });
+                },
+              ),
             ),
-            Icon(Icons.arrow_forward),
+            Container(
+              width: 50,
+              child: FlatButton(
+                child: Icon(Icons.edit),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SendRequest(
+                          update: true,
+                          postId: entry.key,
+                        ),
+                      ));
+                },
+              ),
+            ),
           ],
         ), //to here
         onTap: () {

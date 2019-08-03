@@ -309,7 +309,10 @@ class _DetailedPageState extends State<DetailedPage> {
       ],
     );
 
+    final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
     return Scaffold(
+      key: _scaffoldKey,
         appBar: AppBar(),
         body: Center(
           child: ListView(
@@ -324,7 +327,8 @@ class _DetailedPageState extends State<DetailedPage> {
               ApplyButton(
                   taskId: widget.id,
                   status: this.request.status,
-                  context: context),
+                  context: context,
+                  parentKey: _scaffoldKey),
             ],
           ),
         ));
