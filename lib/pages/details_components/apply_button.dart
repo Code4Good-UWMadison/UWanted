@@ -8,6 +8,7 @@ class ApplyButton extends StatefulWidget {
     @required this.taskId,
     @required String status,
     @required this.context,
+    @required this.parentKey,
   })  : status = StatusTag.getStatusFromString(status),
         userId = FirebaseAuth.instance
             .currentUser()
@@ -17,6 +18,7 @@ class ApplyButton extends StatefulWidget {
   final Status status;
   final Future<String> userId;
   final BuildContext context;
+  final GlobalKey<ScaffoldState> parentKey;
 
   @override
   _ApplyButtonState createState() => _ApplyButtonState();
@@ -100,11 +102,11 @@ class _ApplyButtonState extends State<ApplyButton> {
           print('Already applied!');
           _showNotifyAppliedDialog();
         } else {
-          _updateTaskApplicants(uid);
-          _updateProfileApplied(uid);
+          _updateTaskApplicants(uid)
+              .then((_) => _ != false ? _updateProfileApplied(uid) : false);
         }
       }).catchError((e) {
-        print(e);
+        widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e)));
       });
 
   Future<bool> _checkIfApplied(String uid) async =>
@@ -125,20 +127,22 @@ class _ApplyButtonState extends State<ApplyButton> {
       .then((DocumentSnapshot document) =>
           (document['applied'] as List).contains(widget.taskId));
 
-  Future<void> _updateTaskApplicants(String uid) => Navigator.push(
+  Future _updateTaskApplicants(String uid) => Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ApplicationMessagePage()),
-      ).then((msg) => Firestore.instance
+      ).then((msg) => msg != null
+          ? Firestore.instance
               .collection('tasks')
               .document(widget.taskId)
               .collection('applicants')
               .document(uid)
               .setData({
-            'msg': msg,
-            'created': Timestamp.now(),
-            'updated': Timestamp.now(),
-            'accepted': false,
-          }, merge: true));
+              'msg': msg,
+              'created': Timestamp.now(),
+              'updated': Timestamp.now(),
+              'accepted': false,
+            }, merge: true)
+          : false);
 
   Future<void> _updateProfileApplied(String uid) =>
       Firestore.instance.collection('users').document(uid).updateData({

@@ -96,30 +96,39 @@ class _MyPostsPageState extends State<MyPostsPage> {
           //Merged here
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            FlatButton(
-              child: Icon(Icons.list),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ApplicantsList(taskId: entry.key),
-                    ));
-              },
+            Container(
+              width: 50,
+              child: FlatButton(
+                child: Icon(Icons.list),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ApplicantsList(taskId: entry.key),
+                      )).then((_) {
+                    setState(() {
+                      this._getPostsFromRemote();
+                    });
+                  });
+                },
+              ),
             ),
-            FlatButton(
-              child: Icon(Icons.edit),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SendRequest(
-                        update: true,
-                        postId: entry.key,
-                      ),
-                    ));
-              },
+            Container(
+              width: 50,
+              child: FlatButton(
+                child: Icon(Icons.edit),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SendRequest(
+                          update: true,
+                          postId: entry.key,
+                        ),
+                      ));
+                },
+              ),
             ),
-            Icon(Icons.arrow_forward),
           ],
         ), //to here
         onTap: () {

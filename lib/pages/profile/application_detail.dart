@@ -18,7 +18,7 @@ class _ApplicationDetailState extends State<ApplicationDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('data'),
+        title: Text('Application Detail'),
       ),
       body: _buildApplicationDetail(),
     );
@@ -37,7 +37,9 @@ class _ApplicationDetailState extends State<ApplicationDetail> {
           if (snapshot.hasError) return Text('Error: ${snapshot.error}');
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
-              return CircularProgressIndicator();
+              return Center(
+                child: CircularProgressIndicator(),
+              );
             default:
               return ListView(
                 children: <Widget>[
@@ -56,6 +58,7 @@ class _ApplicationDetailState extends State<ApplicationDetail> {
                           ? null
                           : _buildOnpressed(snapshot.data['accepted']),
                       child: _buildText(snapshot.data['accepted']),
+                      color: _buildColor(snapshot.data['accepted']),
                     ),
                   ),
                 ],
@@ -65,13 +68,27 @@ class _ApplicationDetailState extends State<ApplicationDetail> {
       );
 
   VoidCallback _buildOnpressed(bool accepted) => () {
+        setState(() {
+          this._acceptPressed = true;
+        });
         Firestore.instance
             .collection('tasks')
             .document(widget.taskId)
             .collection('applicants')
             .document(widget.applicantId)
-            .updateData({'accepted': !accepted}).then(
-                _changeTaskStatusFromAccepteds);
+            .updateData({'accepted': !accepted})
+            .then(_changeTaskStatusFromAccepteds)
+            .then((_) {
+              setState(() {
+                this._acceptPressed = false;
+              });
+            })
+            .catchError((e) {
+              Scaffold.of(context).showSnackBar(SnackBar(content: Text(e)));
+              setState(() {
+                this._acceptPressed = false;
+              });
+            });
       };
 
   _changeTaskStatusFromAccepteds(_) {
@@ -87,5 +104,6 @@ class _ApplicationDetailState extends State<ApplicationDetail> {
     });
   }
 
-  Text _buildText(bool accepted) => Text(accepted ? 'Accepted' : 'Accept');
+  Text _buildText(bool accepted) => Text(accepted ? 'Cancel' : 'Accept');
+  Color _buildColor(bool accepted) => accepted ? Colors.red : Colors.green;
 }

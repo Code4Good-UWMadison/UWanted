@@ -63,7 +63,9 @@ class _ApplicantsListState extends State<ApplicantsList> {
           if (snapshot.hasError) return Text('Error: ${snapshot.error}');
           switch (snapshot.connectionState) {
             case ConnectionState.waiting:
-              return CircularProgressIndicator();
+              return Row(
+                children: <Widget>[CircularProgressIndicator()],
+              );
             default:
               return Text(snapshot.data['name']);
           }
