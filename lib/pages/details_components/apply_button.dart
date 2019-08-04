@@ -223,6 +223,8 @@ class _ApplicationMessagePageState extends State<ApplicationMessagePage> {
             padding: EdgeInsets.all(16.0),
             child: TextField(
               controller: myController,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
             ),
           )
         ],
