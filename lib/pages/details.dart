@@ -331,20 +331,13 @@ class _DetailedPageState extends State<DetailedPage> {
                 child: labels,
               ),
               contactInfo,
-<<<<<<< HEAD
               widget.cancelButton
                   ? _buildCancelButton()
                   : ApplyButton(
                       taskId: widget.id,
                       status: this.request.status,
-                      context: context)
-=======
-              ApplyButton(
-                  taskId: widget.id,
-                  status: this.request.status,
-                  context: context,
-                  parentKey: _scaffoldKey),
->>>>>>> 278d22b4ea8b0131cd6e0b1244cec9d41ff6d425
+                      context: context,
+                      parentKey: _scaffoldKey)
             ],
           ),
         ));
