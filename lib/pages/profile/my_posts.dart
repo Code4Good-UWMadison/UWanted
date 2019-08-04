@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/pages/details.dart';
 import 'package:thewanted/pages/status_tag.dart';
-import 'package:thewanted/pages/send_request.dart';
+import '../send_request_page/send_request_refactored.dart';
 import 'package:thewanted/pages/profile/applicants_list.dart';
 
 class MyPostsPage extends StatefulWidget {
@@ -121,10 +121,10 @@ class _MyPostsPageState extends State<MyPostsPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => SendRequest(
-                          update: true,
-                          postId: entry.key,
-                        ),
+                        builder: (context) => RequestForm(
+                        needUpdate: true,
+                        postId: entry.key,
+                      ),
                       ));
                 },
               ),
