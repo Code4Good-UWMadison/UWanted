@@ -36,15 +36,22 @@ class Request {
 }
 
 class DetailedPage extends StatefulWidget {
-  DetailedPage({@required this.title, @required this.id, @required this.currUserId, @required this.auth});
+  DetailedPage(
+      {@required this.title,
+      @required this.id,
+      @required this.currUserId,
+      @required this.auth,
+      @required this.cancelButton});
 
   final title;
   final id;
   final String currUserId;
   final BaseAuth auth;
+  bool cancelButton;
 
   @override
   _DetailedPageState createState() => _DetailedPageState();
+
 //final description;
 
   static Request getReqInfoForUpdate(String id) {
@@ -321,13 +328,53 @@ class _DetailedPageState extends State<DetailedPage> {
                 child: labels,
               ),
               contactInfo,
-              ApplyButton(
-                  taskId: widget.id,
-                  status: this.request.status,
-                  context: context),
+              widget.cancelButton
+                  ? _buildCancelButton()
+                  : ApplyButton(
+                      taskId: widget.id,
+                      status: this.request.status,
+                      context: context)
             ],
           ),
         ));
+  }
+
+  _buildCancelButton() => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: RaisedButton(
+          color: Colors.red,
+          onPressed: () {
+            _deleteAppliedTask();
+          },
+          child: Text("Cancel Application"),
+        ),
+      );
+
+  _deleteAppliedTask() async {
+    List list;
+    await Firestore.instance
+        .collection("users")
+        .document(widget.currUserId)
+        .get()
+        .then((DocumentSnapshot doc) {
+      list = List<String>.from(doc['applied'], growable: true);
+      list.remove(widget.id);
+      //appliedList.removeWhere((item) => item == widget.id);
+    });
+    await Firestore.instance
+        .collection("tasks")
+        .document(widget.id)
+        .collection('applicants')
+        .document(widget.currUserId)
+        .delete();
+    await Firestore.instance
+        .collection('users')
+        .document(widget.currUserId)
+        .updateData({
+      "applied": list
+      //FieldValue.arrayRemove(new List)
+    });
+
   }
 }
 

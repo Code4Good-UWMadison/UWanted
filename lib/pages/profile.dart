@@ -60,6 +60,10 @@ class _ProfilePageState extends State<ProfilePage> {
             title: Text('Posts'),
             children: List.from(_buildPosts())..add(_buildEditPostsListTile()),
           ),
+          ExpansionTile(
+            title: Text('Applied'),
+            children: List.from(_buildAppliedList()),
+          ),
           // AboutListTile(icon: null),
         ],
       ).toList(),
@@ -264,10 +268,10 @@ class _ProfilePageState extends State<ProfilePage> {
       context,
       MaterialPageRoute(
         builder: (context) => MyPostsPage(
-          auth: widget.auth,
-          userId: widget.userId,
-          posts: this.user.posts,
-        ),
+              auth: widget.auth,
+              userId: widget.userId,
+              posts: this.user.posts,
+            ),
       ),
     );
   }
@@ -287,11 +291,11 @@ class _ProfilePageState extends State<ProfilePage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => DetailedPage(
-                          title: snapshot.data['title'],
-                          id: uid,
-                          currUserId: widget.userId,
-                          auth: widget.auth,
-                        ),
+                              title: snapshot.data['title'],
+                              id: uid,
+                              currUserId: widget.userId,
+                              auth: widget.auth,
+                            ),
                       ),
                     );
                   },
@@ -301,6 +305,46 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ))
       .toList();
+
+  List<Widget> _buildAppliedList() => user.applied
+      .map((String uid) => FutureBuilder<DocumentSnapshot>(
+            future: Firestore.instance.collection('tasks').document(uid).get(),
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.data != null) {
+                return ListTile(
+                  leading: Text(
+                    snapshot.data['title'],
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Icon(Icons.arrow_forward),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailedPage(
+                                title: snapshot.data['title'],
+                                id: uid,
+                                currUserId: widget.userId,
+                                auth: widget.auth,
+                                cancelButton: true,
+                              ),
+                        ));
+                  },
+                );
+              } else {
+                return CircularProgressIndicator();
+              }
+            },
+          ))
+      .toList();
+
+
 
 //////
   Future getImage() async {

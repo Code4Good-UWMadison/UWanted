@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../dashboard.dart';
 import '../details.dart';
 import 'requestLabel.dart';
-//import 'requestAttributes.dart';
 
 class RequestForm extends StatefulWidget {
   RequestForm ({Key key, this.auth, this.userId, this.needUpdate, this.postId})
@@ -244,7 +243,6 @@ class _RequestFormState extends State<RequestForm> {
                     ));
               }
             },
-            //backgroundColor: Colors.brown,
             child: Text(
               "Submit",
               style: TextStyle(color: Colors.white),
@@ -259,7 +257,6 @@ class _RequestFormState extends State<RequestForm> {
     children: <Widget>[
       Container(
         height: 500.0,
-        //decoration: BoxDecoration(color: Colors.brown),
         child: Column(
           mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -295,7 +292,6 @@ class _RequestFormState extends State<RequestForm> {
                   Radius.circular(30.0),
                 ),
                 child: TextField(
-                  //onChanged: (text) {des = text;},
                   controller: _controllerRequestTitle,
                   decoration: new InputDecoration(
                     hintText: widget.needUpdate ? null : 'Type description',
@@ -328,9 +324,6 @@ class _RequestFormState extends State<RequestForm> {
                     Radius.circular(30.0),
                   ),
                   child: TextField(
-//                      onChanged: (text) {
-//                        details = text;
-//                      },
                     controller: _controllerDetail,
                     decoration: new InputDecoration(
                       hintText:
@@ -353,14 +346,10 @@ class _RequestFormState extends State<RequestForm> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-//        SizedBox(
-//          height: 20.0,
-//        ),
         Text(
           "Labels:",
           style: TextStyle(
               fontSize: 18.0,
-              //color: textColor,
               decoration: TextDecoration.none),
           textAlign: TextAlign.center,
         ),
@@ -459,9 +448,6 @@ class _RequestFormState extends State<RequestForm> {
               Radius.circular(30.0),
             ),
             child: TextField(
-//              onChanged: (text) {
-//                contact = text;
-//              },
               controller: _controllerContact,
               decoration: new InputDecoration(
                 hintText: 'Email will be preferred',
