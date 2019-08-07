@@ -295,6 +295,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               id: uid,
                               currUserId: widget.userId,
                               auth: widget.auth,
+                              cancelButton: false,
                             ),
                       ),
                     );
