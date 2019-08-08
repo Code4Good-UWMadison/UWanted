@@ -211,6 +211,7 @@ class _RequestFormState extends State<RequestForm> {
       );
     }
     return Scaffold(
+      appBar: AppBar(),
       body: ListView(
         // mainAxisSize: MainAxisSize.max,
         // crossAxisAlignment: CrossAxisAlignment.center,
@@ -225,13 +226,18 @@ class _RequestFormState extends State<RequestForm> {
               if (_validSubmission()) {
                 _addOrUpdateRequestInfo();
                 _initRequestFields();
-                //TODO: Return back to dashboard, restart a HomePage instead of DashboardPage. It's terrible rn.
-                Navigator.push(
-                    context,
-                    new MaterialPageRoute(
-                      builder: (ctxt) => new DashboardPage(
-                          userId: widget.userId, auth: widget.auth),
-                    ));
+                if(widget.needUpdate){
+                  Navigator.of(context).pop();
+                }else{
+                  showDialog(
+                      context: context,
+                      builder: (_) => new AlertDialog(
+                        content: new Text(
+                          'Request Submitted',
+                          textAlign: TextAlign.center,
+                        ),
+                      ));
+                }
               } else {
                 showDialog(
                     context: context,
