@@ -25,18 +25,45 @@ class ApplyButton extends StatefulWidget {
 }
 
 class _ApplyButtonState extends State<ApplyButton> {
-  bool pressed = false;
+  bool _applied = false;
+  bool _pressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateButton();
+  }
+
+  Future _updateButton() async {
+    widget.userId.then((String uid) {
+      _checkIfApplied(uid).then((applied) {
+        setState(() {
+          this._applied = applied;
+        });
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: RaisedButton(
           color: _buildColorFromStatus(),
-          onPressed: this.pressed ? null : _buildOnpressedFromStatus(),
-          child: _buildTextFromStatus(),
+          onPressed: this._pressed ? null : _buildOnpressedFromStatus(),
+          child: _buildChildFromStatus(),
         ),
       );
 
-  Text _buildTextFromStatus() {
+  Widget _buildChildFromStatus() {
+    if (this._pressed)
+      return SizedBox(
+        child: CircularProgressIndicator(strokeWidth: 2),
+        height: 15,
+        width: 15,
+      );
+
+    if (this._applied) return Text('Withdraw');
+
     switch (widget.status) {
       case Status.open:
         return Text('Apply');
@@ -54,6 +81,8 @@ class _ApplyButtonState extends State<ApplyButton> {
   }
 
   Color _buildColorFromStatus() {
+    if (this._applied) return Colors.orange;
+
     switch (widget.status) {
       case Status.open:
         return Colors.green;
@@ -81,29 +110,24 @@ class _ApplyButtonState extends State<ApplyButton> {
     }
   }
 
-  _apply() {
+  void _apply() {
     setState(() {
-      this.pressed = true;
+      this._pressed = true;
     });
-    print('Apply this task!');
-    // TODO: implement apply
-    // 1. ask user to input apply message
-    // 2. add apply to firestore
     _updateTaskdataAndProfiledata().then((_) {
       setState(() {
-        this.pressed = false;
+        this._pressed = false;
       });
     });
   }
 
   Future<void> _updateTaskdataAndProfiledata() =>
       widget.userId.then((String uid) async {
-        if (await _checkIfApplied(uid)) {
-          print('Already applied!');
+        if (this._applied) {
           _showNotifyAppliedDialog();
         } else {
-          _updateTaskApplicants(uid)
-              .then((_) => _ != false ? _updateProfileApplied(uid) : false);
+          _updateTaskApplicants(uid).then((ifUserPressedSave) =>
+              ifUserPressedSave != false ? _updateProfileApplied(uid) : false);
         }
       }).catchError((e) {
         widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e)));
@@ -130,19 +154,20 @@ class _ApplyButtonState extends State<ApplyButton> {
   Future _updateTaskApplicants(String uid) => Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => ApplicationMessagePage()),
-      ).then((msg) => msg != null
-          ? Firestore.instance
-              .collection('tasks')
-              .document(widget.taskId)
-              .collection('applicants')
-              .document(uid)
-              .setData({
-              'msg': msg,
-              'created': Timestamp.now(),
-              'updated': Timestamp.now(),
-              'accepted': false,
-            }, merge: true)
-          : false);
+      ).then((msg) =>
+          msg != null // if msg == null, the user pressed BACK, not SAVE
+              ? Firestore.instance
+                  .collection('tasks')
+                  .document(widget.taskId)
+                  .collection('applicants')
+                  .document(uid)
+                  .setData({
+                  'msg': msg,
+                  'created': Timestamp.now(),
+                  'updated': Timestamp.now(),
+                  'accepted': false,
+                }, merge: true)
+              : false);
 
   Future<void> _updateProfileApplied(String uid) =>
       Firestore.instance.collection('users').document(uid).updateData({
@@ -157,22 +182,24 @@ class _ApplyButtonState extends State<ApplyButton> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Whoops'),
+          title: Text('Warning'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
                 Text('You\'ve applid this task.'),
-                Text('Are you trying to modify your application?'),
+                Text('Are you sure you want to withdraw your application?'),
               ],
             ),
           ),
           actions: <Widget>[
             FlatButton(
               child: Text(
-                'Modify',
-                // style: TextStyle(color: Colors.red),
+                'Withdraw',
+                style: TextStyle(color: Colors.red),
               ),
-              onPressed: null,
+              onPressed: () {
+                _withdrawApplication(context);
+              },
             ),
             FlatButton(
               child: Text('CANCEL'),
@@ -184,6 +211,27 @@ class _ApplyButtonState extends State<ApplyButton> {
         );
       },
     );
+  }
+
+  _withdrawApplication(BuildContext context) {
+    widget.userId.then((String uid) async {
+      Firestore.instance
+          .collection('tasks')
+          .document(widget.taskId)
+          .collection('applicants')
+          .document(uid)
+          .delete();
+      Firestore.instance.collection('users').document(uid).updateData({
+        'applied': FieldValue.arrayRemove([
+          widget.taskId,
+        ])
+      });
+    }).then((_) {
+      Navigator.of(context).pop();
+      _updateButton();
+    }).catchError((e) {
+      widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e)));
+    });
   }
 }
 
@@ -223,6 +271,8 @@ class _ApplicationMessagePageState extends State<ApplicationMessagePage> {
             padding: EdgeInsets.all(16.0),
             child: TextField(
               controller: myController,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
             ),
           )
         ],
