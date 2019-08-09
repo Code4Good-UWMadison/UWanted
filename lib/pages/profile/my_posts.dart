@@ -126,7 +126,11 @@ class _MyPostsPageState extends State<MyPostsPage> {
                         needUpdate: true,
                         postId: entry.key,
                       ),
-                      ));
+                      )).then((_) {
+                        setState(() {
+                          this._getPostsFromRemote();
+                        });
+                  });
                 },
               ),
             ),
@@ -141,12 +145,17 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 id: entry.key,
                 currUserId: widget.userId,
                 auth: widget.auth,
-                cancelButton: false,
+                withdrawlButton: false,
               ),
             ),
-          );
+          ).then((_) {
+            setState(() {
+              this._getPostsFromRemote();
+            });
+          });
         },
       );
+
 
   FlatButton _editButton() => FlatButton(
         child:

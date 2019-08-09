@@ -41,13 +41,13 @@ class DetailedPage extends StatefulWidget {
       @required this.id,
       @required this.currUserId,
       @required this.auth,
-      @required this.cancelButton});
+      @required this.withdrawlButton});
 
   final title;
   final id;
   final String currUserId;
   final BaseAuth auth;
-  bool cancelButton;
+  bool withdrawlButton;
 
   @override
   _DetailedPageState createState() => _DetailedPageState();
@@ -331,8 +331,8 @@ class _DetailedPageState extends State<DetailedPage> {
                 child: labels,
               ),
               contactInfo,
-              widget.cancelButton
-                  ? _buildCancelButton()
+              widget.withdrawlButton
+                  ? _buildWithdrawButton()
                   : ApplyButton(
                       taskId: widget.id,
                       status: this.request.status,
@@ -343,34 +343,73 @@ class _DetailedPageState extends State<DetailedPage> {
         ));
   }
 
-  _buildCancelButton() => Padding(
+  _buildWithdrawButton() => Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: RaisedButton(
           color: Colors.red,
           onPressed: () {
-            _deleteAppliedTask();
+            return showDialog(context: context,
+              barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text("Warning"),
+                content: SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      Text('Are you sure you want to withdraw this application?')
+                    ],
+                  ),
+                ),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Withdraw'),
+                    onPressed: () {
+                      _deleteAppliedTask();
+                      setState(() {
+                        widget.withdrawlButton = false;
+                      });
+                      Navigator.of(context).pop();
+                    }
+                  ),
+                  FlatButton(
+                    child: Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              );
+            });
+
           },
-          child: Text("Cancel Application"),
+          child: Text("Withdraw Application"),
         ),
       );
 
   _deleteAppliedTask() async {
     List list;
     await Firestore.instance
-        .collection("users")
+        .collection('users')
         .document(widget.currUserId)
         .get()
         .then((DocumentSnapshot doc) {
       list = List<String>.from(doc['applied'], growable: true);
       list.remove(widget.id);
-      //appliedList.removeWhere((item) => item == widget.id);
     });
     await Firestore.instance
-        .collection("tasks")
+        .collection('tasks')
         .document(widget.id)
         .collection('applicants')
         .document(widget.currUserId)
         .delete();
+    if(await Firestore.instance
+        .collection('tasks')
+        .document(widget.id)
+        .collection('applicants').snapshots().isEmpty){
+        await Firestore.instance.collection('tasks').document(widget.id).updateData({
+          'status': 'open'
+        });
+    }
     await Firestore.instance
         .collection('users')
         .document(widget.currUserId)
@@ -378,7 +417,6 @@ class _DetailedPageState extends State<DetailedPage> {
       "applied": list
       //FieldValue.arrayRemove(new List)
     });
-
   }
 }
 
