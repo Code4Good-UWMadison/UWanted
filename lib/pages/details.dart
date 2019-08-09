@@ -389,20 +389,27 @@ class _DetailedPageState extends State<DetailedPage> {
   _deleteAppliedTask() async {
     List list;
     await Firestore.instance
-        .collection("users")
+        .collection('users')
         .document(widget.currUserId)
         .get()
         .then((DocumentSnapshot doc) {
       list = List<String>.from(doc['applied'], growable: true);
       list.remove(widget.id);
-      //appliedList.removeWhere((item) => item == widget.id);
     });
     await Firestore.instance
-        .collection("tasks")
+        .collection('tasks')
         .document(widget.id)
         .collection('applicants')
         .document(widget.currUserId)
         .delete();
+    if(await Firestore.instance
+        .collection('tasks')
+        .document(widget.id)
+        .collection('applicants').snapshots().isEmpty){
+        await Firestore.instance.collection('tasks').document(widget.id).updateData({
+          'status': 'open'
+        });
+    }
     await Firestore.instance
         .collection('users')
         .document(widget.currUserId)

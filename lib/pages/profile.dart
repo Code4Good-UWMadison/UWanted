@@ -314,7 +314,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.data != null) {
                 return ListTile(
-                  leading: Text(
+                  leading: StatusTag.fromString(snapshot.data['status']),
+                  title: Text(
                     snapshot.data['title'],
                     style: TextStyle(fontSize: 15),
                   ),
