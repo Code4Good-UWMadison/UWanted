@@ -237,8 +237,8 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       );
 
-  void _navigateToProfileEditingPage() async {
-    User user = await Navigator.push(
+  void _navigateToProfileEditingPage() {
+    Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => EditProfilePage(
@@ -246,9 +246,8 @@ class _ProfilePageState extends State<ProfilePage> {
               userId: widget.userId,
               user: User.clone(this.user))),
     );
-    setState(() {
-      this.user = (user != null ? user : this.user);
-    });
+
+    _getRemoteUserData(null);
   }
 
   ListTile _buildEditProfileTile() => ListTile(
@@ -268,10 +267,10 @@ class _ProfilePageState extends State<ProfilePage> {
       context,
       MaterialPageRoute(
         builder: (context) => MyPostsPage(
-              auth: widget.auth,
-              userId: widget.userId,
-              posts: this.user.posts,
-            ),
+          auth: widget.auth,
+          userId: widget.userId,
+          posts: this.user.posts,
+        ),
       ),
     );
   }
@@ -291,12 +290,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => DetailedPage(
-                              title: snapshot.data['title'],
-                              id: uid,
-                              currUserId: widget.userId,
-                              auth: widget.auth,
-                              withdrawlButton: false,
-                            ),
+                          title: snapshot.data['title'],
+                          id: uid,
+                          currUserId: widget.userId,
+                          auth: widget.auth,
+                          withdrawlButton: false,
+                        ),
                       ),
                     );
                   },
@@ -324,12 +323,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: <Widget>[
                       FlatButton(
                         child: Icon(Icons.delete),
-                        onPressed: (){
-                          if(snapshot.data['status'] == 'closed'){
+                        onPressed: () {
+                          if (snapshot.data['status'] == 'closed') {
                             _deleteAppliedTask(uid);
-                          }
-                          else{
-                              _showAlertDialog(uid);
+                          } else {
+                            _showAlertDialog(uid);
                           }
                         },
                       ),
@@ -341,16 +339,16 @@ class _ProfilePageState extends State<ProfilePage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => DetailedPage(
-                                title: snapshot.data['title'],
-                                id: uid,
-                                currUserId: widget.userId,
-                                auth: widget.auth,
-                                withdrawlButton: true,
-                              ),
-                        )).then((_){
-                          setState(() {
-                            _getRemoteUserData(_);
-                          });
+                            title: snapshot.data['title'],
+                            id: uid,
+                            currUserId: widget.userId,
+                            auth: widget.auth,
+                            withdrawlButton: true,
+                          ),
+                        )).then((_) {
+                      setState(() {
+                        _getRemoteUserData(_);
+                      });
                     });
                   },
                 );
@@ -360,7 +358,6 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ))
       .toList();
-
 
   Future<void> _showAlertDialog(String uid) async {
     return showDialog<void>(
@@ -408,9 +405,7 @@ class _ProfilePageState extends State<ProfilePage> {
       "applied": list
       //FieldValue.arrayRemove(new List)
     });
-
   }
-
 
 //////
   Future getImage() async {
