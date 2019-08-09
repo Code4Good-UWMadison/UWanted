@@ -6,13 +6,13 @@ import '../details.dart';
 import 'requestLabel.dart';
 
 class RequestForm extends StatefulWidget {
-  RequestForm ({Key key, this.auth, this.userId, this.needUpdate, this.postId})
+  RequestForm({Key key, this.auth, this.userId, this.needUpdate, this.postId})
       : super(key: key);
   final BaseAuth auth;
   final String userId;
-  final bool needUpdate; //indicator of whether to update request instead of creating new one
+  final bool
+      needUpdate; //indicator of whether to update request instead of creating new one
   final String postId;
-
 
   @override
   State<StatefulWidget> createState() => _RequestFormState();
@@ -31,19 +31,22 @@ class _RequestFormState extends State<RequestForm> {
     if (widget.needUpdate) {
       _getRequest(widget.postId);
     }
-    if(!widget.needUpdate){
+    if (!widget.needUpdate) {
       _initRequestFields();
     }
     super.initState();
   }
 
   _initController() {
-    _controllerRequestTitle =
-        TextEditingController();
-    _controllerDetail =
-        TextEditingController();
-    _controllerContact =
-        TextEditingController();
+    _controllerRequestTitle = TextEditingController();
+    _controllerDetail = TextEditingController();
+    _controllerContact = TextEditingController();
+  }
+
+  _clearController() {
+    _controllerContact.clear();
+    _controllerDetail.clear();
+    _controllerRequestTitle.clear();
   }
 
   @override
@@ -73,7 +76,10 @@ class _RequestFormState extends State<RequestForm> {
   _addOrUpdateRequestInfo() {
     if (widget.needUpdate == true) {
       //update request info in database
-      Firestore.instance.collection('tasks').document(widget.postId).updateData({
+      Firestore.instance
+          .collection('tasks')
+          .document(widget.postId)
+          .updateData({
         'title': myRequest.requestTitle,
         'description': myRequest.description,
         'contact': myRequest.contact,
@@ -85,28 +91,29 @@ class _RequestFormState extends State<RequestForm> {
         'Other': myRequest.others,
         'updated': DateTime.now(),
       })
-        ..then((_) {
-          showDialog(
-              builder: (_) => new AlertDialog(
-                content: new Text(
-                  'Request submitted.',
-                  textAlign: TextAlign.center,
-                ),
-              ));
-        })
-        ..catchError((e) {
-          showDialog(
-              builder: (_) => new AlertDialog(
-                content: new Text(
-                  'Please retry $e',
-                  textAlign: TextAlign.center,
-                ),
-              ));
-        });
+            ..then((_) {
+              showDialog(
+                  builder: (_) => new AlertDialog(
+                        content: new Text(
+                          'Request submitted.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ));
+            })
+            ..catchError((e) {
+              showDialog(
+                  builder: (_) => new AlertDialog(
+                        content: new Text(
+                          'Please retry $e',
+                          textAlign: TextAlign.center,
+                        ),
+                      ));
+            });
     } else {
       //create and store new request in database
       DocumentReference docRef =
-      Firestore.instance.collection('tasks').document();
+          Firestore.instance.collection('tasks').document();
+      String uidOfTask = docRef.documentID;
       docRef.setData({
         'userId': widget.userId, //record id of user who posted the request
         'title': myRequest.requestTitle,
@@ -121,20 +128,54 @@ class _RequestFormState extends State<RequestForm> {
         'created': DateTime.now(),
         'updated': DateTime.now(),
         'status': 'open',
-      });
-      String uidOfTask = docRef.documentID;
-      Firestore.instance
-          .collection('users')
-          .document(widget.userId)
-          .get()
-          .then((DocumentSnapshot document) {
-        List<String> updatedPosts =
-        List<String>.from(document['posts'], growable: true);
-        updatedPosts.addAll([uidOfTask]);
-        Firestore.instance.collection('users').document(widget.userId).updateData({
-          'posts': updatedPosts,
+      }).then((foo) {
+        Firestore.instance
+            .collection('users')
+            .document(widget.userId)
+            .get().then((DocumentSnapshot document){
+          List<String> updatedPosts =
+          List<String>.from(document['posts'], growable: true);
+          updatedPosts.addAll([uidOfTask]);
+          Firestore.instance
+              .collection('users')
+              .document(widget.userId)
+              .updateData({
+            'posts': updatedPosts,
+          });
         });
+      }).catchError((e){
+        showDialog(
+            builder: (_) => new AlertDialog(
+              content: new Text(
+                'Please retry $e',
+                textAlign: TextAlign.center,
+              ),
+            ));
       });
+
+//      Firestore.instance
+//          .collection('users')
+//          .document(widget.userId)
+//          .get()
+//          .then((DocumentSnapshot document) {
+//        List<String> updatedPosts =
+//            List<String>.from(document['posts'], growable: true);
+//        updatedPosts.addAll([uidOfTask]);
+//        Firestore.instance
+//            .collection('users')
+//            .document(widget.userId)
+//            .updateData({
+//          'posts': updatedPosts,
+//        });
+//      }).catchError((e){
+//        showDialog(
+//            builder: (_) => new AlertDialog(
+//              content: new Text(
+//                'Please retry $e',
+//                textAlign: TextAlign.center,
+//              ),
+//            ));
+//      });
     }
   }
 
@@ -150,11 +191,11 @@ class _RequestFormState extends State<RequestForm> {
         return showDialog(
             context: context,
             builder: (_) => new AlertDialog(
-              content: new Text(
-                'Request does not exist.',
-                textAlign: TextAlign.center,
-              ),
-            ));
+                  content: new Text(
+                    'Request does not exist.',
+                    textAlign: TextAlign.center,
+                  ),
+                ));
       } else {
         req = new Request(
           userId: document.data['userId'],
@@ -182,11 +223,15 @@ class _RequestFormState extends State<RequestForm> {
   ///Check if the request info has been filled correctly, no empty field
   bool _validSubmission() {
     validRequest = false;
-    if (myRequest.backend || myRequest.aiml ||
-        myRequest.frontend || myRequest.others ||
-        myRequest.data || myRequest.app) {
-      if (myRequest.requestTitle != "" && myRequest.description != ""
-          && myRequest.contact != "") {
+    if (myRequest.backend ||
+        myRequest.aiml ||
+        myRequest.frontend ||
+        myRequest.others ||
+        myRequest.data ||
+        myRequest.app) {
+      if (myRequest.requestTitle != "" &&
+          myRequest.description != "" &&
+          myRequest.contact != "") {
         validRequest = true;
       }
     }
@@ -194,8 +239,7 @@ class _RequestFormState extends State<RequestForm> {
   }
 
   @override
-  Widget build(BuildContext context){
-
+  Widget build(BuildContext context) {
     _controllerRequestTitle.addListener(() {
       myRequest.requestTitle = _controllerRequestTitle.text;
     });
@@ -211,6 +255,11 @@ class _RequestFormState extends State<RequestForm> {
       );
     }
     return Scaffold(
+      appBar: widget.needUpdate
+          ? AppBar(
+              title: Text("Edit Post"),
+            )
+          : null,
       body: ListView(
         // mainAxisSize: MainAxisSize.max,
         // crossAxisAlignment: CrossAxisAlignment.center,
@@ -220,32 +269,37 @@ class _RequestFormState extends State<RequestForm> {
           SizedBox(
             height: 50.0,
           ),
-          FloatingActionButton(
+          FlatButton(
+            color: Colors.blue,
+            textColor: Colors.white,
+            disabledColor: Colors.grey,
+            disabledTextColor: Colors.black,
+            padding: EdgeInsets.all(8.0),
+            splashColor: Colors.blueAccent,
             onPressed: () {
               if (_validSubmission()) {
                 _addOrUpdateRequestInfo();
                 _initRequestFields();
-                //TODO: Return back to dashboard, restart a HomePage instead of DashboardPage. It's terrible rn.
-                Navigator.push(
-                    context,
-                    new MaterialPageRoute(
-                      builder: (ctxt) => new DashboardPage(
-                          userId: widget.userId, auth: widget.auth),
-                    ));
+                if (widget.needUpdate) {
+                  Navigator.of(context).pop();
+                } else {
+                  Scaffold.of(context).showSnackBar(
+                      _snackBar("Request submitted successfully."));
+                  _clearController();
+                }
               } else {
                 showDialog(
                     context: context,
                     builder: (_) => new AlertDialog(
-                      content: new Text(
-                        'Request is incomplete. \nPlease finish all fields before submitting.',
-                        textAlign: TextAlign.center,
-                      ),
-                    ));
+                          content: new Text(
+                            'Request is incomplete. \nPlease finish all fields before submitting.',
+                            textAlign: TextAlign.center,
+                          ),
+                        ));
               }
             },
             child: Text(
               "Submit",
-              style: TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -253,35 +307,201 @@ class _RequestFormState extends State<RequestForm> {
     );
   }
 
+  _snackBar(String msg) {
+    return SnackBar(
+      content: Text(msg),
+    );
+  }
+
   Stack _buildFirstHalfRequest() => Stack(
-    children: <Widget>[
-      Container(
-        height: 500.0,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Container(
+            height: 500.0,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(
+                  height: 50.0,
+                ),
+                Text(
+                  "SEND REQUEST",
+                  style: TextStyle(
+                      fontSize: 24.0,
+                      color: Colors.black,
+                      decoration: TextDecoration.none),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 50.0),
+                Text(
+                  "Request Title(Short Description):",
+                  style: TextStyle(
+                      fontSize: 18.0,
+                      //color: textColor,
+                      decoration: TextDecoration.none),
+                  textAlign: TextAlign.left,
+                ),
+                SizedBox(height: 20.0),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 32.0,
+                  ),
+                  child: Material(
+                    elevation: 5.0,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(30.0),
+                    ),
+                    child: TextField(
+                      controller: _controllerRequestTitle,
+                      decoration: new InputDecoration(
+                        hintText: widget.needUpdate ? null : 'Type description',
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 13.0),
+                      ),
+                    ), //TextField
+                  ), //Material
+                ), //padding
+                SizedBox(height: 30.0),
+                Text(
+                  "Details:",
+                  style: TextStyle(
+                      fontSize: 18.0,
+                      //color: textColor,
+                      decoration: TextDecoration.none),
+                  textAlign: TextAlign.left,
+                ),
+                SizedBox(height: 20.0),
+                Container(
+                  height: 100,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 32.0,
+                    ),
+                    child: Material(
+                      elevation: 5.0,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(30.0),
+                      ),
+                      child: TextField(
+                        controller: _controllerDetail,
+                        decoration: new InputDecoration(
+                          hintText:
+                              'Be specific as much as possible, including techinical details and the purpose',
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 13.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          )
+        ],
+      );
+
+  Column _buildSecondHalfRequest() => Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            SizedBox(
-              height: 50.0,
-            ),
             Text(
-              "SEND REQUEST",
-              style: TextStyle(
-                  fontSize: 24.0,
-                  color: Colors.black,
-                  decoration: TextDecoration.none),
+              "Labels:",
+              style: TextStyle(fontSize: 18.0, decoration: TextDecoration.none),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 50.0),
+            SizedBox(height: 20.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                new SizedBox(
+                  width: 90,
+                  height: 30,
+                  child: RequestLabel(
+                      Text(
+                        'Backend',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      widget.needUpdate ? myRequest.backend : false,
+                      myRequest),
+                ),
+                new SizedBox(
+                  width: 100,
+                  height: 30,
+                  child: RequestLabel(
+                      Text(
+                        'Frontend',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      widget.needUpdate ? myRequest.frontend : false,
+                      myRequest),
+                ),
+                new SizedBox(
+                  width: 90,
+                  height: 30,
+                  child: RequestLabel(
+                      Text(
+                        'AI&ML',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      widget.needUpdate ? myRequest.aiml : false,
+                      myRequest),
+                ),
+              ],
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 10.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  new SizedBox(
+                    width: 90,
+                    height: 30,
+                    child: RequestLabel(
+                        Text(
+                          'Data',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        widget.needUpdate ? myRequest.data : false,
+                        myRequest),
+                  ),
+                  new SizedBox(
+                    width: 100,
+                    height: 30,
+                    child: RequestLabel(
+                        Text(
+                          'App',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        widget.needUpdate ? myRequest.app : false,
+                        myRequest),
+                  ),
+                  new SizedBox(
+                    width: 90,
+                    height: 30,
+                    child: RequestLabel(
+                        Text(
+                          'Other',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        widget.needUpdate ? myRequest.others : false,
+                        myRequest),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 30.0),
             Text(
-              "Request Title(Short Description):",
+              "Contact Info:",
               style: TextStyle(
                   fontSize: 18.0,
                   //color: textColor,
                   decoration: TextDecoration.none),
               textAlign: TextAlign.left,
             ),
-            SizedBox(height: 20.0),
+            SizedBox(height: 10.0),
             Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: 32.0,
@@ -292,175 +512,15 @@ class _RequestFormState extends State<RequestForm> {
                   Radius.circular(30.0),
                 ),
                 child: TextField(
-                  controller: _controllerRequestTitle,
+                  controller: _controllerContact,
                   decoration: new InputDecoration(
-                    hintText: widget.needUpdate ? null : 'Type description',
+                    hintText: 'Email will be preferred',
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 13.0),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 13.0),
                   ),
                 ), //TextField
               ), //Material
             ), //padding
-            SizedBox(height: 30.0),
-            Text(
-              "Details:",
-              style: TextStyle(
-                  fontSize: 18.0,
-                  //color: textColor,
-                  decoration: TextDecoration.none),
-              textAlign: TextAlign.left,
-            ),
-            SizedBox(height: 20.0),
-            Container(
-              height: 100,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 32.0,
-                ),
-                child: Material(
-                  elevation: 5.0,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(30.0),
-                  ),
-                  child: TextField(
-                    controller: _controllerDetail,
-                    decoration: new InputDecoration(
-                      hintText:
-                      'Be specific as much as possible, including techinical details and the purpose',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 13.0),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      )
-    ],
-  );
-
-  Column _buildSecondHalfRequest() => Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Text(
-          "Labels:",
-          style: TextStyle(
-              fontSize: 18.0,
-              decoration: TextDecoration.none),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: 20.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            new SizedBox(
-              width: 90,
-              height: 30,
-              child: RequestLabel(
-                  Text(
-                    'Backend',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  widget.needUpdate ? myRequest.backend : false, myRequest),
-            ),
-            new SizedBox(
-              width: 100,
-              height: 30,
-              child: RequestLabel(
-                  Text(
-                    'Frontend',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  widget.needUpdate ? myRequest.frontend : false, myRequest),
-            ),
-            new SizedBox(
-              width: 90,
-              height: 30,
-              child: RequestLabel(
-                  Text(
-                    'AI&ML',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  widget.needUpdate ? myRequest.aiml : false, myRequest),
-            ),
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              new SizedBox(
-                width: 90,
-                height: 30,
-                child: RequestLabel(
-                    Text(
-                      'Data',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    widget.needUpdate ? myRequest.data : false, myRequest),
-              ),
-              new SizedBox(
-                width: 100,
-                height: 30,
-                child: RequestLabel(
-                    Text(
-                      'App',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    widget.needUpdate ? myRequest.app : false, myRequest),
-              ),
-              new SizedBox(
-                width: 90,
-                height: 30,
-                child: RequestLabel(
-                    Text(
-                      'Other',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    widget.needUpdate ? myRequest.others : false, myRequest),
-              ),
-            ],
-          ),
-        ),
-
-        SizedBox(height: 30.0),
-        Text(
-          "Contact Info:",
-          style: TextStyle(
-              fontSize: 18.0,
-              //color: textColor,
-              decoration: TextDecoration.none),
-          textAlign: TextAlign.left,
-        ),
-        SizedBox(height: 10.0),
-        Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: 32.0,
-          ),
-          child: Material(
-            elevation: 5.0,
-            borderRadius: BorderRadius.all(
-              Radius.circular(30.0),
-            ),
-            child: TextField(
-              controller: _controllerContact,
-              decoration: new InputDecoration(
-                hintText: 'Email will be preferred',
-                border: InputBorder.none,
-                contentPadding:
-                EdgeInsets.symmetric(horizontal: 16.0, vertical: 13.0),
-              ),
-            ), //TextField
-          ), //Material
-        ), //padding
-      ]);
-
-
-
+          ]);
 }
-
