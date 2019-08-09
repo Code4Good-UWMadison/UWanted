@@ -89,6 +89,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
         title: Row(
           children: <Widget>[
             Text(entry.value['title']),
+            Container(width: 10.0),
             StatusTag.fromString(this.posts[entry.key]['status']),
           ],
         ),
@@ -140,6 +141,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 id: entry.key,
                 currUserId: widget.userId,
                 auth: widget.auth,
+                cancelButton: false,
               ),
             ),
           );
