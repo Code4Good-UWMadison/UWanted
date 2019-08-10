@@ -4,7 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/pages/details.dart';
 import 'package:thewanted/pages/status_tag.dart';
-import 'package:thewanted/pages/send_request.dart';
+import '../send_request_page/send_request_refactored.dart';
+import 'package:thewanted/pages/profile/applicants_list.dart';
 
 class MyPostsPage extends StatefulWidget {
   MyPostsPage(
@@ -88,6 +89,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
         title: Row(
           children: <Widget>[
             Text(entry.value['title']),
+            Container(width: 10.0),
             StatusTag.fromString(this.posts[entry.key]['status']),
           ],
         ),
@@ -95,20 +97,43 @@ class _MyPostsPageState extends State<MyPostsPage> {
           //Merged here
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            FlatButton(
-              child: Icon(Icons.edit),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SendRequest(
-                        update: true,
+            Container(
+              width: 50,
+              child: FlatButton(
+                child: Icon(Icons.list),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ApplicantsList(taskId: entry.key),
+                      )).then((_) {
+                    setState(() {
+                      this._getPostsFromRemote();
+                    });
+                  });
+                },
+              ),
+            ),
+            Container(
+              width: 50,
+              child: FlatButton(
+                child: Icon(Icons.edit),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RequestForm(
+                        needUpdate: true,
                         postId: entry.key,
                       ),
-                    ));
-              },
+                      )).then((_) {
+                        setState(() {
+                          this._getPostsFromRemote();
+                        });
+                  });
+                },
+              ),
             ),
-            Icon(Icons.arrow_forward),
           ],
         ), //to here
         onTap: () {
@@ -120,11 +145,17 @@ class _MyPostsPageState extends State<MyPostsPage> {
                 id: entry.key,
                 currUserId: widget.userId,
                 auth: widget.auth,
+                withdrawlButton: false,
               ),
             ),
-          );
+          ).then((_) {
+            setState(() {
+              this._getPostsFromRemote();
+            });
+          });
         },
       );
+
 
   FlatButton _editButton() => FlatButton(
         child:

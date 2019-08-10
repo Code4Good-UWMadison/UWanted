@@ -60,6 +60,10 @@ class _ProfilePageState extends State<ProfilePage> {
             title: Text('Posts'),
             children: List.from(_buildPosts())..add(_buildEditPostsListTile()),
           ),
+          ExpansionTile(
+            title: Text('Applied'),
+            children: List.from(_buildAppliedList()),
+          ),
           // AboutListTile(icon: null),
         ],
       ).toList(),
@@ -233,8 +237,8 @@ class _ProfilePageState extends State<ProfilePage> {
         ],
       );
 
-  void _navigateToProfileEditingPage() async {
-    User user = await Navigator.push(
+  void _navigateToProfileEditingPage() {
+    Navigator.push(
       context,
       MaterialPageRoute(
           builder: (context) => EditProfilePage(
@@ -242,9 +246,8 @@ class _ProfilePageState extends State<ProfilePage> {
               userId: widget.userId,
               user: User.clone(this.user))),
     );
-    setState(() {
-      this.user = (user != null ? user : this.user);
-    });
+
+    _getRemoteUserData(null);
   }
 
   ListTile _buildEditProfileTile() => ListTile(
@@ -291,6 +294,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           id: uid,
                           currUserId: widget.userId,
                           auth: widget.auth,
+                          withdrawlButton: false,
                         ),
                       ),
                     );
@@ -301,6 +305,107 @@ class _ProfilePageState extends State<ProfilePage> {
             },
           ))
       .toList();
+
+  List<Widget> _buildAppliedList() => user.applied
+      .map((String uid) => FutureBuilder<DocumentSnapshot>(
+            future: Firestore.instance.collection('tasks').document(uid).get(),
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.data != null) {
+                return ListTile(
+                  leading: StatusTag.fromString(snapshot.data['status']),
+                  title: Text(
+                    snapshot.data['title'],
+                    style: TextStyle(fontSize: 15),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      FlatButton(
+                        child: Icon(Icons.delete),
+                        onPressed: () {
+                          if (snapshot.data['status'] == 'closed') {
+                            _deleteAppliedTask(uid);
+                          } else {
+                            _showAlertDialog(uid);
+                          }
+                        },
+                      ),
+                      Icon(Icons.arrow_forward),
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DetailedPage(
+                            title: snapshot.data['title'],
+                            id: uid,
+                            currUserId: widget.userId,
+                            auth: widget.auth,
+                            withdrawlButton: true,
+                          ),
+                        )).then((_) {
+                      setState(() {
+                        _getRemoteUserData(_);
+                      });
+                    });
+                  },
+                );
+              } else {
+                return CircularProgressIndicator();
+              }
+            },
+          ))
+      .toList();
+
+  Future<void> _showAlertDialog(String uid) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Warning'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('This task can not be directly deleted.'),
+                Text('Try cancel it instead.')
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _deleteAppliedTask(String uid) async {
+    List list;
+    await Firestore.instance
+        .collection("users")
+        .document(widget.userId)
+        .get()
+        .then((DocumentSnapshot doc) {
+      list = List<String>.from(doc['applied'], growable: true);
+      list.remove(uid);
+      //appliedList.removeWhere((item) => item == widget.id);
+    });
+    await Firestore.instance
+        .collection('users')
+        .document(widget.userId)
+        .updateData({
+      "applied": list
+      //FieldValue.arrayRemove(new List)
+    });
+  }
 
 //////
   Future getImage() async {

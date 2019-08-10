@@ -8,6 +8,7 @@ class User {
   String major;
   Skills skills;
   List<String> posts;
+  List<String> applied;
 
   User(
       {this.userName,
@@ -15,7 +16,8 @@ class User {
       this.lab,
       this.major,
       this.skills,
-      this.posts});
+      this.posts,
+      this.applied});
 
   User.clone(User user)
       : this(
@@ -25,6 +27,7 @@ class User {
           major: user.major,
           skills: Skills.clone(user.skills),
           posts: List.from(user.posts, growable: true),
+          applied: List.from(user.applied, growable: true),
         );
 
   User.fromDocument(DocumentSnapshot document)
@@ -42,7 +45,8 @@ class User {
           app: document['App'],
           others: document['Others'],
         ),
-        posts = List.from(document['posts'], growable: true);
+        posts = List.from(document['posts'], growable: true),
+        applied = List.from(document['applied'], growable: true);
 
   // userRole could be null, that user haven't made a choice
   String userRoleToString() => userRole?.toString()?.substring(9) ?? '';

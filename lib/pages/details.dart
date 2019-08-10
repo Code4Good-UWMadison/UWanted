@@ -36,15 +36,22 @@ class Request {
 }
 
 class DetailedPage extends StatefulWidget {
-  DetailedPage({@required this.title, @required this.id, @required this.currUserId, @required this.auth});
+  DetailedPage(
+      {@required this.title,
+      @required this.id,
+      @required this.currUserId,
+      @required this.auth,
+      @required this.withdrawlButton});
 
   final title;
   final id;
   final String currUserId;
   final BaseAuth auth;
+  bool withdrawlButton;
 
   @override
   _DetailedPageState createState() => _DetailedPageState();
+
 //final description;
 
   static Request getReqInfoForUpdate(String id) {
@@ -309,7 +316,10 @@ class _DetailedPageState extends State<DetailedPage> {
       ],
     );
 
+    final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
     return Scaffold(
+      key: _scaffoldKey,
         appBar: AppBar(),
         body: Center(
           child: ListView(
@@ -321,13 +331,92 @@ class _DetailedPageState extends State<DetailedPage> {
                 child: labels,
               ),
               contactInfo,
-              ApplyButton(
-                  taskId: widget.id,
-                  status: this.request.status,
-                  context: context),
+              widget.withdrawlButton
+                  ? _buildWithdrawButton()
+                  : ApplyButton(
+                      taskId: widget.id,
+                      status: this.request.status,
+                      context: context,
+                      parentKey: _scaffoldKey)
             ],
           ),
         ));
+  }
+
+  _buildWithdrawButton() => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: RaisedButton(
+          color: Colors.red,
+          onPressed: () {
+            return showDialog(context: context,
+              barrierDismissible: false,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text("Warning"),
+                content: SingleChildScrollView(
+                  child: ListBody(
+                    children: <Widget>[
+                      Text('Are you sure you want to withdraw this application?')
+                    ],
+                  ),
+                ),
+                actions: <Widget>[
+                  FlatButton(
+                    child: Text('Withdraw'),
+                    onPressed: () {
+                      _deleteAppliedTask();
+                      setState(() {
+                        widget.withdrawlButton = false;
+                      });
+                      Navigator.of(context).pop();
+                    }
+                  ),
+                  FlatButton(
+                    child: Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              );
+            });
+
+          },
+          child: Text("Withdraw Application"),
+        ),
+      );
+
+  _deleteAppliedTask() async {
+    List list;
+    await Firestore.instance
+        .collection('users')
+        .document(widget.currUserId)
+        .get()
+        .then((DocumentSnapshot doc) {
+      list = List<String>.from(doc['applied'], growable: true);
+      list.remove(widget.id);
+    });
+    await Firestore.instance
+        .collection('tasks')
+        .document(widget.id)
+        .collection('applicants')
+        .document(widget.currUserId)
+        .delete();
+    if(await Firestore.instance
+        .collection('tasks')
+        .document(widget.id)
+        .collection('applicants').snapshots().isEmpty){
+        await Firestore.instance.collection('tasks').document(widget.id).updateData({
+          'status': 'open'
+        });
+    }
+    await Firestore.instance
+        .collection('users')
+        .document(widget.currUserId)
+        .updateData({
+      "applied": list
+      //FieldValue.arrayRemove(new List)
+    });
   }
 }
 

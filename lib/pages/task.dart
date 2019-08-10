@@ -112,6 +112,7 @@ class Task extends StatelessWidget {
                                     id: id,
                                     currUserId: userId,
                                     auth: auth,
+                                withdrawlButton: false,
                                   )));
                     }),
               ],
