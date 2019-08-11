@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'send_request_refactored.dart';
 import '../details.dart';
 
 class RequestLabel extends StatefulWidget {

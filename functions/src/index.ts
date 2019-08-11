@@ -165,7 +165,7 @@ exports.sendWelcomeEmail = functions.firestore
   
     // The user subscribed to the newsletter.
     mailOptions.subject = `Welcome to ${APP_NAME}!`;
-    mailOptions.text = `Hey there! Welcome to ${APP_NAME}. I hope you will enjoy our service.`;
+    mailOptions.text = `Hey there! Welcome to ${APP_NAME}. We hope you will enjoy our service.`;
     await mailTransport.sendMail(mailOptions);
     console.log('New welcome email sent to:', email);
     return null;

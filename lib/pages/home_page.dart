@@ -30,6 +30,8 @@ class _HomePageState extends State<HomePage> {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   int _selectedIndex;
+
+  bool _disableNavi = false;
   @override
   void initState() {
     super.initState();
@@ -78,11 +80,9 @@ class _HomePageState extends State<HomePage> {
       },
       onLaunch: (Map<String, dynamic> message) async {
         print("onLaunch: $message");
-        // TODO optional
       },
       onResume: (Map<String, dynamic> message) async {
         print("onResume: $message");
-        // TODO optional
       },
     );
   }
@@ -235,31 +235,46 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  _newTask() async {
-    setState(() {
-      _selectedIndex = 1;
-      _getUserProfileFromFirebase();
-    });
-  }
-
-  final List<String> entries = <String>['A', 'B', 'C'];
-  final List<int> colorCodes = <int>[600, 500, 100];
+  // _newTask() async {
+  //   setState(() {
+  //     _selectedIndex = 1;
+  //     _getUserProfileFromFirebase();
+  //   });
+  // }
 
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-      if (_selectedIndex == 1) {
-        _getUserProfileFromFirebase();
-      }
-    });
+    if (_disableNavi == false) {
+      setState(() {
+        _selectedIndex = index;
+        if (_selectedIndex == 1) {
+          _getUserProfileFromFirebase();
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final _pageOptions = [
       DashboardPage(userId: widget.userId, auth: widget.auth),
-      RequestForm(userId: widget.userId, auth: widget.auth, needUpdate: false,),
-      ProfilePage(userId: widget.userId, auth: widget.auth),
+      RequestForm(
+        userId: widget.userId,
+        auth: widget.auth,
+        needUpdate: false,
+      ),
+      ProfilePage(
+          userId: widget.userId,
+          auth: widget.auth,
+          uploading: () {
+            setState(() {
+              _disableNavi = true;
+            });
+          },
+          finishUploading: () {
+            setState(() {
+              _disableNavi = false;
+            });
+          }),
     ];
     final _pageName = ["Dashboard", "Send Request", "Profile"];
     return new Scaffold(
@@ -279,11 +294,11 @@ class _HomePageState extends State<HomePage> {
       drawer: Drawer(
         child: DrawerPage(userId: widget.userId, auth: widget.auth),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _newTask, // generate a new task
-        tooltip: 'Request',
-        child: Icon(Icons.add),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _newTask, // generate a new task
+      //   tooltip: 'Request',
+      //   child: Icon(Icons.add),
+      // ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(

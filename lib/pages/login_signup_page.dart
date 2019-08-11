@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
-import 'dart:async';
 
 class LoginSignUpPage extends StatefulWidget {
   LoginSignUpPage({this.auth, this.onSignedIn});
