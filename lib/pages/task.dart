@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:thewanted/services/authentication.dart';
 import './details.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/pages/status_tag.dart';
 
 class Task extends StatelessWidget {

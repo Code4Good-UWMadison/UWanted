@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../dashboard.dart';
 import '../details.dart';
 import 'requestLabel.dart';
 

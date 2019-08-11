@@ -17,11 +17,14 @@ final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 bool _isLoading = false;
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key key, @required this.auth, @required this.userId})
+  ProfilePage({Key key, @required this.auth, @required this.userId, @required this.uploading, @required this.finishUploading,})
       : super(key: key);
 
   final BaseAuth auth;
   final String userId;
+  
+  final Function() uploading;
+  final Function() finishUploading;
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -31,6 +34,7 @@ class _ProfilePageState extends State<ProfilePage> {
   User user;
   File _image;
   String _imageUrl;
+  bool _confirmed;
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +124,8 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
+    _image = null;
+    _imageUrl = null;
     // init profile's url
     var ref = FirebaseStorage.instance
         .ref()
@@ -219,7 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
               },
             ),
           ),
-          (_image != null)
+          (_confirmed == false)
               ? RaisedButton(
                   color: Color(0xff476cfb),
                   onPressed: () {
@@ -252,7 +258,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   ListTile _buildEditProfileTile() => ListTile(
         title: Text('Edit Profile'),
-        trailing: Icon(Icons.chevron_right),
+        trailing: Icon(Icons.arrow_forward),
         onTap: _navigateToProfileEditingPage,
       );
 
@@ -412,6 +418,7 @@ class _ProfilePageState extends State<ProfilePage> {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
     setState(() {
+      _confirmed = false;
       _imageUrl = null;
       _image = image;
       print('Image Path $_image');
@@ -448,6 +455,7 @@ class _ProfilePageState extends State<ProfilePage> {
     uploadTask.events.listen((event) {
       setState(() {
         _isLoading = true;
+        widget.uploading(); // call back in home_page
       });
     }).onError((error) {
       _scaffoldKey.currentState.showSnackBar(new SnackBar(
@@ -461,13 +469,15 @@ class _ProfilePageState extends State<ProfilePage> {
       // });
       setState(() {
         _isLoading = false;
-        _image = null;
-        var ref = FirebaseStorage.instance
-            .ref()
-            .child('user')
-            .child(widget.userId)
-            .child('profile.jpg');
-        ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
+        _confirmed = true;
+        widget.finishUploading(); // call back in home_page
+        // _image = null;
+        // var ref = FirebaseStorage.instance
+        //     .ref()
+        //     .child('user')
+        //     .child(widget.userId)
+        //     .child('profile.jpg');
+        // ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
         print("Profile Picture uploaded");
         Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text('Profile Picture Uploaded')));
