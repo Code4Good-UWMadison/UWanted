@@ -265,9 +265,9 @@ class _RequestFormState extends State<RequestForm> {
         children: <Widget>[
           _buildFirstHalfRequest(),
           _buildSecondHalfRequest(),
-          SizedBox(
-            height: 50.0,
-          ),
+//          SizedBox(
+//            height: 50.0,
+//          ),
           FlatButton(
             color: Colors.blue,
             textColor: Colors.white,
@@ -315,7 +315,7 @@ class _RequestFormState extends State<RequestForm> {
   Stack _buildFirstHalfRequest() => Stack(
         children: <Widget>[
           Container(
-            height: 500.0,
+            height: 450.0,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -372,6 +372,7 @@ class _RequestFormState extends State<RequestForm> {
                 ),
                 SizedBox(height: 20.0),
                 Container(
+                  margin: EdgeInsets.only(bottom: 15),
                   height: 100,
                   child: Padding(
                     padding: EdgeInsets.symmetric(
@@ -389,7 +390,7 @@ class _RequestFormState extends State<RequestForm> {
                               'Be specific as much as possible, including techinical details and the purpose',
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 13.0),
+                              horizontal: 16.0, vertical: 15.0),
                         ),
                       ),
                     ),
@@ -520,6 +521,7 @@ class _RequestFormState extends State<RequestForm> {
                   ),
                 ), //TextField
               ), //Material
-            ), //padding
+            ),
+            SizedBox(height: 25.0),//padding
           ]);
 }

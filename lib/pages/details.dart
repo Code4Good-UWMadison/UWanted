@@ -157,13 +157,6 @@ class _DetailedPageState extends State<DetailedPage> {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        Padding(
-          padding: EdgeInsets.only(left: 10, top: 10),
-          child: Text('Request',
-              style: new TextStyle(
-                fontSize: 20.0,
-              )),
-        ),
         Container(
           alignment: Alignment.center,
           margin: EdgeInsets.only(top: 10, left: 10, bottom: 15),
@@ -176,8 +169,7 @@ class _DetailedPageState extends State<DetailedPage> {
             children: <Widget>[
               Text(
                 widget.title,
-                style: TextStyle(
-                    decoration: TextDecoration.underline, fontSize: 20),
+                style: Theme.of(context).textTheme.headline,
               ),
               StatusTag.fromString(this.request.status),
             ],
@@ -193,22 +185,37 @@ class _DetailedPageState extends State<DetailedPage> {
         Padding(
           padding: EdgeInsets.only(left: 10),
           child: Text('Details',
-              style: new TextStyle(
-                fontSize: 20.0,
-              )),
+              style: Theme.of(context).textTheme.subhead),
         ),
-        Container(
-            margin: EdgeInsets.only(top: 10, left: 10),
-            padding: new EdgeInsets.all(10),
-            width: 280,
-            height: 150,
-            child: SingleChildScrollView(
-              child: Text(
-                this.request.description,
-                style: TextStyle(
-                    decoration: TextDecoration.underline, fontSize: 20),
-              ),
-            )),
+        SizedBox(height: 10.0),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32),
+          child: Material(
+            shadowColor: Colors.blueAccent,
+            elevation: 5.0,
+            borderRadius: BorderRadius.all(
+              Radius.circular(30.0),
+            ),
+          child: Container(
+//            decoration: BoxDecoration(
+//                border: Border.all(width: 1.0),
+//                borderRadius: BorderRadius.all(Radius.circular(15))),
+              margin: EdgeInsets.only(top: 10, left: 10),
+              padding: new EdgeInsets.all(10),
+              width: 280,
+              height: 190,
+              child: SingleChildScrollView(
+                child: Text(
+                  this.request.description,
+                  style: TextStyle(
+                    fontSize: 16,
+
+                  ),
+                ),
+              )),
+          ),
+        )
+
       ],
     );
 
@@ -221,7 +228,7 @@ class _DetailedPageState extends State<DetailedPage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.only(left: 10, bottom: 10),
+                  padding: EdgeInsets.only(left: 10, bottom: 10, top: 20),
                   child: Text('Labels',
                       style: new TextStyle(
                         fontSize: 20.0,
@@ -287,40 +294,51 @@ class _DetailedPageState extends State<DetailedPage> {
                 fontSize: 20.0,
               )),
         ),
-        Container(
-          margin: EdgeInsets.only(left: 10, bottom: 15),
-          //decoration: myBoxDecoration(),
-          alignment: Alignment.center,
-          padding: new EdgeInsets.all(10),
-          width: 260,
-          height: 45,
-          child: Text(
-            this.request.contact,
-            style:
-                TextStyle(decoration: TextDecoration.underline, fontSize: 20),
+
+        Material(
+          shadowColor: Colors.blueAccent,
+          elevation: 5.0,
+          borderRadius: BorderRadius.all(
+            Radius.circular(30.0),
+          ),
+          child: Container(
+            //margin: EdgeInsets.only(left: 10, bottom: 15),
+            //decoration: myBoxDecoration(),
+            alignment: Alignment.center,
+            padding: new EdgeInsets.all(10),
+            width: 260,
+            height: 45,
+            child: Text(
+              this.request.contact,
+              style:
+                  TextStyle(fontSize: 18),
+            ),
           ),
         ),
-        FlatButton(
-          onPressed: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        userProfileInfoPage(this.request.userId)));
-          },
-          child: Text(
-            "See User Profile",
-            style: TextStyle(color: Colors.black),
-          ),
-        )
+//        FlatButton(
+//          onPressed: () {
+//            Navigator.push(
+//                context,
+//                MaterialPageRoute(
+//                    builder: (context) =>
+//                        userProfileInfoPage(this.request.userId)));
+//          },
+//          child: Text(
+//            "See User Profile",
+//            style: TextStyle(color: Colors.black),
+//          ),
+//        )
       ],
     );
 
-    final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> _scaffoldKey =
+        new GlobalKey<ScaffoldState>();
 
     return Scaffold(
-      key: _scaffoldKey,
-        appBar: AppBar(),
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: Text("Request"),
+        ),
         body: Center(
           child: ListView(
             children: <Widget>[
@@ -329,94 +347,17 @@ class _DetailedPageState extends State<DetailedPage> {
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 20.0),
                 child: labels,
+
               ),
               contactInfo,
-              widget.withdrawlButton
-                  ? _buildWithdrawButton()
-                  : ApplyButton(
-                      taskId: widget.id,
-                      status: this.request.status,
-                      context: context,
-                      parentKey: _scaffoldKey)
+              ApplyButton(
+                  taskId: widget.id,
+                  status: this.request.status,
+                  context: context,
+                  parentKey: _scaffoldKey)
             ],
           ),
         ));
-  }
-
-  _buildWithdrawButton() => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: RaisedButton(
-          color: Colors.red,
-          onPressed: () {
-            return showDialog(context: context,
-              barrierDismissible: false,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text("Warning"),
-                content: SingleChildScrollView(
-                  child: ListBody(
-                    children: <Widget>[
-                      Text('Are you sure you want to withdraw this application?')
-                    ],
-                  ),
-                ),
-                actions: <Widget>[
-                  FlatButton(
-                    child: Text('Withdraw'),
-                    onPressed: () {
-                      _deleteAppliedTask();
-                      setState(() {
-                        widget.withdrawlButton = false;
-                      });
-                      Navigator.of(context).pop();
-                    }
-                  ),
-                  FlatButton(
-                    child: Text('Cancel'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  )
-                ],
-              );
-            });
-
-          },
-          child: Text("Withdraw Application"),
-        ),
-      );
-
-  _deleteAppliedTask() async {
-    List list;
-    await Firestore.instance
-        .collection('users')
-        .document(widget.currUserId)
-        .get()
-        .then((DocumentSnapshot doc) {
-      list = List<String>.from(doc['applied'], growable: true);
-      list.remove(widget.id);
-    });
-    await Firestore.instance
-        .collection('tasks')
-        .document(widget.id)
-        .collection('applicants')
-        .document(widget.currUserId)
-        .delete();
-    if(await Firestore.instance
-        .collection('tasks')
-        .document(widget.id)
-        .collection('applicants').snapshots().isEmpty){
-        await Firestore.instance.collection('tasks').document(widget.id).updateData({
-          'status': 'open'
-        });
-    }
-    await Firestore.instance
-        .collection('users')
-        .document(widget.currUserId)
-        .updateData({
-      "applied": list
-      //FieldValue.arrayRemove(new List)
-    });
   }
 }
 
@@ -522,7 +463,7 @@ class _LabelWidgetState extends State<LabelWidget> {
 
   _getColor() {
     if (widget.selected) {
-      myColor = Colors.redAccent;
+      myColor = Colors.blue;
     }
   }
 
@@ -531,7 +472,10 @@ class _LabelWidgetState extends State<LabelWidget> {
     _getColor();
     print(myColor);
     return RaisedButton(
-      disabledColor: myColor,
+      onPressed: () {
+
+      },
+      color: myColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(10)),
       ),
