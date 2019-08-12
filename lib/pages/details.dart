@@ -158,23 +158,27 @@ class _DetailedPageState extends State<DetailedPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Container(
-          alignment: Alignment.center,
-          margin: EdgeInsets.only(top: 10, left: 10, bottom: 15),
-          //decoration: myBoxDecoration(),
-          padding: new EdgeInsets.all(10),
-          width: 300,
-          height: 45,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                widget.title,
-                style: Theme.of(context).textTheme.headline,
-              ),
-              StatusTag.fromString(this.request.status),
-            ],
-          ),
-        )
+//          alignment: Alignment.center,
+//          margin: EdgeInsets.only(top: 10, left: 10, bottom: 15),
+//          //decoration: myBoxDecoration(),
+//          padding: new EdgeInsets.all(10),
+//          width: 300,
+//          height: 45,
+//          child: Wrap(
+//            alignment: WrapAlignment.start,
+//          crossAxisAlignment: WrapCrossAlignment.center,
+//          children: <Widget>[
+//            Text(
+//              widget.title,
+//              style: TextStyle(
+//                fontSize: 20,
+//                fontStyle: FontStyle.normal,
+//              ),
+//            ),
+//            StatusTag.fromString(this.request.status),
+//          ],
+//          ),
+            )
       ],
     );
 
@@ -183,9 +187,9 @@ class _DetailedPageState extends State<DetailedPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Padding(
-          padding: EdgeInsets.only(left: 10),
-          child: Text('Details',
-              style: Theme.of(context).textTheme.subhead),
+          padding: EdgeInsets.only(left: 10, top: 10),
+          child: Text('Request Details',
+              style: Theme.of(context).textTheme.subtitle),
         ),
         SizedBox(height: 10.0),
         Padding(
@@ -196,26 +200,24 @@ class _DetailedPageState extends State<DetailedPage> {
             borderRadius: BorderRadius.all(
               Radius.circular(30.0),
             ),
-          child: Container(
+            child: Container(
 //            decoration: BoxDecoration(
 //                border: Border.all(width: 1.0),
 //                borderRadius: BorderRadius.all(Radius.circular(15))),
-              margin: EdgeInsets.only(top: 10, left: 10),
-              padding: new EdgeInsets.all(10),
-              width: 280,
-              height: 190,
-              child: SingleChildScrollView(
-                child: Text(
-                  this.request.description,
-                  style: TextStyle(
-                    fontSize: 16,
-
+                margin: EdgeInsets.only(top: 10, left: 10),
+                padding: new EdgeInsets.all(10),
+//              width: 280,
+//              height: 250,
+                child: SingleChildScrollView(
+                  child: Text(
+                    this.request.description,
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-              )),
+                )),
           ),
         )
-
       ],
     );
 
@@ -230,9 +232,7 @@ class _DetailedPageState extends State<DetailedPage> {
                 Padding(
                   padding: EdgeInsets.only(left: 10, bottom: 10, top: 20),
                   child: Text('Labels',
-                      style: new TextStyle(
-                        fontSize: 20.0,
-                      )),
+                      style: Theme.of(context).textTheme.subtitle),
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -283,6 +283,10 @@ class _DetailedPageState extends State<DetailedPage> {
       ],
     );
 
+    final GlobalKey<ScaffoldState> _scaffoldKey =
+    new GlobalKey<ScaffoldState>();
+
+
     var contactInfo = Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -290,9 +294,7 @@ class _DetailedPageState extends State<DetailedPage> {
         Padding(
           padding: EdgeInsets.only(left: 10, bottom: 10),
           child: Text('Contact Info',
-              style: new TextStyle(
-                fontSize: 20.0,
-              )),
+              style: Theme.of(context).textTheme.subtitle),
         ),
 
         Material(
@@ -310,11 +312,16 @@ class _DetailedPageState extends State<DetailedPage> {
             height: 45,
             child: Text(
               this.request.contact,
-              style:
-                  TextStyle(fontSize: 18),
+              style: Theme.of(context).textTheme.body2,
             ),
           ),
         ),
+
+        ApplyButton(
+            taskId: widget.id,
+            status: this.request.status,
+            context: context,
+            parentKey: _scaffoldKey)
 //        FlatButton(
 //          onPressed: () {
 //            Navigator.push(
@@ -331,13 +338,15 @@ class _DetailedPageState extends State<DetailedPage> {
       ],
     );
 
-    final GlobalKey<ScaffoldState> _scaffoldKey =
-        new GlobalKey<ScaffoldState>();
-
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Text("Request"),
+          title: Row(
+            children: <Widget>[
+              Text(widget.title + " "),
+              StatusTag.fromString(this.request.status),
+            ],
+          ),
         ),
         body: Center(
           child: ListView(
@@ -347,14 +356,8 @@ class _DetailedPageState extends State<DetailedPage> {
               Padding(
                 padding: EdgeInsets.symmetric(vertical: 20.0),
                 child: labels,
-
               ),
               contactInfo,
-              ApplyButton(
-                  taskId: widget.id,
-                  status: this.request.status,
-                  context: context,
-                  parentKey: _scaffoldKey)
             ],
           ),
         ));
@@ -472,9 +475,7 @@ class _LabelWidgetState extends State<LabelWidget> {
     _getColor();
     print(myColor);
     return RaisedButton(
-      onPressed: () {
-
-      },
+      onPressed: () {},
       color: myColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(10)),

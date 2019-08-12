@@ -48,6 +48,9 @@ class _ApplyButtonState extends State<ApplyButton> {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: RaisedButton(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
           color: _buildColorFromStatus(),
           onPressed: this._pressed ? null : _buildOnpressedFromStatus(),
           child: _buildChildFromStatus(),

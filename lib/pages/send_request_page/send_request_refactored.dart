@@ -5,13 +5,20 @@ import '../details.dart';
 import 'requestLabel.dart';
 
 class RequestForm extends StatefulWidget {
-  RequestForm({Key key, this.auth, this.userId, this.needUpdate, this.postId})
+  RequestForm(
+      {Key key,
+      this.auth,
+      this.userId,
+      this.needUpdate,
+      this.postId,
+      this.goToDashBoard})
       : super(key: key);
   final BaseAuth auth;
   final String userId;
   final bool
       needUpdate; //indicator of whether to update request instead of creating new one
   final String postId;
+  final Function() goToDashBoard;
 
   @override
   State<StatefulWidget> createState() => _RequestFormState();
@@ -131,9 +138,10 @@ class _RequestFormState extends State<RequestForm> {
         Firestore.instance
             .collection('users')
             .document(widget.userId)
-            .get().then((DocumentSnapshot document){
+            .get()
+            .then((DocumentSnapshot document) {
           List<String> updatedPosts =
-          List<String>.from(document['posts'], growable: true);
+              List<String>.from(document['posts'], growable: true);
           updatedPosts.addAll([uidOfTask]);
           Firestore.instance
               .collection('users')
@@ -142,14 +150,14 @@ class _RequestFormState extends State<RequestForm> {
             'posts': updatedPosts,
           });
         });
-      }).catchError((e){
+      }).catchError((e) {
         showDialog(
             builder: (_) => new AlertDialog(
-              content: new Text(
-                'Please retry $e',
-                textAlign: TextAlign.center,
-              ),
-            ));
+                  content: new Text(
+                    'Please retry $e',
+                    textAlign: TextAlign.center,
+                  ),
+                ));
       });
 
 //      Firestore.instance
@@ -268,39 +276,6 @@ class _RequestFormState extends State<RequestForm> {
 //          SizedBox(
 //            height: 50.0,
 //          ),
-          FlatButton(
-            color: Colors.blue,
-            textColor: Colors.white,
-            disabledColor: Colors.grey,
-            disabledTextColor: Colors.black,
-            padding: EdgeInsets.all(8.0),
-            splashColor: Colors.blueAccent,
-            onPressed: () {
-              if (_validSubmission()) {
-                _addOrUpdateRequestInfo();
-                _initRequestFields();
-                if (widget.needUpdate) {
-                  Navigator.of(context).pop();
-                } else {
-                  Scaffold.of(context).showSnackBar(
-                      _snackBar("Request submitted successfully."));
-                  _clearController();
-                }
-              } else {
-                showDialog(
-                    context: context,
-                    builder: (_) => new AlertDialog(
-                          content: new Text(
-                            'Request is incomplete. \nPlease finish all fields before submitting.',
-                            textAlign: TextAlign.center,
-                          ),
-                        ));
-              }
-            },
-            child: Text(
-              "Submit",
-            ),
-          ),
         ],
       ),
     );
@@ -351,6 +326,7 @@ class _RequestFormState extends State<RequestForm> {
                       Radius.circular(30.0),
                     ),
                     child: TextField(
+                      maxLength: 21,
                       controller: _controllerRequestTitle,
                       decoration: new InputDecoration(
                         hintText: widget.needUpdate ? null : 'Type description',
@@ -384,8 +360,11 @@ class _RequestFormState extends State<RequestForm> {
                         Radius.circular(30.0),
                       ),
                       child: TextField(
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
                         controller: _controllerDetail,
                         decoration: new InputDecoration(
+                          labelText: "Enter Request Detail",
                           hintText:
                               'Be specific as much as possible, including techinical details and the purpose',
                           border: InputBorder.none,
@@ -522,6 +501,45 @@ class _RequestFormState extends State<RequestForm> {
                 ), //TextField
               ), //Material
             ),
-            SizedBox(height: 25.0),//padding
+            SizedBox(height: 25.0), //padding
+            MaterialButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              elevation: 5,
+              //minWidth: 30,
+              color: Colors.blue,
+              textColor: Colors.white,
+              disabledColor: Colors.grey,
+              disabledTextColor: Colors.black,
+              // padding: EdgeInsets.all(8.0),
+              splashColor: Colors.blueAccent,
+              onPressed: () {
+                if (_validSubmission()) {
+                  _addOrUpdateRequestInfo();
+                  _initRequestFields();
+                  if (widget.needUpdate) {
+                    Navigator.of(context).pop();
+                  } else {
+                    Scaffold.of(context).showSnackBar(
+                        _snackBar("Request submitted successfully."));
+                    _clearController();
+                    widget.goToDashBoard();
+                  }
+                } else {
+                  showDialog(
+                      context: context,
+                      builder: (_) => new AlertDialog(
+                            content: new Text(
+                              'Request is incomplete. \nPlease finish all fields before submitting.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ));
+                }
+              },
+              child: Text(
+                "Submit",
+              ),
+            ),
           ]);
 }
