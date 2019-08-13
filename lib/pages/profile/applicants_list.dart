@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/pages/profile/application_detail.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+// import 'package:firebase_storage/firebase_storage.dart';
+import 'package:thewanted/pages/components/avatar.dart';
 
 class ApplicantsList extends StatefulWidget {
   ApplicantsList({@required this.taskId});
@@ -53,27 +54,25 @@ class _ApplicantsListState extends State<ApplicantsList> {
             : Icon(Icons.check_box_outline_blank),
         title: Row(
           children: <Widget>[
-            FutureBuilder<dynamic>(
-              future: FirebaseStorage.instance
-                  .ref()
-                  .child('user/' + document.documentID + '/profile.jpg')
-                  .getDownloadURL(),
-              builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-                switch (snapshot.connectionState) {
-                  case ConnectionState.waiting:
-                    return CircularProgressIndicator();
-                  default:
-                    return CircleAvatar(
-                      backgroundImage: NetworkImage(snapshot.data),
-                    );
-                }
-              },
-            ),
-            // CircleAvatar(
-            //   backgroundColor: Colors.brown.shade800,
-            //   child: Text('AH'),
+            // FutureBuilder<dynamic>(
+            //   future: FirebaseStorage.instance
+            //       .ref()
+            //       .child('user/' + document.documentID + '/profile.jpg')
+            //       .getDownloadURL(),
+            //   builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+            //     if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            //     switch (snapshot.connectionState) {
+            //       case ConnectionState.waiting:
+            //         return CircularProgressIndicator();
+            //       default:
+            //         return CircleAvatar(
+            //           backgroundImage: NetworkImage(snapshot.data),
+            //         );
+            //     }
+            //   },
             // ),
+            Avatar(userId: document.documentID),
+
             Container(
               width: 10,
             ),
