@@ -72,6 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
               _buildListTile("Major", this.user.major, Icon(Icons.school)),
               _buildListTile("Technical Skills", this.user.skills.toString(),
                   Icon(Icons.class_)),
+              Divider(color: Colors.black),
               _buildEditProfileTile(),
             ]..insert(0, Divider(color: Colors.black)),
             onExpansionChanged: (bool isExpanded) {
@@ -88,7 +89,7 @@ class _ProfilePageState extends State<ProfilePage> {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             children: List.from(_buildPosts())
-              ..add(_buildEditPostsListTile())
+              ..addAll(_buildEditPostsListTile())
               ..insert(0, Divider(color: Colors.black)),
             onExpansionChanged: (bool isExpanded) {
               setState(() {
@@ -299,16 +300,20 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   ListTile _buildEditProfileTile() => ListTile(
+        leading: Icon(Icons.edit),
         title: Text('Edit Profile'),
         trailing: Icon(Icons.arrow_forward),
         onTap: _navigateToProfileEditingPage,
       );
 
-  ListTile _buildEditPostsListTile() => ListTile(
-        title: Text('Edit Posts'),
-        trailing: Text(this.user.posts.length.toString()),
-        onTap: _navigateToPostsEditingPage,
-      );
+  List<Widget> _buildEditPostsListTile() => <Widget>[]
+    ..add(Divider(color: Colors.black))
+    ..add(ListTile(
+      leading: Icon(Icons.edit),
+      title: Text('Edit Posts'),
+      trailing: Text(this.user.posts.length.toString()),
+      onTap: _navigateToPostsEditingPage,
+    ));
 
   void _navigateToPostsEditingPage() {
     Navigator.push(
