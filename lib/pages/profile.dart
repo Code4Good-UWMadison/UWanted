@@ -72,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
               _buildListTile("Major", this.user.major, Icon(Icons.school)),
               _buildListTile("Technical Skills", this.user.skills.toString(),
                   Icon(Icons.class_)),
-              Divider(color: Colors.black),
+              Divider(height: 0, color: Colors.black),
               _buildEditProfileTile(),
             ]..insert(0, Divider(color: Colors.black)),
             onExpansionChanged: (bool isExpanded) {
@@ -307,7 +307,7 @@ class _ProfilePageState extends State<ProfilePage> {
       );
 
   List<Widget> _buildEditPostsListTile() => <Widget>[]
-    ..add(Divider(color: Colors.black))
+    ..add(Divider(height: 0, color: Colors.black))
     ..add(ListTile(
       leading: Icon(Icons.edit),
       title: Text('Edit Posts'),
