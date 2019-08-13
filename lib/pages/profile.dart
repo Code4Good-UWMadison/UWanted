@@ -17,18 +17,18 @@ final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 bool _isLoading = false;
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key key, 
-  @required this.auth, 
-  @required this.userId, 
-  @required this.uploading, 
-  @required this.finishUploading, 
-  // @required this.skipToProfile
-  })
-      : super(key: key);
+  ProfilePage({
+    Key key,
+    @required this.auth,
+    @required this.userId,
+    @required this.uploading,
+    @required this.finishUploading,
+    // @required this.skipToProfile
+  }) : super(key: key);
 
   final BaseAuth auth;
   final String userId;
-  
+
   final Function() uploading;
   final Function() finishUploading;
   // final Function() skipToProfile;
@@ -38,6 +38,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  List<bool> _expansionStatus = [true, false, false];
   User user;
   File _image;
   String _imageUrl;
@@ -55,27 +56,61 @@ class _ProfilePageState extends State<ProfilePage> {
         context: context,
         tiles: [
           ExpansionTile(
-            initiallyExpanded: true,
-            title: Text('Profile'),
+            key: GlobalKey(),
+            initiallyExpanded: this._expansionStatus[0],
+            title: Text(
+              'Profile',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             children: <Widget>[
               _buildProfile(),
-              _buildListTile("Name", this.user.userName, Icon(Icons.perm_identity)),
-              _buildListTile("Role", this.user.userRoleToString(), Icon(Icons.people)),
+              _buildListTile(
+                  "Name", this.user.userName, Icon(Icons.perm_identity)),
+              _buildListTile(
+                  "Role", this.user.userRoleToString(), Icon(Icons.people)),
               _buildListTile("Lab", this.user.lab, Icon(Icons.business_center)),
               _buildListTile("Major", this.user.major, Icon(Icons.school)),
-              _buildListTile("Technical Skills", this.user.skills.toString(), Icon(Icons.class_)),
+              _buildListTile("Technical Skills", this.user.skills.toString(),
+                  Icon(Icons.class_)),
               _buildEditProfileTile(),
-            ],
+            ]..insert(0, Divider(color: Colors.black)),
+            onExpansionChanged: (bool isExpanded) {
+              setState(() {
+                this._expansionStatus = [isExpanded, false, false];
+              });
+            },
           ),
           ExpansionTile(
-            title: Text('Posts'),
-            children: List.from(_buildPosts())..add(_buildEditPostsListTile()),
+            key: GlobalKey(),
+            initiallyExpanded: this._expansionStatus[1],
+            title: Text(
+              'Posts',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            children: List.from(_buildPosts())
+              ..add(_buildEditPostsListTile())
+              ..insert(0, Divider(color: Colors.black)),
+            onExpansionChanged: (bool isExpanded) {
+              setState(() {
+                this._expansionStatus = [false, isExpanded, false];
+              });
+            },
           ),
           ExpansionTile(
-            title: Text('Applied'),
-            children: List.from(_buildAppliedList()),
+            key: GlobalKey(),
+            initiallyExpanded: this._expansionStatus[2],
+            title: Text(
+              'Applied',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            children: List.from(_buildAppliedList())
+              ..insert(0, Divider(color: Colors.black)),
+            onExpansionChanged: (bool isExpanded) {
+              setState(() {
+                this._expansionStatus = [false, false, isExpanded];
+              });
+            },
           ),
-          // AboutListTile(icon: null),
         ],
       ).toList(),
     );
