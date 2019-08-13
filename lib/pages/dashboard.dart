@@ -82,6 +82,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return new Scaffold(
         body: Container(
+            padding: const EdgeInsets.all(10.0),
             child: Column(children: <Widget>[
       Row(
         children: <Widget>[
@@ -101,13 +102,15 @@ class _DashboardPageState extends State<DashboardPage> {
               decoration: InputDecoration(
                 hintText: 'Search by name',
                 border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(4.0)),
+                    borderRadius: BorderRadius.circular(10.0)),
               ),
             ),
           ),
           Container(
+            alignment: Alignment.center,
             child: DropdownButton<String>(
               // value: 'Sort',
+              
               icon: Icon(Icons.sort),
               onChanged: (String newValue) {
                 setState(() {
