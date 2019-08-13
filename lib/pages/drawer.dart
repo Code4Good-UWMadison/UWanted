@@ -3,6 +3,7 @@ import '../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:thewanted/pages/components/avatar.dart';
 
 class DrawerPage extends StatefulWidget {
   DrawerPage(
@@ -110,20 +111,7 @@ class _DrawerPageState extends State<DrawerPage> {
         ),
       ),
       accountEmail: new Container(child: new Text("Enjoy your day~ ")),
-      currentAccountPicture: new Container(
-        child: (_imageUrl == null)
-            ? (Icon(
-                Icons.account_circle,
-                size: 50.0,
-                color: Colors.white,
-              ))
-            : CircleAvatar(
-                backgroundColor: Colors.white,
-                backgroundImage: NetworkImage(
-                  _imageUrl,
-                ),
-              ),
-      ),
+      currentAccountPicture: Avatar(userId: widget.userId, radius: 30),
       // onDetailsPressed: () {},
     );
   }
