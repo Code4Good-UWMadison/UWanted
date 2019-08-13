@@ -170,17 +170,25 @@ class _ProfilePageState extends State<ProfilePage> {
     _image = null;
     _imageUrl = null;
     // init profile's url
-    var ref = FirebaseStorage.instance
+    FirebaseStorage.instance
         .ref()
-        .child('user')
-        .child(widget.userId)
-        .child('profile.jpg');
-    ref
+        .child('user/' + widget.userId + '/profile.jpg')
         .getDownloadURL()
-        .then((loc) => setState(() => _imageUrl = loc))
-        .catchError((err) {
-      _imageUrl = null;
+        .then(((loc) => setState(() => _imageUrl = loc)), onError: (e) {
+      print(e);
+      this._imageUrl = null;
     });
+    // var ref = FirebaseStorage.instance
+    //     .ref()
+    //     .child('user')
+    //     .child(widget.userId)
+    //     .child('profile.jpg');
+    // ref
+    //     .getDownloadURL()
+    //     .then((loc) => setState(() => _imageUrl = loc))
+    //     .catchError((err) {
+    //   _imageUrl = null;
+    // });
     _getUserProfileFromFirebase();
   }
 
