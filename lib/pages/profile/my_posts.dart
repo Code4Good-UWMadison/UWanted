@@ -8,14 +8,13 @@ import '../send_request_page/send_request_refactored.dart';
 import 'package:thewanted/pages/profile/applicants_list.dart';
 
 class MyPostsPage extends StatefulWidget {
-  MyPostsPage(
-      {Key key,
-      @required this.auth,
-      @required this.userId,
-      @required this.posts,
-      // @required this.skipToProfile
-      })
-      : super(key: key);
+  MyPostsPage({
+    Key key,
+    @required this.auth,
+    @required this.userId,
+    @required this.posts,
+    // @required this.skipToProfile
+  }) : super(key: key);
 
   final BaseAuth auth;
   final String userId;
@@ -93,7 +92,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
         title: Row(
           children: <Widget>[
             Text(entry.value['title']),
-            Container(width: 10.0),
             StatusTag.fromString(this.posts[entry.key]['status']),
           ],
         ),
@@ -131,9 +129,9 @@ class _MyPostsPageState extends State<MyPostsPage> {
                         postId: entry.key,
                       ),
                       )).then((_) {
-                        setState(() {
-                          this._getPostsFromRemote();
-                        });
+                    setState(() {
+                      this._getPostsFromRemote();
+                    });
                   });
                 },
               ),
@@ -159,7 +157,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
           });
         },
       );
-
 
   FlatButton _editButton() => FlatButton(
         child:
@@ -326,5 +323,12 @@ class _MyPostsPageState extends State<MyPostsPage> {
 
   Future<void> _showSnackbarThenWait1sec(String msg) async {
     this._scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  @override
+  void setState(fn) {
+    if (this.mounted) {
+      super.setState(fn);
+    }
   }
 }

@@ -12,23 +12,24 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:thewanted/pages/status_tag.dart';
+import 'package:thewanted/pages/components/avatar.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 bool _isLoading = false;
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key key, 
-  @required this.auth, 
-  @required this.userId, 
-  @required this.uploading, 
-  @required this.finishUploading, 
-  // @required this.skipToProfile
-  })
-      : super(key: key);
+  ProfilePage({
+    Key key,
+    @required this.auth,
+    @required this.userId,
+    @required this.uploading,
+    @required this.finishUploading,
+    // @required this.skipToProfile
+  }) : super(key: key);
 
   final BaseAuth auth;
   final String userId;
-  
+
   final Function() uploading;
   final Function() finishUploading;
   // final Function() skipToProfile;
@@ -38,6 +39,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  List<bool> _expansionStatus = [true, false, false];
   User user;
   File _image;
   String _imageUrl;
@@ -55,27 +57,62 @@ class _ProfilePageState extends State<ProfilePage> {
         context: context,
         tiles: [
           ExpansionTile(
-            initiallyExpanded: true,
-            title: Text('Profile'),
+            key: GlobalKey(),
+            initiallyExpanded: this._expansionStatus[0],
+            title: Text(
+              'Profile',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             children: <Widget>[
               _buildProfile(),
-              _buildListTile("Name", this.user.userName),
-              _buildListTile("Role", this.user.userRoleToString()),
-              _buildListTile("Lab", this.user.lab),
-              _buildListTile("Major", this.user.major),
-              _buildListTile("Technical Skills", this.user.skills.toString()),
+              _buildListTile(
+                  "Name", this.user.userName, Icon(Icons.perm_identity)),
+              _buildListTile(
+                  "Role", this.user.userRoleToString(), Icon(Icons.people)),
+              _buildListTile("Lab", this.user.lab, Icon(Icons.business_center)),
+              _buildListTile("Major", this.user.major, Icon(Icons.school)),
+              _buildListTile("Technical Skills", this.user.skills.toString(),
+                  Icon(Icons.class_)),
+              Divider(height: 0, color: Colors.black),
               _buildEditProfileTile(),
-            ],
+            ]..insert(0, Divider(color: Colors.black)),
+            onExpansionChanged: (bool isExpanded) {
+              setState(() {
+                this._expansionStatus = [isExpanded, false, false];
+              });
+            },
           ),
           ExpansionTile(
-            title: Text('Posts'),
-            children: List.from(_buildPosts())..add(_buildEditPostsListTile()),
+            key: GlobalKey(),
+            initiallyExpanded: this._expansionStatus[1],
+            title: Text(
+              'Posts',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            children: List.from(_buildPosts())
+              ..addAll(_buildEditPostsListTile())
+              ..insert(0, Divider(color: Colors.black)),
+            onExpansionChanged: (bool isExpanded) {
+              setState(() {
+                this._expansionStatus = [false, isExpanded, false];
+              });
+            },
           ),
           ExpansionTile(
-            title: Text('Applied'),
-            children: List.from(_buildAppliedList()),
+            key: GlobalKey(),
+            initiallyExpanded: this._expansionStatus[2],
+            title: Text(
+              'Applied',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            children: List.from(_buildAppliedList())
+              ..insert(0, Divider(color: Colors.black)),
+            onExpansionChanged: (bool isExpanded) {
+              setState(() {
+                this._expansionStatus = [false, false, isExpanded];
+              });
+            },
           ),
-          // AboutListTile(icon: null),
         ],
       ).toList(),
     );
@@ -134,17 +171,25 @@ class _ProfilePageState extends State<ProfilePage> {
     _image = null;
     _imageUrl = null;
     // init profile's url
-    var ref = FirebaseStorage.instance
-        .ref()
-        .child('user')
-        .child(widget.userId)
-        .child('profile.jpg');
-    ref
-        .getDownloadURL()
-        .then((loc) => setState(() => _imageUrl = loc))
-        .catchError((err) {
-      _imageUrl = null;
-    });
+    // FirebaseStorage.instance
+    //     .ref()
+    //     .child('user/' + widget.userId + '/profile.jpg')
+    //     .getDownloadURL()
+    //     .then(((loc) => setState(() => _imageUrl = loc)), onError: (e) {
+    //   print(e);
+    //   this._imageUrl = null;
+    // });
+    // var ref = FirebaseStorage.instance
+    //     .ref()
+    //     .child('user')
+    //     .child(widget.userId)
+    //     .child('profile.jpg');
+    // ref
+    //     .getDownloadURL()
+    //     .then((loc) => setState(() => _imageUrl = loc))
+    //     .catchError((err) {
+    //   _imageUrl = null;
+    // });
     _getUserProfileFromFirebase();
   }
 
@@ -182,10 +227,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  ListTile _buildListTile(String title, String trailing) => ListTile(
+  ListTile _buildListTile(String title, String trailing, Icon icon) => ListTile(
+        leading: icon,
         title: Text(title),
         trailing: Text(trailing),
-        onTap: _navigateToProfileEditingPage,
       );
 
   Row _buildProfile() => Row(
@@ -194,31 +239,36 @@ class _ProfilePageState extends State<ProfilePage> {
           new Container(width: 50, height: 0),
           Align(
             alignment: Alignment.center,
-            child: CircleAvatar(
-              radius: 100,
-              backgroundColor: Colors.white,
-              child: ClipOval(
-                child: new SizedBox(
-                  width: 180.0,
-                  height: 180.0,
-                  child: (_imageUrl == null && _image == null)
-                      ? (Icon(
-                          Icons.account_circle,
-                          size: 180.0,
-                          color: Colors.blue,
-                        ))
-                      : (_image != null)
-                          ? Image.file(
-                              _image,
-                              // fit: BoxFit.fill,
-                            )
-                          : Image.network(
-                              _imageUrl,
-                              // fit: BoxFit.fill,
-                            ),
-                ),
-              ),
+            child: new Avatar(
+              userId: widget.userId,
+              radius: 80,
+              image: this._image ?? null,
             ),
+            // CircleAvatar(
+            //   radius: 100,
+            //   backgroundColor: Colors.white,
+            //   child: ClipOval(
+            //     child: new SizedBox(
+            //       width: 180.0,
+            //       height: 180.0,
+            //       child: (_imageUrl == null && _image == null)
+            //           ? (Icon(
+            //               Icons.account_circle,
+            //               size: 180.0,
+            //               color: Colors.blue,
+            //             ))
+            //           : (_image != null)
+            //               ? Image.file(
+            //                   _image,
+            //                   // fit: BoxFit.fill,
+            //                 )
+            //               : Image.network(
+            //                   _imageUrl,
+            //                   // fit: BoxFit.fill,
+            //                 ),
+            //     ),
+            //   ),
+            // ),
           ),
           Padding(
             padding: EdgeInsets.only(top: 120.0),
@@ -264,16 +314,20 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   ListTile _buildEditProfileTile() => ListTile(
+        leading: Icon(Icons.edit),
         title: Text('Edit Profile'),
         trailing: Icon(Icons.arrow_forward),
         onTap: _navigateToProfileEditingPage,
       );
 
-  ListTile _buildEditPostsListTile() => ListTile(
-        title: Text('Edit Posts'),
-        trailing: Text(this.user.posts.length.toString()),
-        onTap: _navigateToPostsEditingPage,
-      );
+  List<Widget> _buildEditPostsListTile() => <Widget>[]
+    ..add(Divider(height: 0, color: Colors.black))
+    ..add(ListTile(
+      leading: Icon(Icons.edit),
+      title: Text('Edit Posts'),
+      trailing: Text(this.user.posts.length.toString()),
+      onTap: _navigateToPostsEditingPage,
+    ));
 
   void _navigateToPostsEditingPage() {
     Navigator.push(
@@ -493,6 +547,13 @@ class _ProfilePageState extends State<ProfilePage> {
         print("Profile Picture uploaded");
         Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text('Profile Picture Uploaded')));
+      });
+
+      snapshot.ref.getDownloadURL().then((downloadUrl) {
+        Firestore.instance
+            .collection('users')
+            .document(widget.userId)
+            .updateData({'avatarUrl': downloadUrl});
       });
     });
     // StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
