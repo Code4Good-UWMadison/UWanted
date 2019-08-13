@@ -99,6 +99,7 @@ class _RequestFormState extends State<RequestForm> {
       })
             ..then((_) {
               showDialog(
+                  context: context,
                   builder: (_) => new AlertDialog(
                         content: new Text(
                           'Request submitted.',
@@ -108,6 +109,7 @@ class _RequestFormState extends State<RequestForm> {
             })
             ..catchError((e) {
               showDialog(
+                  context: context,
                   builder: (_) => new AlertDialog(
                         content: new Text(
                           'Please retry $e',
@@ -152,6 +154,7 @@ class _RequestFormState extends State<RequestForm> {
         });
       }).catchError((e) {
         showDialog(
+            context: context,
             builder: (_) => new AlertDialog(
                   content: new Text(
                     'Please retry $e',

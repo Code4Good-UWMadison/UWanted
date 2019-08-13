@@ -279,7 +279,14 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _disableNavi = false;
             });
-          }),
+          }, 
+          // skipToProfile: () {
+          //   setState(() {
+          //     _selectedIndex = 2;
+          //   });
+          // },
+        ),
+          
     ];
     final _pageName = ["Dashboard", "Send Request", "Profile"];
     return new Scaffold(
