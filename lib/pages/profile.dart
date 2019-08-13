@@ -52,11 +52,11 @@ class _ProfilePageState extends State<ProfilePage> {
             title: Text('Profile'),
             children: <Widget>[
               _buildProfile(),
-              _buildListTile("Name", this.user.userName),
-              _buildListTile("Role", this.user.userRoleToString()),
-              _buildListTile("Lab", this.user.lab),
-              _buildListTile("Major", this.user.major),
-              _buildListTile("Technical Skills", this.user.skills.toString()),
+              _buildListTile("Name", this.user.userName, Icon(Icons.perm_identity)),
+              _buildListTile("Role", this.user.userRoleToString(), Icon(Icons.people)),
+              _buildListTile("Lab", this.user.lab, Icon(Icons.business_center)),
+              _buildListTile("Major", this.user.major, Icon(Icons.school)),
+              _buildListTile("Technical Skills", this.user.skills.toString(), Icon(Icons.class_)),
               _buildEditProfileTile(),
             ],
           ),
@@ -175,7 +175,8 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  ListTile _buildListTile(String title, String trailing) => ListTile(
+  ListTile _buildListTile(String title, String trailing, Icon icon) => ListTile(
+        leading: icon,
         title: Text(title),
         trailing: Text(trailing),
         onTap: _navigateToProfileEditingPage,
