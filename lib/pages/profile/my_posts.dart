@@ -125,13 +125,9 @@ class _MyPostsPageState extends State<MyPostsPage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => RequestForm(
-                          needUpdate: true,
-                          postId: entry.key,
-                          notFromMyPosts: false,
-                          skipBack: () {
-                            // nothing to do here
-                          },
-                        ),
+                        needUpdate: true,
+                        postId: entry.key,
+                      ),
                       )).then((_) {
                     setState(() {
                       this._getPostsFromRemote();

@@ -261,12 +261,11 @@ class _HomePageState extends State<HomePage> {
         userId: widget.userId,
         auth: widget.auth,
         needUpdate: false,
-        skipBack: (){
+        goToDashBoard: (){
           setState(() {
             _selectedIndex = 0;
           });
         },
-        notFromMyPosts: true,
       ),
       ProfilePage(
           userId: widget.userId,
