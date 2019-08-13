@@ -221,7 +221,6 @@ class _ProfilePageState extends State<ProfilePage> {
         leading: icon,
         title: Text(title),
         trailing: Text(trailing),
-        onTap: _navigateToProfileEditingPage,
       );
 
   Row _buildProfile() => Row(
