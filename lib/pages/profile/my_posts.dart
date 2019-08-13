@@ -8,14 +8,13 @@ import '../send_request_page/send_request_refactored.dart';
 import 'package:thewanted/pages/profile/applicants_list.dart';
 
 class MyPostsPage extends StatefulWidget {
-  MyPostsPage(
-      {Key key,
-      @required this.auth,
-      @required this.userId,
-      @required this.posts,
-      // @required this.skipToProfile
-      })
-      : super(key: key);
+  MyPostsPage({
+    Key key,
+    @required this.auth,
+    @required this.userId,
+    @required this.posts,
+    // @required this.skipToProfile
+  }) : super(key: key);
 
   final BaseAuth auth;
   final String userId;
@@ -126,16 +125,17 @@ class _MyPostsPageState extends State<MyPostsPage> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => RequestForm(
-                        needUpdate: true,
-                        postId: entry.key,
-                        notFromMyPosts: false,
-                        skipBack:(){ // nothing to do here
-                        },
-                      ),
+                          needUpdate: true,
+                          postId: entry.key,
+                          notFromMyPosts: false,
+                          skipBack: () {
+                            // nothing to do here
+                          },
+                        ),
                       )).then((_) {
-                        setState(() {
-                          this._getPostsFromRemote();
-                        });
+                    setState(() {
+                      this._getPostsFromRemote();
+                    });
                   });
                 },
               ),
@@ -161,7 +161,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
           });
         },
       );
-
 
   FlatButton _editButton() => FlatButton(
         child:
@@ -328,5 +327,12 @@ class _MyPostsPageState extends State<MyPostsPage> {
 
   Future<void> _showSnackbarThenWait1sec(String msg) async {
     this._scaffoldKey.currentState.showSnackBar(SnackBar(content: Text(msg)));
+  }
+
+  @override
+  void setState(fn) {
+    if (this.mounted) {
+      super.setState(fn);
+    }
   }
 }
