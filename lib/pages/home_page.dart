@@ -261,6 +261,12 @@ class _HomePageState extends State<HomePage> {
         userId: widget.userId,
         auth: widget.auth,
         needUpdate: false,
+        skipBack: (){
+          setState(() {
+            _selectedIndex = 0;
+          });
+        },
+        notFromMyPosts: true,
       ),
       ProfilePage(
           userId: widget.userId,
@@ -274,7 +280,14 @@ class _HomePageState extends State<HomePage> {
             setState(() {
               _disableNavi = false;
             });
-          }),
+          }, 
+          // skipToProfile: () {
+          //   setState(() {
+          //     _selectedIndex = 2;
+          //   });
+          // },
+        ),
+          
     ];
     final _pageName = ["Dashboard", "Send Request", "Profile"];
     return new Scaffold(
