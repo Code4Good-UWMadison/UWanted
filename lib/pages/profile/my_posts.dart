@@ -129,9 +129,6 @@ class _MyPostsPageState extends State<MyPostsPage> {
                         builder: (context) => RequestForm(
                         needUpdate: true,
                         postId: entry.key,
-                        notFromMyPosts: false,
-                        skipBack:(){ // nothing to do here
-                        },
                       ),
                       )).then((_) {
                         setState(() {
