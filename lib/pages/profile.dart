@@ -12,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:thewanted/pages/status_tag.dart';
+import 'package:thewanted/pages/components/avatar.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 bool _isLoading = false;
@@ -170,14 +171,14 @@ class _ProfilePageState extends State<ProfilePage> {
     _image = null;
     _imageUrl = null;
     // init profile's url
-    FirebaseStorage.instance
-        .ref()
-        .child('user/' + widget.userId + '/profile.jpg')
-        .getDownloadURL()
-        .then(((loc) => setState(() => _imageUrl = loc)), onError: (e) {
-      print(e);
-      this._imageUrl = null;
-    });
+    // FirebaseStorage.instance
+    //     .ref()
+    //     .child('user/' + widget.userId + '/profile.jpg')
+    //     .getDownloadURL()
+    //     .then(((loc) => setState(() => _imageUrl = loc)), onError: (e) {
+    //   print(e);
+    //   this._imageUrl = null;
+    // });
     // var ref = FirebaseStorage.instance
     //     .ref()
     //     .child('user')
@@ -238,31 +239,36 @@ class _ProfilePageState extends State<ProfilePage> {
           new Container(width: 50, height: 0),
           Align(
             alignment: Alignment.center,
-            child: CircleAvatar(
-              radius: 100,
-              backgroundColor: Colors.white,
-              child: ClipOval(
-                child: new SizedBox(
-                  width: 180.0,
-                  height: 180.0,
-                  child: (_imageUrl == null && _image == null)
-                      ? (Icon(
-                          Icons.account_circle,
-                          size: 180.0,
-                          color: Colors.blue,
-                        ))
-                      : (_image != null)
-                          ? Image.file(
-                              _image,
-                              // fit: BoxFit.fill,
-                            )
-                          : Image.network(
-                              _imageUrl,
-                              // fit: BoxFit.fill,
-                            ),
-                ),
-              ),
+            child: new Avatar(
+              userId: widget.userId,
+              radius: 80,
+              image: this._image ?? null,
             ),
+            // CircleAvatar(
+            //   radius: 100,
+            //   backgroundColor: Colors.white,
+            //   child: ClipOval(
+            //     child: new SizedBox(
+            //       width: 180.0,
+            //       height: 180.0,
+            //       child: (_imageUrl == null && _image == null)
+            //           ? (Icon(
+            //               Icons.account_circle,
+            //               size: 180.0,
+            //               color: Colors.blue,
+            //             ))
+            //           : (_image != null)
+            //               ? Image.file(
+            //                   _image,
+            //                   // fit: BoxFit.fill,
+            //                 )
+            //               : Image.network(
+            //                   _imageUrl,
+            //                   // fit: BoxFit.fill,
+            //                 ),
+            //     ),
+            //   ),
+            // ),
           ),
           Padding(
             padding: EdgeInsets.only(top: 120.0),
@@ -541,6 +547,13 @@ class _ProfilePageState extends State<ProfilePage> {
         print("Profile Picture uploaded");
         Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text('Profile Picture Uploaded')));
+      });
+
+      snapshot.ref.getDownloadURL().then((downloadUrl) {
+        Firestore.instance
+            .collection('users')
+            .document(widget.userId)
+            .updateData({'avatarUrl': downloadUrl});
       });
     });
     // StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
