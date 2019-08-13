@@ -17,7 +17,13 @@ final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 bool _isLoading = false;
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key key, @required this.auth, @required this.userId, @required this.uploading, @required this.finishUploading,})
+  ProfilePage({Key key, 
+  @required this.auth, 
+  @required this.userId, 
+  @required this.uploading, 
+  @required this.finishUploading, 
+  // @required this.skipToProfile
+  })
       : super(key: key);
 
   final BaseAuth auth;
@@ -25,6 +31,7 @@ class ProfilePage extends StatefulWidget {
   
   final Function() uploading;
   final Function() finishUploading;
+  // final Function() skipToProfile;
 
   @override
   _ProfilePageState createState() => _ProfilePageState();
@@ -277,6 +284,11 @@ class _ProfilePageState extends State<ProfilePage> {
           auth: widget.auth,
           userId: widget.userId,
           posts: this.user.posts,
+          // skipToProfile: (){
+          //   setState(() {
+          //    widget.skipToProfile();
+          //   });
+          // },
         ),
       ),
     );

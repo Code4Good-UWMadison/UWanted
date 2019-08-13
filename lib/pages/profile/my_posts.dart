@@ -12,12 +12,16 @@ class MyPostsPage extends StatefulWidget {
       {Key key,
       @required this.auth,
       @required this.userId,
-      @required this.posts})
+      @required this.posts,
+      // @required this.skipToProfile
+      })
       : super(key: key);
 
   final BaseAuth auth;
   final String userId;
   final List<String> posts;
+
+  // final Function() skipToProfile;
 
   @override
   _MyPostsPageState createState() => _MyPostsPageState();
@@ -125,6 +129,9 @@ class _MyPostsPageState extends State<MyPostsPage> {
                         builder: (context) => RequestForm(
                         needUpdate: true,
                         postId: entry.key,
+                        notFromMyPosts: false,
+                        skipBack:(){ // nothing to do here
+                        },
                       ),
                       )).then((_) {
                         setState(() {
@@ -313,6 +320,7 @@ class _MyPostsPageState extends State<MyPostsPage> {
             'uid': uid,
             'title': document['title'],
             'isChecked': false,
+            'status': document['status'],
           };
         });
       });

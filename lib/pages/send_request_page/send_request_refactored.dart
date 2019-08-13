@@ -5,13 +5,15 @@ import '../details.dart';
 import 'requestLabel.dart';
 
 class RequestForm extends StatefulWidget {
-  RequestForm({Key key, this.auth, this.userId, this.needUpdate, this.postId})
+  RequestForm({Key key, this.auth, this.userId, this.needUpdate, this.postId, @required this.skipBack, @required this.notFromMyPosts})
       : super(key: key);
   final BaseAuth auth;
   final String userId;
   final bool
       needUpdate; //indicator of whether to update request instead of creating new one
   final String postId;
+  final Function() skipBack;
+  final bool notFromMyPosts;
 
   @override
   State<StatefulWidget> createState() => _RequestFormState();
@@ -92,6 +94,7 @@ class _RequestFormState extends State<RequestForm> {
       })
             ..then((_) {
               showDialog(
+                  context: context,
                   builder: (_) => new AlertDialog(
                         content: new Text(
                           'Request submitted.',
@@ -101,6 +104,7 @@ class _RequestFormState extends State<RequestForm> {
             })
             ..catchError((e) {
               showDialog(
+                  context: context,
                   builder: (_) => new AlertDialog(
                         content: new Text(
                           'Please retry $e',
@@ -144,6 +148,7 @@ class _RequestFormState extends State<RequestForm> {
         });
       }).catchError((e){
         showDialog(
+            context: context,
             builder: (_) => new AlertDialog(
               content: new Text(
                 'Please retry $e',
@@ -286,6 +291,9 @@ class _RequestFormState extends State<RequestForm> {
                       _snackBar("Request submitted successfully."));
                   _clearController();
                 }
+              if(widget.notFromMyPosts){
+                widget.skipBack();
+              }
               } else {
                 showDialog(
                     context: context,
