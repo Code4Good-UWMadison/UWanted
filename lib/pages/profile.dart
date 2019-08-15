@@ -308,9 +308,7 @@ class _ProfilePageState extends State<ProfilePage> {
               auth: widget.auth,
               userId: widget.userId,
               user: User.clone(this.user))),
-    );
-
-    _getRemoteUserData(null);
+    ).then((_) => _getRemoteUserData(null));
   }
 
   ListTile _buildEditProfileTile() => ListTile(
