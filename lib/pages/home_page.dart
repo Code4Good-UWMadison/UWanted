@@ -7,6 +7,8 @@ import '../pages/profile.dart';
 import 'send_request_page/send_request_refactored.dart';
 import './dashboard.dart';
 import '../pages/drawer.dart';
+import '../pages/faculty_drawer.dart';
+import '../pages/manageposts.dart';
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -267,26 +269,26 @@ class _HomePageState extends State<HomePage> {
           });
         },
       ),
-      ProfilePage(
-          userId: widget.userId,
-          auth: widget.auth,
-          uploading: () {
-            setState(() {
-              _disableNavi = true;
-            });
-          },
-          finishUploading: () {
-            setState(() {
-              _disableNavi = false;
-            });
-          }, 
-          // skipToProfile: () {
-          //   setState(() {
-          //     _selectedIndex = 2;
-          //   });
-          // },
-        ),
-          
+      // ProfilePage(
+      //     userId: widget.userId,
+      //     auth: widget.auth,
+      //     uploading: () {
+      //       setState(() {
+      //         _disableNavi = true;
+      //       });
+      //     },
+      //     finishUploading: () {
+      //       setState(() {
+      //         _disableNavi = false;
+      //       });
+      //     }, 
+      //     // skipToProfile: () {
+      //     //   setState(() {
+      //     //     _selectedIndex = 2;
+      //     //   });
+      //     // },
+      //   ),
+      ManagePostsPage(userId:widget.userId, auth:widget.auth),
     ];
     final _pageName = ["Dashboard", "Send Request", "Profile"];
     return new Scaffold(
@@ -305,6 +307,7 @@ class _HomePageState extends State<HomePage> {
       body: _pageOptions[_selectedIndex],
       drawer: Drawer(
         child: DrawerPage(userId: widget.userId, auth: widget.auth),
+        // child: FacultyDrawerPage(userId: widget.userId, auth: widget.auth),
       ),
       // floatingActionButton: FloatingActionButton(
       //   onPressed: _newTask, // generate a new task
