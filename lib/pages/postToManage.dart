@@ -19,7 +19,7 @@ class PostToManage extends StatelessWidget {
     @required this.userId,
     @required this.auth,
     @required this.user,
-    @required this.keyForSnack,
+    @required this.showAlertDialog,
   });
   final title;
   final taskId;
@@ -27,7 +27,7 @@ class PostToManage extends StatelessWidget {
   final String userId;
   final BaseAuth auth;
   final User user;
-  final keyForSnack;
+  final Function(String) showAlertDialog;
   final Firestore db = Firestore.instance;
 
   @override
@@ -98,7 +98,7 @@ class PostToManage extends StatelessWidget {
                             style:
                                 TextStyle(color: Colors.blue, fontSize: 14.0)),
                         onPressed: () {
-                          _showAlertDialog(context);
+                          showAlertDialog(this.taskId);
                         }),
                     RaisedButton(
                       shape: RoundedRectangleBorder(
@@ -113,43 +113,7 @@ class PostToManage extends StatelessWidget {
               ],
             )));
   }
-
-  Future<void> _showAlertDialog(context) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Warning'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Delete is irreversible!'),
-                Text('Permanently delete selected tasks?'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text(
-                'PERMANENTLY DELETE',
-                style: TextStyle(color: Colors.red),
-              ),
-              onPressed: _updateRemoteData(context),
-            ),
-            FlatButton(
-              child: Text('CANCEL'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  //change status to finished
+   //change status to finished
   _archiveRequest() {
     db
         .collection('tasks')
@@ -157,20 +121,7 @@ class PostToManage extends StatelessWidget {
         .updateData({'status': 'finished'});
   }
 
-  _updateRemoteData(context) {
-    _deleteCheckedTasksFromFirestore()
-        // .then((_) => _updateRemoteUserPosts())
-        // .then((_) => _updateWidgetPosts())
-        // .then((_) => _updateThisPosts())
-        .then((_) => _showSnackbarThenWait1sec('Success!'))
-        .then((_) => Navigator.of(context).pop())
-        .catchError((e) => _showSnackbarThenWait1sec('Delete failed! $e'));
-  }
-
-  Future<void> _deleteCheckedTasksFromFirestore() async {
-    await db.collection('tasks').document(this.taskId).delete();
-  }
-
+  
   // Future<void> _updateRemoteUserPosts() => db
   //     .collection('users')
   //     .document(this.userId)
@@ -209,9 +160,9 @@ class PostToManage extends StatelessWidget {
   //   });
   // }
 
-  Future<void> _showSnackbarThenWait1sec(String msg) async {
-    this.keyForSnack.currentState.showSnackBar(SnackBar(content: Text(msg)));
-  }
+  // Future<void> _showSnackbarThenWait1sec(String msg) async {
+  //   this.keyForSnack.currentState.showSnackBar(SnackBar(content: Text(msg)));
+  // }
 
   StreamBuilder<QuerySnapshot> _buildReview(taskId) =>
       StreamBuilder<QuerySnapshot>(
