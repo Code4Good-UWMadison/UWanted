@@ -17,12 +17,13 @@ class ManagePostsPage extends StatefulWidget {
     // @required this.taskId,
     @required this.auth,
     @required this.userId,
-    // @required this.skipToProfile
+    // this.navigateBack,
   }) : super(key: key);
 
   // final String taskId;
   final BaseAuth auth;
   final String userId;
+  // final Function() navigateBack;
 
   @override
   _ManagePostsState createState() => _ManagePostsState();
@@ -79,20 +80,6 @@ class _ManagePostsState extends State<ManagePostsPage> {
       return Center(
         child: CircularProgressIndicator(),
       );
-    // var list = ListView(
-    //     padding: EdgeInsets.zero,
-    //     children: ListTile.divideTiles(context: context, tiles: [
-    //       ExpansionTile(
-    //         key: GlobalKey(),
-    //         initiallyExpanded: true,
-    //         title: Text(
-    //           'Manage Your Requests:',
-    //           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-    //         ),
-    //         children: List.from(_buildPosts()),
-    //       )
-    //     ]).toList());
-    // return Scaffold(body: list);
     return new Scaffold(
         key: this._scaffoldKey,
         body: Container(
@@ -139,12 +126,12 @@ class _ManagePostsState extends State<ManagePostsPage> {
                             auth: widget.auth,
                             user: this.user,
                             showAlertDialog: _showAlertDialog,
+                            naviDetails: _navigateToApplicationDetail,
                           );
                         })
                         .where((task) => task.status != 'finished')
                         .toList(),
                   );
-                // return new Text(widget.userId);
               }
             },
           )),
@@ -195,11 +182,7 @@ class _ManagePostsState extends State<ManagePostsPage> {
   List<String> _newList = List<String>();
 
   _updateRemoteData(taskId) {
-    print("HOW???");
     _deleteCheckedTasksFromFirestore(taskId)
-        // .then((_) => _updateRemoteUserPosts())
-        // .then((_) => _updateWidgetPosts())
-        // .then((_) => _updateThisPosts())
         .then((_) => _deleteApps(taskId))
         .then((_) => _getNewList(taskId))
         .then((_) => _updateRemoteUser(taskId))
@@ -225,9 +208,13 @@ class _ManagePostsState extends State<ManagePostsPage> {
     });
   }
 
-  Future<void> _getNewList(taskId) async{
+  Future<void> _getNewList(taskId) async {
     print("getNew");
-    await db.collection('users').document(widget.userId).get().then((DocumentSnapshot document) {
+    await db
+        .collection('users')
+        .document(widget.userId)
+        .get()
+        .then((DocumentSnapshot document) {
       print("getIt?");
       _newList.addAll(List.from(document['posts']));
       print("remove " + taskId);
@@ -235,174 +222,25 @@ class _ManagePostsState extends State<ManagePostsPage> {
     });
   }
 
-  Future<void> _updateRemoteUser(taskId) async{
+  Future<void> _updateRemoteUser(taskId) async {
     print("updating");
     await db.collection('users').document(widget.userId).updateData({
-     'posts': _newList,
-   });
+      'posts': _newList,
+    });
   }
 
-
-
-  // List<Widget> _buildPosts() => this
-  //     .user
-  //     .posts
-  //     .map((String uid) => FutureBuilder<DocumentSnapshot>(
-  //           future: Firestore.instance.collection('tasks').document(uid).get(),
-  //           builder: (BuildContext context,
-  //               AsyncSnapshot<DocumentSnapshot> snapshot) {
-  //             if (snapshot.data != null)
-  //               return ListTile(
-  //                 leading: StatusTag.fromString(snapshot.data['status']),
-  //                 title: Container(
-  //                     child: Column(children: <Widget>[
-  //                   Text(snapshot.data['title']),
-  //                   Row(
-  //                     children: <Widget>[
-  //                     ],
-  //                   ),
-  //                   Container(child:_buildReview(uid),)
-  //                   // Column(children: <Widget>[
-  //                   //   // Expanded(
-  //                   //   //     child: _buildReview(uid),
-  //                   //   // ),
-  //                   //   _buildReview(uid),
-  //                   //   ],)
-  //                 ])),
-  //                 // trailing: Icon(Icons.arrow_forward),
-  //                 onTap: () {
-  //                   Navigator.push(
-  //                     context,
-  //                     MaterialPageRoute(
-  //                       builder: (context) => DetailedPage(
-  //                         title: snapshot.data['title'],
-  //                         id: uid,
-  //                         currUserId: widget.userId,
-  //                         auth: widget.auth,
-  //                         withdrawlButton: false,
-  //                       ),
-  //                     ),
-  //                   );
-  //                 },
-  //               );
-  //             else
-  //               return CircularProgressIndicator();
-  //           },
-  //         ))
-  //     .toList();
-
-  // StreamBuilder<QuerySnapshot> _buildReview(taskId) =>
-  //     StreamBuilder<QuerySnapshot>(
-  //       stream: Firestore.instance
-  //           .collection('tasks')
-  //           .document(taskId)
-  //           .collection('applicants')
-  //           .where('accepted', isEqualTo: true)
-  //           .snapshots(),
-  //       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-  //         if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-  //         switch (snapshot.connectionState) {
-  //           case ConnectionState.waiting:
-  //             return Center(
-  //               child: CircularProgressIndicator(),
-  //             );
-  //           default:
-  //             return ListView(
-  //               children: snapshot.data.documents
-  //                   .map(_buildListTileFromDocument)
-  //                   .toList(),
-  //             );
-  //         }
-  //       },
-  //     );
-
-  // ListTile _buildListTileFromDocument(DocumentSnapshot document) => ListTile(
-  //       // leading: (document['accepted'] as bool)
-  //       //     ? Icon(Icons.check_box)
-  //       //     : Icon(Icons.check_box_outline_blank),
-  //       title: Row(
-  //         children: <Widget>[
-  //           Avatar(userId: document.documentID),
-  //           Container(
-  //             width: 10,
-  //           ),
-  //           _buildTitleFromUsername(document.documentID),
-  //           StarRating(
-  //             onChanged: (value) {
-  //               int number = _updateNumberOfRating(document.documentID);
-  //               _updateRating(number, document.documentID, value);
-  //             },
-  //           ),
-  //         ],
-  //       ),
-  //       // trailing: Icon(Icons.arrow_forward),
-  //       // onTap: _navigateToApplicationDetail(document.documentID),
-  //     );
-
-  // _updateNumberOfRating(String uid) async {
-  //   int number;
-  //   await Firestore.instance
-  //       .collection("users")
-  //       .document(uid)
-  //       .get()
-  //       .then((DocumentSnapshot doc) {
-  //     number = doc['numberOfRate'];
-  //     //appliedList.removeWhere((item) => item == widget.id);
-  //   });
-  //   await Firestore.instance.collection('users').document(uid).updateData({
-  //     "numberOfRate": number
-  //     //FieldValue.arrayRemove(new List)
-  //   });
-  //   return number;
-  // }
-
-  // _updateRating(int number, String uid, int value) async {
-  //   num rate;
-  //   await Firestore.instance
-  //       .collection("users")
-  //       .document(uid)
-  //       .get()
-  //       .then((DocumentSnapshot doc) {
-  //     rate = doc['rating'];
-  //     //appliedList.removeWhere((item) => item == widget.id);
-  //   });
-  //   if (rate == 0) {
-  //     rate = value;
-  //   } else {
-  //     rate = (rate + value) / number;
-  //   }
-  //   await Firestore.instance.collection('users').document(uid).updateData({
-  //     "rating": rate
-  //     //FieldValue.arrayRemove(new List)
-  //   });
-  // }
-
-  // FutureBuilder<DocumentSnapshot> _buildTitleFromUsername(String uid) =>
-  //     FutureBuilder<DocumentSnapshot>(
-  //       future: Firestore.instance.collection('users').document(uid).get(),
-  //       builder:
-  //           (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-  //         if (snapshot.hasError) return Text('Error: ${snapshot.error}');
-  //         switch (snapshot.connectionState) {
-  //           case ConnectionState.waiting:
-  //             return Row(
-  //               children: <Widget>[CircularProgressIndicator()],
-  //             );
-  //           default:
-  //             return Text(snapshot.data['name']);
-  //         }
-  //       },
-  //     );
-
-  // VoidCallback _navigateToApplicationDetail(String applicantId) => () {
-  //       Navigator.push(
-  //         context,
-  //         MaterialPageRoute(
-  //           builder: (context) => ApplicationDetail(
-  //             taskId: taskId,
-  //             applicantId: applicantId,
-  //           ),
-  //         ),
-  //       );
-  //     };
+  VoidCallback _navigateToApplicationDetail(
+          String applicantId, String taskId) =>
+      () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ApplicationDetail(
+              taskId: taskId,
+              applicantId: applicantId,
+              // navigateBack: widget.navigateBack,
+            ),
+          ),
+        );
+      };
 }

@@ -13,6 +13,7 @@ class ApplicationDetail extends StatefulWidget {
 
 class _ApplicationDetailState extends State<ApplicationDetail> {
   bool _acceptPressed = false;
+  bool _rejectPressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -61,11 +62,98 @@ class _ApplicationDetailState extends State<ApplicationDetail> {
                       color: _buildColor(snapshot.data['accepted']),
                     ),
                   ),
+                  snapshot.data['accepted']
+                      ? null
+                      : Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: RaisedButton(
+                            onPressed: () {
+                              this._rejectPressed
+                                  ? null
+                                  : _rejectDelAndGoBack();
+                            },
+                            child: Text("Reject"),
+                            color: Colors.deepOrange,
+                          ),
+                        ),
                 ],
               );
           }
         },
       );
+
+  Future<void> _rejectDelAndGoBack() async {
+    setState(() {
+      this._rejectPressed = true;
+    });
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Warning'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Reject is irreversible!'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+                child: Text(
+                  'REJECT THIS APPLICANT',
+                  style: TextStyle(color: Colors.red),
+                ),
+                onPressed: () {
+                  _updateRemoteData();
+                }),
+            FlatButton(
+              child: Text('CANCEL'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _updateRemoteData() {
+    _deleteApplicantFromFirestore()
+        .then((_) => _deleteFromUserSide())
+        .then((_) {
+          setState(() {
+            this._rejectPressed = false;
+          });
+        })
+        .then((_) => Navigator.of(context).pop())
+        .then((_) => Navigator.of(context).pop())
+        // .then((_) => Navigator.popUntil(
+        //     context, (Route<dynamic> route) => route.isFirst))
+        .then((_) => print("Finish"));
+  }
+
+  Future<void> _deleteApplicantFromFirestore() async {
+    await Firestore.instance
+        .collection('tasks')
+        .document(widget.taskId)
+        .collection("applicants")
+        .document(widget.applicantId)
+        .delete();
+  }
+
+  Future<void> _deleteFromUserSide() async {
+    await Firestore.instance
+        .collection('users')
+        .document(widget.applicantId)
+        .updateData({
+      'applied': FieldValue.arrayRemove([
+        widget.taskId,
+      ])
+    });
+  }
 
   VoidCallback _buildOnpressed(bool accepted) => () {
         setState(() {

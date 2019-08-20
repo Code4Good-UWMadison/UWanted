@@ -20,6 +20,7 @@ class PostToManage extends StatelessWidget {
     @required this.auth,
     @required this.user,
     @required this.showAlertDialog,
+    @required this.naviDetails,
   });
   final title;
   final taskId;
@@ -28,6 +29,7 @@ class PostToManage extends StatelessWidget {
   final BaseAuth auth;
   final User user;
   final Function(String) showAlertDialog;
+  final Function(String, String) naviDetails;
   final Firestore db = Firestore.instance;
 
   @override
@@ -114,7 +116,7 @@ class PostToManage extends StatelessWidget {
                   ),
                 ],
               )),
-          Container(padding: const EdgeInsets.all(10.0), child: _buildReview()),
+          _buildAppList(),
         ]));
   }
 
@@ -146,7 +148,7 @@ class PostToManage extends StatelessWidget {
             default:
               return ListView(
                 children: snapshot.data.documents
-                    .map(_buildListTileFromDocument)
+                    .map(_buildReviewListTileFromDocument)
                     .toList(),
                 shrinkWrap: true,
               );
@@ -154,17 +156,15 @@ class PostToManage extends StatelessWidget {
         },
       );
 
-  ListTile _buildListTileFromDocument(DocumentSnapshot document) => ListTile(
-        // leading: (document['accepted'] as bool)
-        //     ? Icon(Icons.check_box)
-        //     : Icon(Icons.check_box_outline_blank),
+  ListTile _buildReviewListTileFromDocument(DocumentSnapshot document) =>
+      ListTile(
         title: Row(
           children: <Widget>[
             Avatar(userId: document.documentID),
             Container(
               width: 10,
             ),
-            _buildTitle(document.documentID),
+            _buildReviewTile(document.documentID),
           ],
         ),
         // trailing: Icon(Icons.arrow_forward),
@@ -180,19 +180,6 @@ class PostToManage extends StatelessWidget {
       reviewed = doc['reviewed'];
     });
   }
-
-  // _getRating(String uid) {
-  //   Firestore.instance
-  //       .collection("users")
-  //       .document(uid)
-  //       .get()
-  //       .then((DocumentSnapshot doc) {
-  //     rate = doc['rating'].toInt();
-  //     print("GET Rate" + rate.toString());
-  //     //appliedList.removeWhere((item) => item == widget.id);
-  //   });
-  //   return rate;
-  // }
 
   _updateNumberOfRating(String uid) async {
     // int number;
@@ -236,7 +223,7 @@ class PostToManage extends StatelessWidget {
         .updateData({"reviewed": true});
   }
 
-  FutureBuilder<DocumentSnapshot> _buildTitle(String uid) =>
+  FutureBuilder<DocumentSnapshot> _buildReviewTile(String uid) =>
       FutureBuilder<DocumentSnapshot>(
         future: Firestore.instance.collection('users').document(uid).get(),
         builder:
@@ -259,7 +246,6 @@ class PostToManage extends StatelessWidget {
                       changeStar: (value) {
                         setState(() {
                           rate = rate.toInt();
-                          print("2REVIEWED:" + reviewed.toString());
                           _checkReviewed()
                               .then((_) => reviewed
                                   ? null
@@ -268,7 +254,6 @@ class PostToManage extends StatelessWidget {
                               .then((_) => rate = rate.toInt())
                               .then((_) => print("RATE" + rate.toString()));
                           reviewed = reviewed;
-                          print("3REVIEWED:" + reviewed.toString());
                         });
                       },
                     );
@@ -295,4 +280,86 @@ class PostToManage extends StatelessWidget {
           }
         },
       );
+
+  StreamBuilder<QuerySnapshot> _buildSelect() => StreamBuilder<QuerySnapshot>(
+        stream: Firestore.instance
+            .collection('tasks')
+            .document(this.taskId)
+            .collection('applicants')
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            default:
+              return ListView(
+                children: snapshot.data.documents
+                    .map(_buildSelectListTileFromDocument)
+                    .toList(),
+                shrinkWrap: true,
+              );
+          }
+        },
+      );
+
+  ListTile _buildSelectListTileFromDocument(DocumentSnapshot document) =>
+      ListTile(
+        leading: (document['accepted'] as bool) ? Icon(Icons.check_box) : null,
+        title: Row(
+          children: <Widget>[
+            Avatar(userId: document.documentID),
+            Container(
+              width: 10,
+            ),
+            _buildSelectTile(document.documentID),
+          ],
+        ),
+        trailing: Icon(Icons.arrow_forward),
+        onTap: naviDetails(document.documentID, this.taskId),
+      );
+
+  FutureBuilder<DocumentSnapshot> _buildSelectTile(String uid) =>
+      FutureBuilder<DocumentSnapshot>(
+          future: Firestore.instance.collection('users').document(uid).get(),
+          builder:
+              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Row(
+                  children: <Widget>[CircularProgressIndicator()],
+                );
+              default:
+                rate = snapshot.data['rating'].toInt();
+                return Row(children: <Widget>[
+                  Text(snapshot.data['name']),
+                ]);
+            }
+          });
+
+  FutureBuilder<DocumentSnapshot> _buildAppList() =>
+      FutureBuilder<DocumentSnapshot>(
+          future: Firestore.instance
+              .collection('tasks')
+              .document(this.taskId)
+              .get(),
+          builder:
+              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.hasError) return Text('Error: ${snapshot.error}');
+            switch (snapshot.connectionState) {
+              case ConnectionState.waiting:
+                return Row(
+                  children: <Widget>[CircularProgressIndicator()],
+                );
+              default:
+                String status = snapshot.data['status'];
+                return Container(
+                    padding: const EdgeInsets.all(10.0),
+                    child:
+                        status == "finished" ? _buildReview() : _buildSelect());
+            }
+          });
 }
