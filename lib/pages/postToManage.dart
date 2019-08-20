@@ -32,88 +32,93 @@ class PostToManage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ScreenUtil.instance = ScreenUtil(width: 640, height: 1136)..init(context);
     return Card(
-        child: Container(
-            padding: const EdgeInsets.only(top: 5.0),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      title,
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
-                    StatusTag.fromString(this.status),
-                  ],
-                ),
-                // Column(children: <Widget>[_buildReview(this.taskId)],),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    RaisedButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Text("Details",
-                            style:
-                                TextStyle(color: Colors.blue, fontSize: 14.0)),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => DetailedPage(
-                                        title: title,
-                                        id: taskId,
-                                        currUserId: userId,
-                                        auth: auth,
-                                        withdrawlButton: false,
-                                      )));
-                        }),
-                    RaisedButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Text("Edit",
-                            style:
-                                TextStyle(color: Colors.blue, fontSize: 14.0)),
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RequestForm(
-                                  needUpdate: true,
-                                  postId: taskId,
-                                ),
-                              ));
-                        }),
-                    RaisedButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                        child: Text('Delete',
-                            style:
-                                TextStyle(color: Colors.blue, fontSize: 14.0)),
-                        onPressed: () {
-                          showAlertDialog(this.taskId);
-                        }),
-                    RaisedButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
+        child: Column(
+            // mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+          Container(
+              padding: const EdgeInsets.only(top: 5.0),
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        title,
+                        style: TextStyle(
+                            fontSize: 30, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.center,
                       ),
-                      child: Text('Archive',
-                          style: TextStyle(color: Colors.blue, fontSize: 14.0)),
-                      onPressed: _archiveRequest,
-                    ),
-                  ],
-                ),
-              ],
-            )));
+                      StatusTag.fromString(this.status),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      RaisedButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          child: Text("Details",
+                              style: TextStyle(
+                                  color: Colors.blue, fontSize: 14.0)),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => DetailedPage(
+                                          title: title,
+                                          id: this.taskId,
+                                          currUserId: userId,
+                                          auth: auth,
+                                          withdrawlButton: false,
+                                        )));
+                          }),
+                      RaisedButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          child: Text("Edit",
+                              style: TextStyle(
+                                  color: Colors.blue, fontSize: 14.0)),
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => RequestForm(
+                                    needUpdate: true,
+                                    postId: this.taskId,
+                                  ),
+                                ));
+                          }),
+                      RaisedButton(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                          ),
+                          child: Text('Delete',
+                              style: TextStyle(
+                                  color: Colors.blue, fontSize: 14.0)),
+                          onPressed: () {
+                            showAlertDialog(this.taskId);
+                          }),
+                      RaisedButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                        child: Text('Archive',
+                            style:
+                                TextStyle(color: Colors.blue, fontSize: 14.0)),
+                        onPressed: _archiveRequest,
+                      ),
+                    ],
+                  ),
+                ],
+              )),
+          Container(padding: const EdgeInsets.all(10.0), child: _buildReview()),
+        ]));
   }
-   //change status to finished
+
+  //change status to finished
   _archiveRequest() {
     db
         .collection('tasks')
@@ -121,54 +126,13 @@ class PostToManage extends StatelessWidget {
         .updateData({'status': 'finished'});
   }
 
-  
-  // Future<void> _updateRemoteUserPosts() => db
-  //     .collection('users')
-  //     .document(this.userId)
-  //     .updateData({'posts': _getUncheckedList()});
-
-  // Future<void> _updateWidgetPosts() => db
-  //         .collection('users')
-  //         .document(this.userId)
-  //         .get()
-  //         .then((DocumentSnapshot document) {
-  //       setState(() {
-  //         widget.posts.clear();
-  //         widget.posts.addAll(List.from(document['posts']));
-  //       });
-  //     });
-
-  // Future<void> _updateThisPosts() async {
-  //   setState(() {
-  //     this.posts = new Map<String, Map<String, dynamic>>();
-  //   });
-  //   widget.posts.forEach((String uid) {
-  //     db
-  //         .collection('tasks')
-  //         .document(uid)
-  //         .get()
-  //         .then((DocumentSnapshot document) {
-  //       setState(() {
-  //         this.posts[uid] = {
-  //           'uid': uid,
-  //           'title': document['title'],
-  //           'isChecked': false,
-  //           'status': document['status'],
-  //         };
-  //       });
-  //     });
-  //   });
-  // }
-
-  // Future<void> _showSnackbarThenWait1sec(String msg) async {
-  //   this.keyForSnack.currentState.showSnackBar(SnackBar(content: Text(msg)));
-  // }
-
-  StreamBuilder<QuerySnapshot> _buildReview(taskId) =>
-      StreamBuilder<QuerySnapshot>(
+  int number = 0;
+  bool reviewed = false;
+  num rate = 0;
+  StreamBuilder<QuerySnapshot> _buildReview() => StreamBuilder<QuerySnapshot>(
         stream: Firestore.instance
             .collection('tasks')
-            .document(taskId)
+            .document(this.taskId)
             .collection('applicants')
             .where('accepted', isEqualTo: true)
             .snapshots(),
@@ -184,6 +148,7 @@ class PostToManage extends StatelessWidget {
                 children: snapshot.data.documents
                     .map(_buildListTileFromDocument)
                     .toList(),
+                shrinkWrap: true,
               );
           }
         },
@@ -199,38 +164,54 @@ class PostToManage extends StatelessWidget {
             Container(
               width: 10,
             ),
-            _buildTitleFromUsername(document.documentID),
-            StarRating(
-              onChanged: (value) {
-                int number = _updateNumberOfRating(document.documentID);
-                _updateRating(number, document.documentID, value);
-              },
-            ),
+            _buildTitle(document.documentID),
           ],
         ),
         // trailing: Icon(Icons.arrow_forward),
         // onTap: _navigateToApplicationDetail(document.documentID),
       );
 
+  _checkReviewed() async {
+    await db
+        .collection("tasks")
+        .document(this.taskId)
+        .get()
+        .then((DocumentSnapshot doc) {
+      reviewed = doc['reviewed'];
+    });
+  }
+
+  // _getRating(String uid) {
+  //   Firestore.instance
+  //       .collection("users")
+  //       .document(uid)
+  //       .get()
+  //       .then((DocumentSnapshot doc) {
+  //     rate = doc['rating'].toInt();
+  //     print("GET Rate" + rate.toString());
+  //     //appliedList.removeWhere((item) => item == widget.id);
+  //   });
+  //   return rate;
+  // }
+
   _updateNumberOfRating(String uid) async {
-    int number;
+    // int number;
     await Firestore.instance
         .collection("users")
         .document(uid)
         .get()
         .then((DocumentSnapshot doc) {
-      number = doc['numberOfRate'];
+      number = doc['numberOfRate'] + 1;
       //appliedList.removeWhere((item) => item == widget.id);
     });
     await Firestore.instance.collection('users').document(uid).updateData({
       "numberOfRate": number
       //FieldValue.arrayRemove(new List)
     });
-    return number;
+    // return number;
   }
 
-  _updateRating(int number, String uid, int value) async {
-    num rate;
+  _updateRating(String uid, int value) async {
     await Firestore.instance
         .collection("users")
         .document(uid)
@@ -239,18 +220,23 @@ class PostToManage extends StatelessWidget {
       rate = doc['rating'];
       //appliedList.removeWhere((item) => item == widget.id);
     });
-    if (rate == 0) {
+    if (number == 1) {
       rate = value;
     } else {
-      rate = (rate + value) / number;
+      rate = (rate * (number - 1) + value) / number;
     }
+    print("UPDATE RATE" + rate.toString());
     await Firestore.instance.collection('users').document(uid).updateData({
       "rating": rate
       //FieldValue.arrayRemove(new List)
     });
+    await db
+        .collection('tasks')
+        .document(this.taskId)
+        .updateData({"reviewed": true});
   }
 
-  FutureBuilder<DocumentSnapshot> _buildTitleFromUsername(String uid) =>
+  FutureBuilder<DocumentSnapshot> _buildTitle(String uid) =>
       FutureBuilder<DocumentSnapshot>(
         future: Firestore.instance.collection('users').document(uid).get(),
         builder:
@@ -262,7 +248,50 @@ class PostToManage extends StatelessWidget {
                 children: <Widget>[CircularProgressIndicator()],
               );
             default:
-              return Text(snapshot.data['name']);
+              rate = snapshot.data['rating'].toInt();
+              return Row(
+                children: <Widget>[
+                  Text(snapshot.data['name']),
+                  StatefulBuilder(builder: (context, setState) {
+                    return StarRating(
+                      value: rate,
+                      reviewed: reviewed,
+                      changeStar: (value) {
+                        setState(() {
+                          rate = rate.toInt();
+                          print("2REVIEWED:" + reviewed.toString());
+                          _checkReviewed()
+                              .then((_) => reviewed
+                                  ? null
+                                  : _updateNumberOfRating(uid)
+                                      .then((_) => _updateRating(uid, value)))
+                              .then((_) => rate = rate.toInt())
+                              .then((_) => print("RATE" + rate.toString()));
+                          reviewed = reviewed;
+                          print("3REVIEWED:" + reviewed.toString());
+                        });
+                      },
+                    );
+                  }),
+                  FutureBuilder<DocumentSnapshot>(
+                      future:
+                          db.collection("tasks").document(this.taskId).get(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<DocumentSnapshot> taskshot) {
+                        if (taskshot.hasError)
+                          return Text('Error: ${taskshot.error}');
+                        switch (taskshot.connectionState) {
+                          case ConnectionState.waiting:
+                            return Row(
+                              children: <Widget>[CircularProgressIndicator()],
+                            );
+                          default:
+                            reviewed = taskshot.data['reviewed'];
+                            return reviewed ? Text("  Reviewed") : Text("");
+                        }
+                      })
+                ],
+              );
           }
         },
       );

@@ -43,18 +43,20 @@ class StarDisplayWidget extends StatelessWidget {
 }
 
 class StarRating extends StatelessWidget {
-  final void Function(int index) onChanged;
+  final void Function(int index) changeStar;
   final int value;
   final IconData filledStar;
   final IconData unfilledStar;
   final double size;
   final Color color;
   final int marginFactor;
+  final bool reviewed;
 
   const StarRating({
     Key key,
-    @required this.onChanged,
-    this.value = 0,
+    @required this.changeStar,
+    @required this.value,
+    @required this.reviewed,
     this.filledStar,
     this.unfilledStar,
     this.color = Colors.orange,
@@ -65,32 +67,35 @@ class StarRating extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(5, (index) {
-        return RawMaterialButton(
-          child: Icon(
-            index < value
-                ? filledStar ?? Icons.star
-                : unfilledStar ?? Icons.star_border,
-            color: color,
-            size: size,
-          ),
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: CircleBorder(),
-          constraints: BoxConstraints.expand(
-              width: size - size / marginFactor, height: size),
-          padding: EdgeInsets.zero,
-          highlightColor: Colors.transparent,
-          splashColor: Colors.transparent,
-          onPressed: onChanged != null
-              ? () {
-                  onChanged(value == index + 1 ? index : index + 1);
-                }
-              : null,
-        );
-      }),
-    );
+    return Row(children: <Widget>[
+      Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(5, (index) {
+          return RawMaterialButton(
+            child: Icon(
+              index < value
+                  ? filledStar ?? Icons.star
+                  : unfilledStar ?? Icons.star_border,
+              color: color,
+              size: size,
+            ),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: CircleBorder(),
+            constraints: BoxConstraints.expand(
+                width: size - size / marginFactor, height: size),
+            padding: EdgeInsets.zero,
+            highlightColor: Colors.transparent,
+            splashColor: Colors.transparent,
+            onPressed: changeStar != null
+                ? () {
+                    changeStar(value == index + 1 ? index : index + 1);
+                  }
+                : null,
+          );
+        }),
+      ),
+      this.reviewed ? Text("Reviewed") : Text(""),
+    ]);
   }
 }
