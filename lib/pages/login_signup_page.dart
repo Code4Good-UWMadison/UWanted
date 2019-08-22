@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 
@@ -106,6 +108,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
     return new Scaffold(
         body: Stack(
           children: <Widget>[
+            _permissionForm(),
             _showBody(),
             _showCircularProgress(),
           ],
@@ -265,5 +268,32 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
             onPressed: _validateAndSubmit,
           ),
         ));
+  }
+
+  Widget _permissionForm() {
+    return new AlertDialog(
+      title: new Text("You need to read and agree the following to continue"),
+      content: new Container(
+                  child: new SingleChildScrollView(
+                    child: new Text("Test",
+                      style: new TextStyle(fontSize: 30.0),
+                    ),
+                  ),
+                ),
+      actions: <Widget>[
+            new FlatButton(
+              child: new Text("CONTINUE"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            new FlatButton(
+              child: new Text("QUIT"),
+              onPressed: () {
+                exit(0);
+              },
+            )
+          ],
+    );
   }
 }
