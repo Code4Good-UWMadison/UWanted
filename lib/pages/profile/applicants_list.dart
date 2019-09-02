@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/pages/profile/application_detail.dart';
 // import 'package:firebase_storage/firebase_storage.dart';
 import 'package:thewanted/pages/components/avatar.dart';
+import 'package:thewanted/pages/profile/starRating.dart';
 
 class ApplicantsList extends StatefulWidget {
   ApplicantsList({@required this.taskId});
@@ -76,7 +77,8 @@ class _ApplicantsListState extends State<ApplicantsList> {
             Container(
               width: 10,
             ),
-            _buildTitleFromUsername(document.documentID)
+            _buildTitleFromUsername(document.documentID),
+            StarDisplayWidget(value: document.data['rating'],),
           ],
         ),
         trailing: Icon(Icons.arrow_forward),

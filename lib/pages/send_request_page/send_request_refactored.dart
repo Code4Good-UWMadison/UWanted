@@ -136,6 +136,7 @@ class _RequestFormState extends State<RequestForm> {
         'created': DateTime.now(),
         'updated': DateTime.now(),
         'status': 'open',
+        'reviewed': 'false',
       }).then((foo) {
         Firestore.instance
             .collection('users')

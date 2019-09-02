@@ -42,7 +42,7 @@ class _ProfilePageState extends State<ProfilePage> {
   List<bool> _expansionStatus = [true, false, false];
   User user;
   File _image;
-  String _imageUrl;
+  // String _imageUrl;
   bool _confirmed;
 
   @override
@@ -169,7 +169,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _image = null;
-    _imageUrl = null;
+    // _imageUrl = null;
     // init profile's url
     // FirebaseStorage.instance
     //     .ref()
@@ -483,7 +483,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     setState(() {
       _confirmed = false;
-      _imageUrl = null;
+      // _imageUrl = null;
       _image = image;
       print('Image Path $_image');
     });
