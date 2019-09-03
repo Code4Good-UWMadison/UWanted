@@ -73,7 +73,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
             _errorMessage = e.details;
           } else
             print("WRONG");
-            _errorMessage = e.message;
+          _errorMessage = e.message;
         });
       }
     }
@@ -91,6 +91,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
     _errorMessage = "";
     setState(() {
       _formMode = FormMode.SIGNUP;
+      _permissionForm();
     });
   }
 
@@ -107,12 +108,11 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
     _isIos = Theme.of(context).platform == TargetPlatform.iOS;
     return new Scaffold(
         body: Stack(
-          children: <Widget>[
-            _permissionForm(),
-            _showBody(),
-            _showCircularProgress(),
-          ],
-        ));
+      children: <Widget>[
+        _showBody(),
+        _showCircularProgress(),
+      ],
+    ));
   }
 
   Widget _showCircularProgress() {
@@ -270,17 +270,23 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
         ));
   }
 
-  Widget _permissionForm() {
-    return new AlertDialog(
-      title: new Text("You need to read and agree the following to continue"),
-      content: new Container(
-                  child: new SingleChildScrollView(
-                    child: new Text("Test",
-                      style: new TextStyle(fontSize: 30.0),
-                    ),
-                  ),
-                ),
-      actions: <Widget>[
+  _permissionForm() {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title:
+              new Text("You need to read and agree the following to continue"),
+          content: new Container(
+            child: new SingleChildScrollView(
+              child: new Text(
+                "Test",
+                style: new TextStyle(fontSize: 30.0),
+              ),
+            ),
+          ),
+          actions: <Widget>[
             new FlatButton(
               child: new Text("CONTINUE"),
               onPressed: () {
@@ -294,6 +300,8 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
               },
             )
           ],
+        );
+      },
     );
   }
 }
