@@ -246,8 +246,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
   void _valueStdChanged(bool value) => setState(() => _valueStd = value);
 
   Widget _showIdCheckboxes() {
-    return (_formMode == FormMode.SIGNUP) ? new 
-      Container(
+    return (_formMode == FormMode.SIGNUP) ? new Container(
         //padding: new EdgeInsets.all(16.0),
         child: new Center(
           child: new Column(
@@ -256,7 +255,9 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
               new CheckboxListTile(value: _valueFac, onChanged: _valueFacChanged, title:Text("Faculty")),
               new CheckboxListTile(value: _valueStd, onChanged: _valueStdChanged, title:Text("Student")),
             ],
-    ),),):Container();
+          ),
+        ),
+    ) : Container();
   }
 
   Widget _showSecondaryButton() {

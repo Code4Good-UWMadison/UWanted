@@ -35,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _checkIdentityVerification();
     _checkEmailVerification();
     _selectedIndex = 0;
     _getUserProfileFromFirebase();
@@ -162,6 +163,10 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
+  void _checkIdentityVerification() {
+    
+  }
+
   bool _isEmailVerified = false;
 
   void _checkEmailVerification() async {
@@ -206,6 +211,7 @@ class _HomePageState extends State<HomePage> {
 
   void _showVerifyEmailSentDialog() {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         // return object of type Dialog
