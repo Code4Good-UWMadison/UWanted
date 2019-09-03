@@ -142,16 +142,24 @@ class _ApplyButtonState extends State<ApplyButton> {
               _updateProfileApplied(uid);
             }
           }).then((_) {
-            showInSnackBar('sdfadsfadsfadsfadsfa'); //TODO: showsnackbar!!!
+            showInSnackBar('Success!'); //TODO: showsnackbar!!!
           });
         }
       }).catchError((e) {
-        widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e)));
+        print(e);
+        widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e))); //TODO: showsnackbar!!!
       });
 
+  //TODO: showsnackbar!!!
+  // not figure out how to display snackbar yet, none of these work
+  // Reason: After submitting the application, the details page will be redrawn, 
+  // causing the change of context and key, but the widget created before cannot know 
+  // the key created now, thus cannot display snackbar on current Scaffold
   void showInSnackBar(String value) {
     widget.parentKey.currentState
-        .showSnackBar(new SnackBar(content: new Text(value)));
+        .showSnackBar(SnackBar(content: Text(value)));
+    // Scaffold.of(context).showSnackBar(SnackBar(content: Text(value)));
+    // Scaffold.of(widget.context).showSnackBar(SnackBar(content: Text(value)));
   }
 
   Future<bool> _checkIfApplied(String uid) async =>
@@ -179,13 +187,15 @@ class _ApplyButtonState extends State<ApplyButton> {
       .then((DocumentSnapshot document) =>
           document['rating'] >= widget.request.leastRating);
 
-  Future<bool> _checkIfNotFull() => Firestore.instance
-      .collection('tasks')
-      .document(widget.taskId)
-      .collection('applicants')
-      .getDocuments()
-      .then((QuerySnapshot snapshot) =>
-          snapshot.documents.length < widget.request.maximumApplicants);
+  Future<bool> _checkIfNotFull() => widget.request.maximumApplicants < 0
+      ? Future(() => true)
+      : Firestore.instance
+          .collection('tasks')
+          .document(widget.taskId)
+          .collection('applicants')
+          .getDocuments()
+          .then((QuerySnapshot snapshot) =>
+              snapshot.documents.length < widget.request.maximumApplicants);
 
   Future<String> _showRatingNotEnoughDialog() async => showDialog<String>(
         context: widget.context,
