@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 
+
 class LoginSignUpPage extends StatefulWidget {
   LoginSignUpPage({this.auth, this.onSignedIn});
 
@@ -159,6 +160,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
               _showLogo(),
               _showEmailInput(),
               _showPasswordInput(),
+              _showIdCheckboxes(),
               _showPrimaryButton(),
               _showSecondaryButton(),
               _showErrorMessage(),
@@ -234,6 +236,27 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
         onSaved: (value) => _password = value,
       ),
     );
+  }
+
+
+  bool _valueFac = false;
+  bool _valueStd = false;
+
+  void _valueFacChanged(bool value) => setState(() => _valueFac = value);
+  void _valueStdChanged(bool value) => setState(() => _valueStd = value);
+
+  Widget _showIdCheckboxes() {
+    return (_formMode == FormMode.SIGNUP) ? new 
+      Container(
+        //padding: new EdgeInsets.all(16.0),
+        child: new Center(
+          child: new Column(
+            //mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              new CheckboxListTile(value: _valueFac, onChanged: _valueFacChanged, title:Text("Faculty")),
+              new CheckboxListTile(value: _valueStd, onChanged: _valueStdChanged, title:Text("Student")),
+            ],
+    ),),):Container();
   }
 
   Widget _showSecondaryButton() {
