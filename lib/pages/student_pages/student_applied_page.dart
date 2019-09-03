@@ -159,58 +159,67 @@ class _StudentAppliedPageState extends State<StudentAppliedPage> {
     }
   }
 
-  List<Widget> _buildAppliedList() => user.applied
-      .map((String uid) => FutureBuilder<DocumentSnapshot>(
-    future: Firestore.instance.collection('tasks').document(uid).get(),
-    builder: (BuildContext context,
-        AsyncSnapshot<DocumentSnapshot> snapshot) {
-      if (snapshot.data != null) {
-        return ListTile(
-          leading: StatusTag.fromString(snapshot.data['status']),
-          title: Text(
-            snapshot.data['title'],
-            style: TextStyle(fontSize: 15),
-          ),
-          trailing: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              FlatButton(
-                child: Icon(Icons.delete),
-                onPressed: () {
-                  if (snapshot.data['status'] == 'closed') {
-                    _deleteAppliedTask(uid);
-                  } else {
-                    _showAlertDialog(uid);
-                  }
+  List<Widget> _buildAppliedList() {
+    var list = List<Widget>();
+    if(user.applied == null || user.applied.length == 0){
+      list.add(Text("Applied list is empty."));
+      return list;
+    }
+    else return user.applied
+        .map((String uid) =>
+        FutureBuilder<DocumentSnapshot>(
+          future: Firestore.instance.collection('tasks').document(uid).get(),
+          builder: (BuildContext context,
+              AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.data != null) {
+              return ListTile(
+                leading: StatusTag.fromString(snapshot.data['status']),
+                title: Text(
+                  snapshot.data['title'],
+                  style: TextStyle(fontSize: 15),
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    FlatButton(
+                      child: Icon(Icons.delete),
+                      onPressed: () {
+                        if (snapshot.data['status'] == 'closed') {
+                          _deleteAppliedTask(uid);
+                        } else {
+                          _showAlertDialog(uid);
+                        }
+                      },
+                    ),
+                    Icon(Icons.arrow_forward),
+                  ],
+                ),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            DetailedPage(
+                              title: snapshot.data['title'],
+                              id: uid,
+                              currUserId: widget.userId,
+                              auth: widget.auth,
+                              withdrawlButton: true,
+                            ),
+                      )).then((_) {
+                    setState(() {
+                      _getRemoteUserData(_);
+                    });
+                  });
                 },
-              ),
-              Icon(Icons.arrow_forward),
-            ],
-          ),
-          onTap: () {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DetailedPage(
-                    title: snapshot.data['title'],
-                    id: uid,
-                    currUserId: widget.userId,
-                    auth: widget.auth,
-                    withdrawlButton: true,
-                  ),
-                )).then((_) {
-              setState(() {
-                _getRemoteUserData(_);
-              });
-            });
+              );
+            } else {
+              return CircularProgressIndicator();
+            }
           },
-        );
-      } else {
-        return CircularProgressIndicator();
-      }
-    },
-  ))
-      .toList();
+        ))
+        .toList();
+  }
 
   Future<void> _showAlertDialog(String uid) async {
     return showDialog<void>(
