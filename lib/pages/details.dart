@@ -19,6 +19,8 @@ class Request {
   bool app;
   bool others;
   final String status;
+  double leastRating;
+  int maximumApplicants;
 
   Request({
     this.userId,
@@ -32,6 +34,8 @@ class Request {
     this.others,
     this.requestTitle,
     @required this.status,
+    @required this.leastRating,
+    @required this.maximumApplicants, // set to negative if don't want this limit
   });
 }
 
@@ -84,6 +88,8 @@ class DetailedPage extends StatefulWidget {
           others: document.data['Other'],
           status: document['status'],
           requestTitle: document.data['title'],
+          leastRating: document.data['leastRating'],
+          maximumApplicants: document.data['maximumApplicants'],
         );
         return req;
       }
@@ -137,6 +143,8 @@ class _DetailedPageState extends State<DetailedPage> {
           others: document.data['Other'],
           status: document['status'],
           requestTitle: widget.title,
+          leastRating: document.data['leastRating'],
+          maximumApplicants: document.data['maximumApplicants'],
         );
 
         setState(() {
@@ -284,8 +292,7 @@ class _DetailedPageState extends State<DetailedPage> {
     );
 
     final GlobalKey<ScaffoldState> _scaffoldKey =
-    new GlobalKey<ScaffoldState>();
-
+        new GlobalKey<ScaffoldState>();
 
     var contactInfo = Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -293,8 +300,8 @@ class _DetailedPageState extends State<DetailedPage> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: 10, bottom: 10),
-          child: Text('Contact Info',
-              style: Theme.of(context).textTheme.subtitle),
+          child:
+              Text('Contact Info', style: Theme.of(context).textTheme.subtitle),
         ),
 
         Material(
@@ -321,7 +328,9 @@ class _DetailedPageState extends State<DetailedPage> {
             taskId: widget.id,
             status: this.request.status,
             context: context,
-            parentKey: _scaffoldKey)
+            parentKey: _scaffoldKey,
+            request: this.request,
+            )
 //        FlatButton(
 //          onPressed: () {
 //            Navigator.push(

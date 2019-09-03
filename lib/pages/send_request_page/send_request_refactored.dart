@@ -3,6 +3,7 @@ import '../../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../details.dart';
 import 'requestLabel.dart';
+import 'package:thewanted/pages/send_request_page/filter.dart';
 
 class RequestForm extends StatefulWidget {
   RequestForm(
@@ -32,6 +33,7 @@ class _RequestFormState extends State<RequestForm> {
   TextEditingController _controllerRequestTitle;
   TextEditingController _controllerDetail;
   TextEditingController _controllerContact;
+  TextEditingController _controllerMaxApp;
 
   @override
   void initState() {
@@ -49,12 +51,14 @@ class _RequestFormState extends State<RequestForm> {
     _controllerRequestTitle = TextEditingController();
     _controllerDetail = TextEditingController();
     _controllerContact = TextEditingController();
+    _controllerMaxApp = TextEditingController();
   }
 
   _clearController() {
     _controllerContact.clear();
     _controllerDetail.clear();
     _controllerRequestTitle.clear();
+    _controllerMaxApp.clear();
   }
 
   @override
@@ -63,6 +67,7 @@ class _RequestFormState extends State<RequestForm> {
     _controllerRequestTitle.dispose();
     _controllerDetail.dispose();
     _controllerContact.dispose();
+    _controllerMaxApp.dispose();
   }
 
   _initRequestFields() {
@@ -78,6 +83,8 @@ class _RequestFormState extends State<RequestForm> {
       others: false,
       status: "open",
       requestTitle: "",
+      leastRating: 0.0,
+      maximumApplicants: -1,
     );
   }
 
@@ -98,6 +105,8 @@ class _RequestFormState extends State<RequestForm> {
         'App': myRequest.app,
         'Other': myRequest.others,
         'updated': DateTime.now(),
+        'leastRating': myRequest.leastRating,
+        'maximumApplicants': myRequest.maximumApplicants,
       })
             ..then((_) {
               showDialog(
@@ -139,6 +148,8 @@ class _RequestFormState extends State<RequestForm> {
         'updated': DateTime.now(),
         'status': 'open',
         'reviewed': 'false',
+        'leastRating': myRequest.leastRating,
+        'maximumApplicants': myRequest.maximumApplicants,
       }).then((foo) {
         Firestore.instance
             .collection('users')
@@ -222,12 +233,15 @@ class _RequestFormState extends State<RequestForm> {
           others: document.data['Other'],
           status: document.data['status'],
           requestTitle: document.data["title"],
+          leastRating: document.data['leastRating'],
+          maximumApplicants: document.data['maximumApplicants'],
         );
         setState(() {
           myRequest = req;
           _controllerRequestTitle.text = myRequest.requestTitle;
           _controllerDetail.text = myRequest.description;
           _controllerContact.text = myRequest.contact;
+          _controllerMaxApp.text = myRequest.maximumApplicants.toString();
         });
       }
     });
@@ -261,6 +275,10 @@ class _RequestFormState extends State<RequestForm> {
     });
     _controllerContact.addListener(() {
       myRequest.contact = _controllerContact.text;
+    });
+    _controllerMaxApp.addListener(() {
+      myRequest.maximumApplicants = int.tryParse(_controllerMaxApp.text) ??
+        (_controllerMaxApp.text.isEmpty ? -1 : myRequest.maximumApplicants);
     });
     if (myRequest == null && widget.needUpdate == true) {
       return Center(
@@ -506,6 +524,11 @@ class _RequestFormState extends State<RequestForm> {
                   ),
                 ), //TextField
               ), //Material
+            ),
+            SizedBox(height: 25.0), //padding
+            Filter(
+              myRequest: myRequest,
+              maxAppController: _controllerMaxApp,
             ),
             SizedBox(height: 25.0), //padding
             MaterialButton(
