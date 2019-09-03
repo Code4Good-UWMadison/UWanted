@@ -11,14 +11,16 @@ class RequestForm extends StatefulWidget {
       this.userId,
       this.needUpdate,
       this.postId,
-      this.goToDashBoard})
+      this.closeRequestForm,
+      this.goToDashboard})
       : super(key: key);
   final BaseAuth auth;
   final String userId;
   final bool
       needUpdate; //indicator of whether to update request instead of creating new one
   final String postId;
-  final Function() goToDashBoard;
+  final Function() closeRequestForm;
+  final Function() goToDashboard;
 
   @override
   State<StatefulWidget> createState() => _RequestFormState();
@@ -270,7 +272,7 @@ class _RequestFormState extends State<RequestForm> {
           ? AppBar(
               title: Text("Edit Post"),
             )
-          : null,
+          : AppBar(title: Text("New Request"),),
       body: ListView(
         // mainAxisSize: MainAxisSize.max,
         // crossAxisAlignment: CrossAxisAlignment.center,
@@ -330,7 +332,7 @@ class _RequestFormState extends State<RequestForm> {
                       Radius.circular(30.0),
                     ),
                     child: TextField(
-                      maxLength: 21,
+                      maxLength: 19,
                       controller: _controllerRequestTitle,
                       decoration: new InputDecoration(
                         hintText: widget.needUpdate ? null : 'Type description',
@@ -520,15 +522,18 @@ class _RequestFormState extends State<RequestForm> {
               splashColor: Colors.blueAccent,
               onPressed: () {
                 if (_validSubmission()) {
+                  print("valid submission");
                   _addOrUpdateRequestInfo();
                   _initRequestFields();
                   if (widget.needUpdate) {
                     Navigator.of(context).pop();
                   } else {
+                    print("submitted");
                     Scaffold.of(context).showSnackBar(
                         _snackBar("Request submitted successfully."));
                     _clearController();
-                    widget.goToDashBoard();
+                    //widget.closeRequestForm();
+                    Navigator.pop(context);
                   }
                 } else {
                   showDialog(

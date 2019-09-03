@@ -10,8 +10,9 @@ import '../pages/drawer.dart';
 import '../pages/faculty_drawer.dart';
 import '../pages/manageposts.dart';
 import 'dart:async';
-
+import 'student_pages/student_applied_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'student_pages/student_profile.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.auth, this.userId, this.onSignedOut})
@@ -34,6 +35,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex;
 
   bool _disableNavi = false;
+
   @override
   void initState() {
     super.initState();
@@ -66,18 +68,18 @@ class _HomePageState extends State<HomePage> {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            content: ListTile(
-              title: Text(message['notification']['title']),
-              subtitle: Text(message['notification']['body']),
-            ),
-            actions: <Widget>[
-              FlatButton(
-                color: Colors.amber,
-                child: Text('Ok'),
-                onPressed: () => Navigator.of(context).pop(),
+                content: ListTile(
+                  title: Text(message['notification']['title']),
+                  subtitle: Text(message['notification']['body']),
+                ),
+                actions: <Widget>[
+                  FlatButton(
+                    color: Colors.amber,
+                    child: Text('Ok'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
               ),
-            ],
-          ),
         );
       },
       onLaunch: (Map<String, dynamic> message) async {
@@ -269,6 +271,7 @@ class _HomePageState extends State<HomePage> {
           });
         },
       ),
+
       ProfilePage(
         userId: widget.userId,
         auth: widget.auth,
@@ -288,6 +291,30 @@ class _HomePageState extends State<HomePage> {
         //   });
         // },
       ),
+
+//      StudentProfilePage(
+//        userId: widget.userId,
+//        auth: widget.auth,
+//        uploading: () {
+//          setState(() {
+//            _disableNavi = true;
+//          });
+//        },
+//        finishUploading: () {
+//          setState(() {
+//            _disableNavi = false;
+//          });
+//        },
+//        // skipToProfile: () {
+//        //   setState(() {
+//        //     _selectedIndex = 2;
+//        //   });
+//        // },
+//      ),
+//      StudentAppliedPage(
+//        userId: widget.userId,
+//        auth: widget.auth,
+//      ),
       // ManagePostsPage(
       //   userId: widget.userId,
       //   auth: widget.auth,
@@ -295,7 +322,8 @@ class _HomePageState extends State<HomePage> {
     ];
     final _pageName = ["Dashboard", "Send Request", "Profile"];
     return new Scaffold(
-      key: _scaffoldKey, // used to add snackbar
+      key: _scaffoldKey,
+      // used to add snackbar
       appBar: new AppBar(
         // automaticallyImplyLeading: false,
         title: new Text(_pageName[_selectedIndex]),
@@ -312,11 +340,11 @@ class _HomePageState extends State<HomePage> {
         child: DrawerPage(userId: widget.userId, auth: widget.auth),
         // child: FacultyDrawerPage(userId: widget.userId, auth: widget.auth),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _newTask, // generate a new task
-      //   tooltip: 'Request',
-      //   child: Icon(Icons.add),
-      // ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _newRequest, // generate a new task
+        tooltip: 'Request',
+        child: Icon(Icons.add),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -337,5 +365,21 @@ class _HomePageState extends State<HomePage> {
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  _newRequest() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => RequestForm(
+                  auth: widget.auth,
+                  userId: widget.userId,
+                  needUpdate: false,
+//                  closeRequestForm: () {
+//                    setState(() {
+//                      Navigator.pop(context);
+//                    });
+//                  },
+                )));
   }
 }
