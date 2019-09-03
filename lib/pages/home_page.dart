@@ -3,13 +3,18 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
-import '../pages/profile.dart';
+// import '../pages/profile.dart';
 import 'send_request_page/send_request_refactored.dart';
 import './dashboard.dart';
 import '../pages/drawer.dart';
+import '../pages/faculty_drawer.dart';
+import '../pages/manageposts.dart';
 import 'dart:async';
-
+import 'student_pages/student_applied_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'student_pages/student_profile.dart';
+
+enum GuestType { STU, FAC }
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.auth, this.userId, this.onSignedOut})
@@ -27,11 +32,13 @@ class _HomePageState extends State<HomePage> {
   final Firestore _db = Firestore.instance;
   final FirebaseMessaging _fcm = FirebaseMessaging();
   StreamSubscription iosSubscription;
+  GuestType guestType;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   int _selectedIndex;
 
   bool _disableNavi = false;
+
   @override
   void initState() {
     super.initState();
@@ -261,46 +268,60 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final _pageOptions = [
+    final _studentPageOptions = [
       DashboardPage(userId: widget.userId, auth: widget.auth),
+      StudentProfilePage(
+        userId: widget.userId,
+        auth: widget.auth,
+        uploading: () {
+          setState(() {
+            _disableNavi = true;
+          });
+        },
+        finishUploading: () {
+          setState(() {
+            _disableNavi = false;
+          });
+        },
+        // skipToProfile: () {
+        //   setState(() {
+        //     _selectedIndex = 2;
+        //   });
+        // },
+      ),
+      StudentAppliedPage(
+        userId: widget.userId,
+        auth: widget.auth,
+      ),
+    ];
+    final _studentPageName = ["Dashboard", "Applied Posts", "Profile"];
+
+    final _facultyPageOptions = [
       RequestForm(
         userId: widget.userId,
         auth: widget.auth,
         needUpdate: false,
-        skipBack: (){
+        goToDashboard: () {
           setState(() {
             _selectedIndex = 0;
           });
         },
-        notFromMyPosts: true,
       ),
-      ProfilePage(
-          userId: widget.userId,
-          auth: widget.auth,
-          uploading: () {
-            setState(() {
-              _disableNavi = true;
-            });
-          },
-          finishUploading: () {
-            setState(() {
-              _disableNavi = false;
-            });
-          }, 
-          // skipToProfile: () {
-          //   setState(() {
-          //     _selectedIndex = 2;
-          //   });
-          // },
-        ),
-          
+      DashboardPage(userId: widget.userId, auth: widget.auth),
+      ManagePostsPage(
+        userId: widget.userId,
+        auth: widget.auth,
+      ),
     ];
-    final _pageName = ["Dashboard", "Send Request", "Profile"];
+    final _facultyPageName = ["Send Request", "Dashboard", "Manage Posts"];
     return new Scaffold(
-      key: _scaffoldKey, // used to add snackbar
+      key: _scaffoldKey,
+      // used to add snackbar
       appBar: new AppBar(
         // automaticallyImplyLeading: false,
-        title: new Text(_pageName[_selectedIndex]),
+        title: new Text(guestType == GuestType.FAC
+            ? _facultyPageName[_selectedIndex]
+            : _studentPageName[_selectedIndex]),
         actions: <Widget>[
           new FlatButton(
             child: new Text('Logout',
@@ -309,15 +330,19 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: _pageOptions[_selectedIndex],
+      body: guestType == GuestType.FAC
+          ? _facultyPageOptions[_selectedIndex]
+          : _studentPageOptions[_selectedIndex],
       drawer: Drawer(
-        child: DrawerPage(userId: widget.userId, auth: widget.auth),
+        child: guestType == GuestType.STU
+            ? DrawerPage(userId: widget.userId, auth: widget.auth)
+            : FacultyDrawerPage(userId: widget.userId, auth: widget.auth),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _newTask, // generate a new task
-      //   tooltip: 'Request',
-      //   child: Icon(Icons.add),
-      // ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _newRequest, // generate a new task
+        tooltip: 'Request',
+        child: Icon(Icons.add),
+      ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -338,5 +363,21 @@ class _HomePageState extends State<HomePage> {
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  _newRequest() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => RequestForm(
+                  auth: widget.auth,
+                  userId: widget.userId,
+                  needUpdate: false,
+//                  closeRequestForm: () {
+//                    setState(() {
+//                      Navigator.pop(context);
+//                    });
+//                  },
+                )));
   }
 }

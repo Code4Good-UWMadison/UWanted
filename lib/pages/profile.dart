@@ -12,23 +12,24 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:thewanted/pages/status_tag.dart';
+import 'package:thewanted/pages/components/avatar.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 bool _isLoading = false;
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({Key key, 
-  @required this.auth, 
-  @required this.userId, 
-  @required this.uploading, 
-  @required this.finishUploading, 
-  // @required this.skipToProfile
-  })
-      : super(key: key);
+  ProfilePage({
+    Key key,
+    @required this.auth,
+    @required this.userId,
+    @required this.uploading,
+    @required this.finishUploading,
+    // @required this.skipToProfile
+  }) : super(key: key);
 
   final BaseAuth auth;
   final String userId;
-  
+
   final Function() uploading;
   final Function() finishUploading;
   // final Function() skipToProfile;
@@ -38,9 +39,10 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  List<bool> _expansionStatus = [true, false, false];
   User user;
   File _image;
-  String _imageUrl;
+  // String _imageUrl;
   bool _confirmed;
 
   @override
@@ -55,27 +57,62 @@ class _ProfilePageState extends State<ProfilePage> {
         context: context,
         tiles: [
           ExpansionTile(
-            initiallyExpanded: true,
-            title: Text('Profile'),
+            key: GlobalKey(),
+            initiallyExpanded: this._expansionStatus[0],
+            title: Text(
+              'Profile',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
             children: <Widget>[
               _buildProfile(),
-              _buildListTile("Name", this.user.userName),
-              _buildListTile("Role", this.user.userRoleToString()),
-              _buildListTile("Lab", this.user.lab),
-              _buildListTile("Major", this.user.major),
-              _buildListTile("Technical Skills", this.user.skills.toString()),
+              _buildListTile(
+                  "Name", this.user.userName, Icon(Icons.perm_identity)),
+              _buildListTile(
+                  "Role", this.user.userRoleToString(), Icon(Icons.people)),
+              _buildListTile("Lab", this.user.lab, Icon(Icons.business_center)),
+              _buildListTile("Major", this.user.major, Icon(Icons.school)),
+              _buildListTile("Technical Skills", this.user.skills.toString(),
+                  Icon(Icons.class_)),
+              Divider(height: 0, color: Colors.black),
               _buildEditProfileTile(),
-            ],
+            ]..insert(0, Divider(color: Colors.black)),
+            onExpansionChanged: (bool isExpanded) {
+              setState(() {
+                this._expansionStatus = [isExpanded, false, false];
+              });
+            },
           ),
           ExpansionTile(
-            title: Text('Posts'),
-            children: List.from(_buildPosts())..add(_buildEditPostsListTile()),
+            key: GlobalKey(),
+            initiallyExpanded: this._expansionStatus[1],
+            title: Text(
+              'Posts',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            children: List.from(_buildPosts())
+              ..addAll(_buildEditPostsListTile())
+              ..insert(0, Divider(color: Colors.black)),
+            onExpansionChanged: (bool isExpanded) {
+              setState(() {
+                this._expansionStatus = [false, isExpanded, false];
+              });
+            },
           ),
           ExpansionTile(
-            title: Text('Applied'),
-            children: List.from(_buildAppliedList()),
+            key: GlobalKey(),
+            initiallyExpanded: this._expansionStatus[2],
+            title: Text(
+              'Applied',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            children: List.from(_buildAppliedList())
+              ..insert(0, Divider(color: Colors.black)),
+            onExpansionChanged: (bool isExpanded) {
+              setState(() {
+                this._expansionStatus = [false, false, isExpanded];
+              });
+            },
           ),
-          // AboutListTile(icon: null),
         ],
       ).toList(),
     );
@@ -132,19 +169,27 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _image = null;
-    _imageUrl = null;
+    // _imageUrl = null;
     // init profile's url
-    var ref = FirebaseStorage.instance
-        .ref()
-        .child('user')
-        .child(widget.userId)
-        .child('profile.jpg');
-    ref
-        .getDownloadURL()
-        .then((loc) => setState(() => _imageUrl = loc))
-        .catchError((err) {
-      _imageUrl = null;
-    });
+    // FirebaseStorage.instance
+    //     .ref()
+    //     .child('user/' + widget.userId + '/profile.jpg')
+    //     .getDownloadURL()
+    //     .then(((loc) => setState(() => _imageUrl = loc)), onError: (e) {
+    //   print(e);
+    //   this._imageUrl = null;
+    // });
+    // var ref = FirebaseStorage.instance
+    //     .ref()
+    //     .child('user')
+    //     .child(widget.userId)
+    //     .child('profile.jpg');
+    // ref
+    //     .getDownloadURL()
+    //     .then((loc) => setState(() => _imageUrl = loc))
+    //     .catchError((err) {
+    //   _imageUrl = null;
+    // });
     _getUserProfileFromFirebase();
   }
 
@@ -182,73 +227,78 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  ListTile _buildListTile(String title, String trailing) => ListTile(
-        title: Text(title),
-        trailing: Text(trailing),
-        onTap: _navigateToProfileEditingPage,
-      );
+  ListTile _buildListTile(String title, String trailing, Icon icon) => ListTile(
+    leading: icon,
+    title: Text(title),
+    trailing: Text(trailing),
+  );
 
   Row _buildProfile() => Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          new Container(width: 50, height: 0),
-          Align(
-            alignment: Alignment.center,
-            child: CircleAvatar(
-              radius: 100,
-              backgroundColor: Colors.white,
-              child: ClipOval(
-                child: new SizedBox(
-                  width: 180.0,
-                  height: 180.0,
-                  child: (_imageUrl == null && _image == null)
-                      ? (Icon(
-                          Icons.account_circle,
-                          size: 180.0,
-                          color: Colors.blue,
-                        ))
-                      : (_image != null)
-                          ? Image.file(
-                              _image,
-                              // fit: BoxFit.fill,
-                            )
-                          : Image.network(
-                              _imageUrl,
-                              // fit: BoxFit.fill,
-                            ),
-                ),
-              ),
-            ),
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: <Widget>[
+      new Container(width: 50, height: 0),
+      Align(
+        alignment: Alignment.center,
+        child: new Avatar(
+          userId: widget.userId,
+          radius: 80,
+          image: this._image ?? null,
+        ),
+        // CircleAvatar(
+        //   radius: 100,
+        //   backgroundColor: Colors.white,
+        //   child: ClipOval(
+        //     child: new SizedBox(
+        //       width: 180.0,
+        //       height: 180.0,
+        //       child: (_imageUrl == null && _image == null)
+        //           ? (Icon(
+        //               Icons.account_circle,
+        //               size: 180.0,
+        //               color: Colors.blue,
+        //             ))
+        //           : (_image != null)
+        //               ? Image.file(
+        //                   _image,
+        //                   // fit: BoxFit.fill,
+        //                 )
+        //               : Image.network(
+        //                   _imageUrl,
+        //                   // fit: BoxFit.fill,
+        //                 ),
+        //     ),
+        //   ),
+        // ),
+      ),
+      Padding(
+        padding: EdgeInsets.only(top: 120.0),
+        child: IconButton(
+          icon: Icon(
+            FontAwesomeIcons.camera,
+            size: 30.0,
           ),
-          Padding(
-            padding: EdgeInsets.only(top: 120.0),
-            child: IconButton(
-              icon: Icon(
-                FontAwesomeIcons.camera,
-                size: 30.0,
-              ),
-              onPressed: () {
-                getImage();
-              },
-            ),
-          ),
-          (_confirmed == false)
-              ? RaisedButton(
-                  color: Color(0xff476cfb),
-                  onPressed: () {
-                    uploadPic(context);
-                    // _onLoading(context);
-                  },
-                  elevation: 4.0,
-                  splashColor: Colors.blueGrey,
-                  child: Text(
-                    'Confirm',
-                    style: TextStyle(color: Colors.white, fontSize: 16.0),
-                  ),
-                )
-              : new Container(width: 0, height: 0),
-        ],
-      );
+          onPressed: () {
+            getImage();
+          },
+        ),
+      ),
+      (_confirmed == false)
+          ? RaisedButton(
+        color: Color(0xff476cfb),
+        onPressed: () {
+          uploadPic(context);
+          // _onLoading(context);
+        },
+        elevation: 4.0,
+        splashColor: Colors.blueGrey,
+        child: Text(
+          'Confirm',
+          style: TextStyle(color: Colors.white, fontSize: 16.0),
+        ),
+      )
+          : new Container(width: 0, height: 0),
+    ],
+  );
 
   void _navigateToProfileEditingPage() {
     Navigator.push(
@@ -258,22 +308,24 @@ class _ProfilePageState extends State<ProfilePage> {
               auth: widget.auth,
               userId: widget.userId,
               user: User.clone(this.user))),
-    );
-
-    _getRemoteUserData(null);
+    ).then((_) => _getRemoteUserData(null));
   }
 
   ListTile _buildEditProfileTile() => ListTile(
-        title: Text('Edit Profile'),
-        trailing: Icon(Icons.arrow_forward),
-        onTap: _navigateToProfileEditingPage,
-      );
+    leading: Icon(Icons.edit),
+    title: Text('Edit Profile'),
+    trailing: Icon(Icons.arrow_forward),
+    onTap: _navigateToProfileEditingPage,
+  );
 
-  ListTile _buildEditPostsListTile() => ListTile(
-        title: Text('Edit Posts'),
-        trailing: Text(this.user.posts.length.toString()),
-        onTap: _navigateToPostsEditingPage,
-      );
+  List<Widget> _buildEditPostsListTile() => <Widget>[]
+    ..add(Divider(height: 0, color: Colors.black))
+    ..add(ListTile(
+      leading: Icon(Icons.edit),
+      title: Text('Edit Posts'),
+      trailing: Text(this.user.posts.length.toString()),
+      onTap: _navigateToPostsEditingPage,
+    ));
 
   void _navigateToPostsEditingPage() {
     Navigator.push(
@@ -295,86 +347,86 @@ class _ProfilePageState extends State<ProfilePage> {
 
   List<Widget> _buildPosts() => user.posts
       .map((String uid) => FutureBuilder<DocumentSnapshot>(
-            future: Firestore.instance.collection('tasks').document(uid).get(),
-            builder: (BuildContext context,
-                AsyncSnapshot<DocumentSnapshot> snapshot) {
-              if (snapshot.data != null)
-                return ListTile(
-                  leading: StatusTag.fromString(snapshot.data['status']),
-                  title: Text(snapshot.data['title']),
-                  trailing: Icon(Icons.arrow_forward),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DetailedPage(
-                          title: snapshot.data['title'],
-                          id: uid,
-                          currUserId: widget.userId,
-                          auth: widget.auth,
-                          withdrawlButton: false,
-                        ),
-                      ),
-                    );
-                  },
-                );
-              else
-                return CircularProgressIndicator();
-            },
-          ))
+    future: Firestore.instance.collection('tasks').document(uid).get(),
+    builder: (BuildContext context,
+        AsyncSnapshot<DocumentSnapshot> snapshot) {
+      if (snapshot.data != null)
+        return ListTile(
+          leading: StatusTag.fromString(snapshot.data['status']),
+          title: Text(snapshot.data['title']),
+          trailing: Icon(Icons.arrow_forward),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DetailedPage(
+                  title: snapshot.data['title'],
+                  id: uid,
+                  currUserId: widget.userId,
+                  auth: widget.auth,
+                  withdrawlButton: false,
+                ),
+              ),
+            );
+          },
+        );
+      else
+        return CircularProgressIndicator();
+    },
+  ))
       .toList();
 
   List<Widget> _buildAppliedList() => user.applied
       .map((String uid) => FutureBuilder<DocumentSnapshot>(
-            future: Firestore.instance.collection('tasks').document(uid).get(),
-            builder: (BuildContext context,
-                AsyncSnapshot<DocumentSnapshot> snapshot) {
-              if (snapshot.data != null) {
-                return ListTile(
-                  leading: StatusTag.fromString(snapshot.data['status']),
-                  title: Text(
-                    snapshot.data['title'],
-                    style: TextStyle(fontSize: 15),
+    future: Firestore.instance.collection('tasks').document(uid).get(),
+    builder: (BuildContext context,
+        AsyncSnapshot<DocumentSnapshot> snapshot) {
+      if (snapshot.data != null) {
+        return ListTile(
+          leading: StatusTag.fromString(snapshot.data['status']),
+          title: Text(
+            snapshot.data['title'],
+            style: TextStyle(fontSize: 15),
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              FlatButton(
+                child: Icon(Icons.delete),
+                onPressed: () {
+                  if (snapshot.data['status'] == 'closed') {
+                    _deleteAppliedTask(uid);
+                  } else {
+                    _showAlertDialog(uid);
+                  }
+                },
+              ),
+              Icon(Icons.arrow_forward),
+            ],
+          ),
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DetailedPage(
+                    title: snapshot.data['title'],
+                    id: uid,
+                    currUserId: widget.userId,
+                    auth: widget.auth,
+                    withdrawlButton: true,
                   ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      FlatButton(
-                        child: Icon(Icons.delete),
-                        onPressed: () {
-                          if (snapshot.data['status'] == 'closed') {
-                            _deleteAppliedTask(uid);
-                          } else {
-                            _showAlertDialog(uid);
-                          }
-                        },
-                      ),
-                      Icon(Icons.arrow_forward),
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => DetailedPage(
-                            title: snapshot.data['title'],
-                            id: uid,
-                            currUserId: widget.userId,
-                            auth: widget.auth,
-                            withdrawlButton: true,
-                          ),
-                        )).then((_) {
-                      setState(() {
-                        _getRemoteUserData(_);
-                      });
-                    });
-                  },
-                );
-              } else {
-                return CircularProgressIndicator();
-              }
-            },
-          ))
+                )).then((_) {
+              setState(() {
+                _getRemoteUserData(_);
+              });
+            });
+          },
+        );
+      } else {
+        return CircularProgressIndicator();
+      }
+    },
+  ))
       .toList();
 
   Future<void> _showAlertDialog(String uid) async {
@@ -431,7 +483,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     setState(() {
       _confirmed = false;
-      _imageUrl = null;
+      // _imageUrl = null;
       _image = image;
       print('Image Path $_image');
     });
@@ -494,6 +546,13 @@ class _ProfilePageState extends State<ProfilePage> {
         Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text('Profile Picture Uploaded')));
       });
+
+      snapshot.ref.getDownloadURL().then((downloadUrl) {
+        Firestore.instance
+            .collection('users')
+            .document(widget.userId)
+            .updateData({'avatarUrl': downloadUrl});
+      });
     });
     // StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
     // setState(() {
@@ -522,7 +581,7 @@ appendListToRemotePosts(List<String> newPosts, String userId) {
       .get()
       .then((DocumentSnapshot document) {
     List<String> updatedPosts =
-        List<String>.from(document['posts'], growable: true);
+    List<String>.from(document['posts'], growable: true);
     updatedPosts.addAll(newPosts);
     Firestore.instance.collection('users').document(userId).updateData({
       'posts': updatedPosts,

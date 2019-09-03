@@ -96,7 +96,6 @@ class _DashboardPageState extends State<DashboardPage> {
                       .where('title', isGreaterThanOrEqualTo: search)
                       .where('title', isLessThan: search + 'z')
                       .snapshots();
-                  print("finish");
                 });
               },
               decoration: InputDecoration(

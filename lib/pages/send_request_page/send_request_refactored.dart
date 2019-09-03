@@ -3,17 +3,25 @@ import '../../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../details.dart';
 import 'requestLabel.dart';
+import 'package:thewanted/pages/send_request_page/filter.dart';
 
 class RequestForm extends StatefulWidget {
-  RequestForm({Key key, this.auth, this.userId, this.needUpdate, this.postId, @required this.skipBack, @required this.notFromMyPosts})
+  RequestForm(
+      {Key key,
+      this.auth,
+      this.userId,
+      this.needUpdate,
+      this.postId,
+      this.closeRequestForm,
+      this.goToDashboard})
       : super(key: key);
   final BaseAuth auth;
   final String userId;
   final bool
       needUpdate; //indicator of whether to update request instead of creating new one
   final String postId;
-  final Function() skipBack;
-  final bool notFromMyPosts;
+  final Function() closeRequestForm;
+  final Function() goToDashboard;
 
   @override
   State<StatefulWidget> createState() => _RequestFormState();
@@ -25,6 +33,7 @@ class _RequestFormState extends State<RequestForm> {
   TextEditingController _controllerRequestTitle;
   TextEditingController _controllerDetail;
   TextEditingController _controllerContact;
+  TextEditingController _controllerMaxApp;
 
   @override
   void initState() {
@@ -42,12 +51,14 @@ class _RequestFormState extends State<RequestForm> {
     _controllerRequestTitle = TextEditingController();
     _controllerDetail = TextEditingController();
     _controllerContact = TextEditingController();
+    _controllerMaxApp = TextEditingController();
   }
 
   _clearController() {
     _controllerContact.clear();
     _controllerDetail.clear();
     _controllerRequestTitle.clear();
+    _controllerMaxApp.clear();
   }
 
   @override
@@ -56,6 +67,7 @@ class _RequestFormState extends State<RequestForm> {
     _controllerRequestTitle.dispose();
     _controllerDetail.dispose();
     _controllerContact.dispose();
+    _controllerMaxApp.dispose();
   }
 
   _initRequestFields() {
@@ -71,6 +83,8 @@ class _RequestFormState extends State<RequestForm> {
       others: false,
       status: "open",
       requestTitle: "",
+      leastRating: 0.0,
+      maximumApplicants: -1,
     );
   }
 
@@ -91,6 +105,8 @@ class _RequestFormState extends State<RequestForm> {
         'App': myRequest.app,
         'Other': myRequest.others,
         'updated': DateTime.now(),
+        'leastRating': myRequest.leastRating,
+        'maximumApplicants': myRequest.maximumApplicants,
       })
             ..then((_) {
               showDialog(
@@ -131,13 +147,17 @@ class _RequestFormState extends State<RequestForm> {
         'created': DateTime.now(),
         'updated': DateTime.now(),
         'status': 'open',
+        'reviewed': 'false',
+        'leastRating': myRequest.leastRating,
+        'maximumApplicants': myRequest.maximumApplicants,
       }).then((foo) {
         Firestore.instance
             .collection('users')
             .document(widget.userId)
-            .get().then((DocumentSnapshot document){
+            .get()
+            .then((DocumentSnapshot document) {
           List<String> updatedPosts =
-          List<String>.from(document['posts'], growable: true);
+              List<String>.from(document['posts'], growable: true);
           updatedPosts.addAll([uidOfTask]);
           Firestore.instance
               .collection('users')
@@ -146,15 +166,15 @@ class _RequestFormState extends State<RequestForm> {
             'posts': updatedPosts,
           });
         });
-      }).catchError((e){
+      }).catchError((e) {
         showDialog(
             context: context,
             builder: (_) => new AlertDialog(
-              content: new Text(
-                'Please retry $e',
-                textAlign: TextAlign.center,
-              ),
-            ));
+                  content: new Text(
+                    'Please retry $e',
+                    textAlign: TextAlign.center,
+                  ),
+                ));
       });
 
 //      Firestore.instance
@@ -213,12 +233,15 @@ class _RequestFormState extends State<RequestForm> {
           others: document.data['Other'],
           status: document.data['status'],
           requestTitle: document.data["title"],
+          leastRating: document.data['leastRating'],
+          maximumApplicants: document.data['maximumApplicants'],
         );
         setState(() {
           myRequest = req;
           _controllerRequestTitle.text = myRequest.requestTitle;
           _controllerDetail.text = myRequest.description;
           _controllerContact.text = myRequest.contact;
+          _controllerMaxApp.text = myRequest.maximumApplicants.toString();
         });
       }
     });
@@ -253,6 +276,10 @@ class _RequestFormState extends State<RequestForm> {
     _controllerContact.addListener(() {
       myRequest.contact = _controllerContact.text;
     });
+    _controllerMaxApp.addListener(() {
+      myRequest.maximumApplicants = int.tryParse(_controllerMaxApp.text) ??
+        (_controllerMaxApp.text.isEmpty ? -1 : myRequest.maximumApplicants);
+    });
     if (myRequest == null && widget.needUpdate == true) {
       return Center(
         child: CircularProgressIndicator(),
@@ -263,52 +290,16 @@ class _RequestFormState extends State<RequestForm> {
           ? AppBar(
               title: Text("Edit Post"),
             )
-          : null,
+          : AppBar(title: Text("New Request"),),
       body: ListView(
         // mainAxisSize: MainAxisSize.max,
         // crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           _buildFirstHalfRequest(),
           _buildSecondHalfRequest(),
-          SizedBox(
-            height: 50.0,
-          ),
-          FlatButton(
-            color: Colors.blue,
-            textColor: Colors.white,
-            disabledColor: Colors.grey,
-            disabledTextColor: Colors.black,
-            padding: EdgeInsets.all(8.0),
-            splashColor: Colors.blueAccent,
-            onPressed: () {
-              if (_validSubmission()) {
-                _addOrUpdateRequestInfo();
-                _initRequestFields();
-                if (widget.needUpdate) {
-                  Navigator.of(context).pop();
-                } else {
-                  Scaffold.of(context).showSnackBar(
-                      _snackBar("Request submitted successfully."));
-                  _clearController();
-                }
-              if(widget.notFromMyPosts){
-                widget.skipBack();
-              }
-              } else {
-                showDialog(
-                    context: context,
-                    builder: (_) => new AlertDialog(
-                          content: new Text(
-                            'Request is incomplete. \nPlease finish all fields before submitting.',
-                            textAlign: TextAlign.center,
-                          ),
-                        ));
-              }
-            },
-            child: Text(
-              "Submit",
-            ),
-          ),
+//          SizedBox(
+//            height: 50.0,
+//          ),
         ],
       ),
     );
@@ -323,7 +314,7 @@ class _RequestFormState extends State<RequestForm> {
   Stack _buildFirstHalfRequest() => Stack(
         children: <Widget>[
           Container(
-            height: 500.0,
+            height: 450.0,
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -359,6 +350,7 @@ class _RequestFormState extends State<RequestForm> {
                       Radius.circular(30.0),
                     ),
                     child: TextField(
+                      maxLength: 19,
                       controller: _controllerRequestTitle,
                       decoration: new InputDecoration(
                         hintText: widget.needUpdate ? null : 'Type description',
@@ -380,6 +372,7 @@ class _RequestFormState extends State<RequestForm> {
                 ),
                 SizedBox(height: 20.0),
                 Container(
+                  margin: EdgeInsets.only(bottom: 15),
                   height: 100,
                   child: Padding(
                     padding: EdgeInsets.symmetric(
@@ -391,13 +384,16 @@ class _RequestFormState extends State<RequestForm> {
                         Radius.circular(30.0),
                       ),
                       child: TextField(
+                        keyboardType: TextInputType.multiline,
+                        maxLines: null,
                         controller: _controllerDetail,
                         decoration: new InputDecoration(
+                          labelText: "Enter Request Detail",
                           hintText:
                               'Be specific as much as possible, including techinical details and the purpose',
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 13.0),
+                              horizontal: 16.0, vertical: 15.0),
                         ),
                       ),
                     ),
@@ -528,6 +524,54 @@ class _RequestFormState extends State<RequestForm> {
                   ),
                 ), //TextField
               ), //Material
-            ), //padding
+            ),
+            SizedBox(height: 25.0), //padding
+            Filter(
+              myRequest: myRequest,
+              maxAppController: _controllerMaxApp,
+            ),
+            SizedBox(height: 25.0), //padding
+            MaterialButton(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(10)),
+              ),
+              elevation: 5,
+              //minWidth: 30,
+              color: Colors.blue,
+              textColor: Colors.white,
+              disabledColor: Colors.grey,
+              disabledTextColor: Colors.black,
+              // padding: EdgeInsets.all(8.0),
+              splashColor: Colors.blueAccent,
+              onPressed: () {
+                if (_validSubmission()) {
+                  print("valid submission");
+                  _addOrUpdateRequestInfo();
+                  _initRequestFields();
+                  if (widget.needUpdate) {
+                    Navigator.of(context).pop();
+                  } else {
+                    print("submitted");
+                    Scaffold.of(context).showSnackBar(
+                        _snackBar("Request submitted successfully."));
+                    _clearController();
+                    //widget.closeRequestForm();
+                    Navigator.pop(context);
+                  }
+                } else {
+                  showDialog(
+                      context: context,
+                      builder: (_) => new AlertDialog(
+                            content: new Text(
+                              'Request is incomplete. \nPlease finish all fields before submitting.',
+                              textAlign: TextAlign.center,
+                            ),
+                          ));
+                }
+              },
+              child: Text(
+                "Submit",
+              ),
+            ),
           ]);
 }

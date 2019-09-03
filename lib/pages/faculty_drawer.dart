@@ -4,9 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:thewanted/pages/components/avatar.dart';
+import '../pages/profile/faculty_edit_profile.dart';
 
-class DrawerPage extends StatefulWidget {
-  DrawerPage(
+class FacultyDrawerPage extends StatefulWidget {
+  FacultyDrawerPage(
       {Key key,
       @required this.auth,
       @required this.userId,
@@ -18,10 +19,10 @@ class DrawerPage extends StatefulWidget {
   final bool isInDrawer;
 
   @override
-  _DrawerPageState createState() => _DrawerPageState();
+  _FacultyDrawerPageState createState() => _FacultyDrawerPageState();
 }
 
-class _DrawerPageState extends State<DrawerPage> {
+class _FacultyDrawerPageState extends State<FacultyDrawerPage> {
   User user;
   String _imageUrl;
 
@@ -40,8 +41,7 @@ class _DrawerPageState extends State<DrawerPage> {
             _buildDrawerHeader(),
             _buildListTile("Role", this.user.userRoleToString()),
             _buildListTile("Lab", this.user.lab),
-            _buildListTile("Major", this.user.major),
-            _buildListTile("Technical Skills", this.user.skills.toString()),
+            _buildButton(),
             AboutListTile(icon: null),
           ],
         ).toList(),
@@ -131,4 +131,27 @@ class _DrawerPageState extends State<DrawerPage> {
         title: Text(title),
         trailing: Text(trailing),
       );
+  
+  ListTile _buildButton() => ListTile(
+    title: Text("Edit Profile"),
+    trailing: Icon(Icons.edit),
+    onTap: _navigateToProfileEditingPage,
+  );
+
+    void _navigateToProfileEditingPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => FacultyEditProfilePage(
+              auth: widget.auth,
+              userId: widget.userId,
+              user: User.clone(this.user))),
+    );
+
+    _getRemoteUserData(null);
+  }
+        //   leading: Icon(Icons.edit),
+        // title: Text('Edit Profile'),
+        // trailing: Icon(Icons.arrow_forward),
+        // onTap: _navigateToProfileEditingPage,
 }
