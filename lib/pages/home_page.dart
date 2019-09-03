@@ -38,18 +38,20 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   int _selectedIndex;
   bool _initialized = false;
-  
+
   bool _disableNavi = false;
 
   @override
   void initState() {
     super.initState();
-    _getUserProfileFromFirebase();
 
-    //_checkIdentityVerification();
-    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkIdentityVerification();
+    });
+
     _checkEmailVerification();
     _selectedIndex = 0;
+    _getUserProfileFromFirebase();
     if (Platform.isIOS) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         print(data);
@@ -151,11 +153,11 @@ class _HomePageState extends State<HomePage> {
 
   _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
     if (!document.exists) {
-       Firestore.instance
+      Firestore.instance
           .collection('users')
           .document(widget.userId)
           .setData(User.initialUserData);
-       _initialized = true;
+      _initialized = true;
     } else {
       _initialized = true;
     }
@@ -186,33 +188,39 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
-  bool _identityCheck = false;  
+  bool _identityCheck = false;
 
-  Future<GuestType> _checkIdentityVerification() async {
-    //_initialized = await 
-    return await showDialog<GuestType>(
-      context: context,
-      barrierDismissible: true,
-      builder: (BuildContext context) {
-        return SimpleDialog (
-          title: const Text('Select role'),
-          children: <Widget>[
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context, GuestType.STU);
-              },
-              child: const Text('Student'),
-            ),
-            SimpleDialogOption(
-              onPressed: () {
-                Navigator.pop(context, GuestType.FAC);
-              },
-              child: const Text('Faculty'),
-            ),
-          ],
-        );
-      }
-    );
+  _checkIdentityVerification() {
+    //_initialized = await
+    print("1");
+    return showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            title: const Text('Select role'),
+            children: <Widget>[
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    guestType = GuestType.STU;
+                  });
+                },
+                child: const Text('Student'),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    guestType = GuestType.FAC;
+                  });
+                },
+                child: const Text('Faculty'),
+              ),
+            ],
+          );
+        });
   }
 
   bool _isEmailVerified = false;
