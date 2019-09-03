@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thewanted/pages/status_tag.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:thewanted/pages/details.dart';
 
 class ApplyButton extends StatefulWidget {
   ApplyButton({
@@ -9,6 +10,7 @@ class ApplyButton extends StatefulWidget {
     @required String status,
     @required this.context,
     @required this.parentKey,
+    @required this.request,
   })  : status = StatusTag.getStatusFromString(status),
         userId = FirebaseAuth.instance
             .currentUser()
@@ -19,6 +21,7 @@ class ApplyButton extends StatefulWidget {
   final Future<String> userId;
   final BuildContext context;
   final GlobalKey<ScaffoldState> parentKey;
+  final Request request;
 
   @override
   _ApplyButtonState createState() => _ApplyButtonState();
@@ -128,13 +131,28 @@ class _ApplyButtonState extends State<ApplyButton> {
       widget.userId.then((String uid) async {
         if (this._applied) {
           _showNotifyAppliedDialog();
+        } else if (!await _checkIfRatingQualified(uid)) {
+          _showRatingNotEnoughDialog();
+        } else if (!await _checkIfNotFull()) {
+          _showFullDialog();
         } else {
-          _updateTaskApplicants(uid).then((ifUserPressedSave) =>
-              ifUserPressedSave != false ? _updateProfileApplied(uid) : false);
+          _showAppMsgDialog().then((String appMsg) {
+            if (appMsg != null) {
+              _updateTaskApplicants(uid, appMsg);
+              _updateProfileApplied(uid);
+            }
+          }).then((_) {
+            showInSnackBar('sdfadsfadsfadsfadsfa'); //TODO: showsnackbar!!!
+          });
         }
       }).catchError((e) {
         widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e)));
       });
+
+  void showInSnackBar(String value) {
+    widget.parentKey.currentState
+        .showSnackBar(new SnackBar(content: new Text(value)));
+  }
 
   Future<bool> _checkIfApplied(String uid) async =>
       await _checkIfAppliedInTask(uid) && await _checkIfAppliedInUser(uid);
@@ -154,23 +172,106 @@ class _ApplyButtonState extends State<ApplyButton> {
       .then((DocumentSnapshot document) =>
           (document['applied'] as List).contains(widget.taskId));
 
-  Future _updateTaskApplicants(String uid) => Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ApplicationMessagePage()),
-      ).then((msg) =>
-          msg != null // if msg == null, the user pressed BACK, not SAVE
-              ? Firestore.instance
-                  .collection('tasks')
-                  .document(widget.taskId)
-                  .collection('applicants')
-                  .document(uid)
-                  .setData({
-                  'msg': msg,
-                  'created': Timestamp.now(),
-                  'updated': Timestamp.now(),
-                  'accepted': false,
-                }, merge: true)
-              : false);
+  Future<bool> _checkIfRatingQualified(String uid) => Firestore.instance
+      .collection('users')
+      .document(uid)
+      .get()
+      .then((DocumentSnapshot document) =>
+          document['rating'] >= widget.request.leastRating);
+
+  Future<bool> _checkIfNotFull() => Firestore.instance
+      .collection('tasks')
+      .document(widget.taskId)
+      .collection('applicants')
+      .getDocuments()
+      .then((QuerySnapshot snapshot) =>
+          snapshot.documents.length < widget.request.maximumApplicants);
+
+  Future<String> _showRatingNotEnoughDialog() async => showDialog<String>(
+        context: widget.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Not enough rating!'),
+            content: Text(
+                "Sorry, your rating is not high enough for this task.\n" +
+                    "Try to get higher rate!"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+  Future<String> _showFullDialog() async => showDialog<String>(
+        context: widget.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Too Late!'),
+            content: Text("Sorry, this task has received many applications\n" +
+                "Try to apply early next time!"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+  Future<String> _showAppMsgDialog() async {
+    TextEditingController _controller = TextEditingController();
+    return showDialog<String>(
+      context: widget.context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enter your application message'),
+          content: SingleChildScrollView(
+            child: TextField(
+              controller: _controller,
+              autofocus: true,
+              decoration: InputDecoration(labelText: 'Application Message'),
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Submit'),
+              onPressed: () {
+                Navigator.of(context).pop(_controller.text);
+              },
+            ),
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future _updateTaskApplicants(String uid, String msg) => Firestore.instance
+          .collection('tasks')
+          .document(widget.taskId)
+          .collection('applicants')
+          .document(uid)
+          .setData({
+        'msg': msg,
+        'created': Timestamp.now(),
+        'updated': Timestamp.now(),
+        'accepted': false,
+      }, merge: true);
 
   Future<void> _updateProfileApplied(String uid) =>
       Firestore.instance.collection('users').document(uid).updateData({
@@ -235,51 +336,5 @@ class _ApplyButtonState extends State<ApplyButton> {
     }).catchError((e) {
       widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e)));
     });
-  }
-}
-
-class ApplicationMessagePage extends StatefulWidget {
-  ApplicationMessagePage();
-
-  @override
-  _ApplicationMessagePageState createState() => _ApplicationMessagePageState();
-}
-
-class _ApplicationMessagePageState extends State<ApplicationMessagePage> {
-  final myController = TextEditingController();
-
-  @override
-  void dispose() {
-    myController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Application Message'),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.save),
-            onPressed: () {
-              Navigator.pop(context, myController.text);
-            },
-          ),
-        ],
-      ),
-      body: ListView(
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: TextField(
-              controller: myController,
-              keyboardType: TextInputType.multiline,
-              maxLines: null,
-            ),
-          )
-        ],
-      ),
-    );
   }
 }
