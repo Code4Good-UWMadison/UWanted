@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
 // import '../pages/profile.dart';
+import 'package:thewanted/models/user.dart';
 import 'send_request_page/send_request_refactored.dart';
 import './dashboard.dart';
 import '../pages/drawer.dart';
@@ -36,17 +37,19 @@ class _HomePageState extends State<HomePage> {
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   int _selectedIndex;
-
+  bool _initialized = false;
+  
   bool _disableNavi = false;
 
   @override
   void initState() {
     super.initState();
-    _checkIdentityVerification();
+    _getUserProfileFromFirebase();
+
+    //_checkIdentityVerification();
+    
     _checkEmailVerification();
     _selectedIndex = 0;
-    _getUserProfileFromFirebase();
-    print(guestType);
     if (Platform.isIOS) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         print(data);
@@ -147,14 +150,26 @@ class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
-    if (!document.exists || document.data['name'] == "") {
-      print("add Profile!");
-      setState(() {
-        _selectedIndex = 2;
-      });
-      showInSnackBar();
+    if (!document.exists) {
+       Firestore.instance
+          .collection('users')
+          .document(widget.userId)
+          .setData(User.initialUserData);
+       _initialized = true;
+    } else {
+      _initialized = true;
     }
   }
+
+// _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
+//     if (!document.exists || document.data['name'] == "") {
+//       print("add Profile!");
+//       setState(() {
+//         _selectedIndex = 2;
+//       });
+//       showInSnackBar();
+//     }
+//   }
 
   void showInSnackBar() {
     _scaffoldKey.currentState.removeCurrentSnackBar();
@@ -171,8 +186,33 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
-  void _checkIdentityVerification() {
-    
+  bool _identityCheck = false;  
+
+  Future<GuestType> _checkIdentityVerification() async {
+    //_initialized = await 
+    return await showDialog<GuestType>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return SimpleDialog (
+          title: const Text('Select role'),
+          children: <Widget>[
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, GuestType.STU);
+              },
+              child: const Text('Student'),
+            ),
+            SimpleDialogOption(
+              onPressed: () {
+                Navigator.pop(context, GuestType.FAC);
+              },
+              child: const Text('Faculty'),
+            ),
+          ],
+        );
+      }
+    );
   }
 
   bool _isEmailVerified = false;
@@ -271,10 +311,6 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final _studentPageOptions = [
       DashboardPage(userId: widget.userId, auth: widget.auth),
-      StudentAppliedPage(
-        userId: widget.userId,
-        auth: widget.auth,
-      ),
       StudentProfilePage(
         userId: widget.userId,
         auth: widget.auth,
@@ -293,6 +329,10 @@ class _HomePageState extends State<HomePage> {
         //     _selectedIndex = 2;
         //   });
         // },
+      ),
+      StudentAppliedPage(
+        userId: widget.userId,
+        auth: widget.auth,
       ),
     ];
     final _studentPageName = ["Dashboard", "Applied Posts", "Profile"];
@@ -345,22 +385,19 @@ class _HomePageState extends State<HomePage> {
         child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
+        items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              title: new Text(guestType == GuestType.FAC
-                  ? _facultyPageName[0]
-                  : _studentPageName[0])),
+            icon: Icon(Icons.home),
+            title: Text('Dashboard'),
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.business),
-              title: new Text(guestType == GuestType.FAC
-                  ? _facultyPageName[1]
-                  : _studentPageName[1])),
+            icon: Icon(Icons.business),
+            title: Text('Send Request'),
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.school),
-              title: new Text(guestType == GuestType.FAC
-                  ? _facultyPageName[2]
-                  : _studentPageName[2])),
+            icon: Icon(Icons.school),
+            title: Text('Profile'),
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
