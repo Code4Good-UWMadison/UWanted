@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   final Firestore _db = Firestore.instance;
   final FirebaseMessaging _fcm = FirebaseMessaging();
   StreamSubscription iosSubscription;
-  GuestType guestType;
+  GuestType guestType = GuestType.STU;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   int _selectedIndex;
@@ -46,6 +46,7 @@ class _HomePageState extends State<HomePage> {
     _checkEmailVerification();
     _selectedIndex = 0;
     _getUserProfileFromFirebase();
+    print(guestType);
     if (Platform.isIOS) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         print(data);
@@ -270,6 +271,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final _studentPageOptions = [
       DashboardPage(userId: widget.userId, auth: widget.auth),
+      StudentAppliedPage(
+        userId: widget.userId,
+        auth: widget.auth,
+      ),
       StudentProfilePage(
         userId: widget.userId,
         auth: widget.auth,
@@ -288,10 +293,6 @@ class _HomePageState extends State<HomePage> {
         //     _selectedIndex = 2;
         //   });
         // },
-      ),
-      StudentAppliedPage(
-        userId: widget.userId,
-        auth: widget.auth,
       ),
     ];
     final _studentPageName = ["Dashboard", "Applied Posts", "Profile"];
@@ -344,19 +345,22 @@ class _HomePageState extends State<HomePage> {
         child: Icon(Icons.add),
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            title: Text('Dashboard'),
-          ),
+              icon: Icon(Icons.home),
+              title: new Text(guestType == GuestType.FAC
+                  ? _facultyPageName[0]
+                  : _studentPageName[0])),
           BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            title: Text('Send Request'),
-          ),
+              icon: Icon(Icons.business),
+              title: new Text(guestType == GuestType.FAC
+                  ? _facultyPageName[1]
+                  : _studentPageName[1])),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            title: Text('Profile'),
-          ),
+              icon: Icon(Icons.school),
+              title: new Text(guestType == GuestType.FAC
+                  ? _facultyPageName[2]
+                  : _studentPageName[2])),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],

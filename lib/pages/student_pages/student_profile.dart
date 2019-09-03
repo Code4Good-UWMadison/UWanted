@@ -196,77 +196,77 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
   }
 
   ListTile _buildListTile(String title, String trailing, Icon icon) => ListTile(
-    leading: icon,
-    title: Text(title),
-    trailing: Text(trailing),
-  );
+        leading: icon,
+        title: Text(title),
+        trailing: Text(trailing),
+      );
 
   Row _buildProfile() => Row(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: <Widget>[
-      new Container(width: 50, height: 0),
-      Align(
-        alignment: Alignment.center,
-        child: new Avatar(
-          userId: widget.userId,
-          radius: 80,
-          image: this._image ?? null,
-        ),
-        // CircleAvatar(
-        //   radius: 100,
-        //   backgroundColor: Colors.white,
-        //   child: ClipOval(
-        //     child: new SizedBox(
-        //       width: 180.0,
-        //       height: 180.0,
-        //       child: (_imageUrl == null && _image == null)
-        //           ? (Icon(
-        //               Icons.account_circle,
-        //               size: 180.0,
-        //               color: Colors.blue,
-        //             ))
-        //           : (_image != null)
-        //               ? Image.file(
-        //                   _image,
-        //                   // fit: BoxFit.fill,
-        //                 )
-        //               : Image.network(
-        //                   _imageUrl,
-        //                   // fit: BoxFit.fill,
-        //                 ),
-        //     ),
-        //   ),
-        // ),
-      ),
-      Padding(
-        padding: EdgeInsets.only(top: 120.0),
-        child: IconButton(
-          icon: Icon(
-            FontAwesomeIcons.camera,
-            size: 30.0,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          new Container(width: 50, height: 0),
+          Align(
+            alignment: Alignment.center,
+            child: new Avatar(
+              userId: widget.userId,
+              radius: 80,
+              image: this._image ?? null,
+            ),
+            // CircleAvatar(
+            //   radius: 100,
+            //   backgroundColor: Colors.white,
+            //   child: ClipOval(
+            //     child: new SizedBox(
+            //       width: 180.0,
+            //       height: 180.0,
+            //       child: (_imageUrl == null && _image == null)
+            //           ? (Icon(
+            //               Icons.account_circle,
+            //               size: 180.0,
+            //               color: Colors.blue,
+            //             ))
+            //           : (_image != null)
+            //               ? Image.file(
+            //                   _image,
+            //                   // fit: BoxFit.fill,
+            //                 )
+            //               : Image.network(
+            //                   _imageUrl,
+            //                   // fit: BoxFit.fill,
+            //                 ),
+            //     ),
+            //   ),
+            // ),
           ),
-          onPressed: () {
-            getImage();
-          },
-        ),
-      ),
-      (_confirmed == false)
-          ? RaisedButton(
-        color: Color(0xff476cfb),
-        onPressed: () {
-          uploadPic(context);
-          // _onLoading(context);
-        },
-        elevation: 4.0,
-        splashColor: Colors.blueGrey,
-        child: Text(
-          'Confirm',
-          style: TextStyle(color: Colors.white, fontSize: 16.0),
-        ),
-      )
-          : new Container(width: 0, height: 0),
-    ],
-  );
+          Padding(
+            padding: EdgeInsets.only(top: 120.0),
+            child: IconButton(
+              icon: Icon(
+                FontAwesomeIcons.camera,
+                size: 30.0,
+              ),
+              onPressed: () {
+                getImage();
+              },
+            ),
+          ),
+          (_confirmed == false)
+              ? RaisedButton(
+                  color: Color(0xff476cfb),
+                  onPressed: () {
+                    uploadPic(context);
+                    // _onLoading(context);
+                  },
+                  elevation: 4.0,
+                  splashColor: Colors.blueGrey,
+                  child: Text(
+                    'Confirm',
+                    style: TextStyle(color: Colors.white, fontSize: 16.0),
+                  ),
+                )
+              : new Container(width: 0, height: 0),
+        ],
+      );
 
   void _navigateToProfileEditingPage() {
     Navigator.push(
@@ -276,17 +276,15 @@ class _StudentProfilePageState extends State<StudentProfilePage> {
               auth: widget.auth,
               userId: widget.userId,
               user: User.clone(this.user))),
-    );
-
-    _getRemoteUserData(null);
+    ).then((_) => _getRemoteUserData(null));
   }
 
   ListTile _buildEditProfileTile() => ListTile(
-    leading: Icon(Icons.edit),
-    title: Text('Edit Profile'),
-    trailing: Icon(Icons.arrow_forward),
-    onTap: _navigateToProfileEditingPage,
-  );
+        leading: Icon(Icons.edit),
+        title: Text('Edit Profile'),
+        trailing: Icon(Icons.arrow_forward),
+        onTap: _navigateToProfileEditingPage,
+      );
 
 //////
   Future getImage() async {
