@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
+
 
 class LoginSignUpPage extends StatefulWidget {
   LoginSignUpPage({this.auth, this.onSignedIn});
@@ -71,7 +74,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
             _errorMessage = e.details;
           } else
             print("WRONG");
-            _errorMessage = e.message;
+          _errorMessage = e.message;
         });
       }
     }
@@ -89,6 +92,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
     _errorMessage = "";
     setState(() {
       _formMode = FormMode.SIGNUP;
+      _permissionForm();
     });
   }
 
@@ -104,15 +108,12 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
   Widget build(BuildContext context) {
     _isIos = Theme.of(context).platform == TargetPlatform.iOS;
     return new Scaffold(
-        appBar: new AppBar(
-          title: new Text('Flutter login demo'),
-        ),
         body: Stack(
-          children: <Widget>[
-            _showBody(),
-            _showCircularProgress(),
-          ],
-        ));
+      children: <Widget>[
+        _showBody(),
+        _showCircularProgress(),
+      ],
+    ));
   }
 
   Widget _showCircularProgress() {
@@ -159,6 +160,7 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
               _showLogo(),
               _showEmailInput(),
               _showPasswordInput(),
+              _showIdCheckboxes(),
               _showPrimaryButton(),
               _showSecondaryButton(),
               _showErrorMessage(),
@@ -236,6 +238,28 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
     );
   }
 
+
+  bool _valueFac = false;
+  bool _valueStd = false;
+
+  void _valueFacChanged(bool value) => setState(() => _valueFac = value);
+  void _valueStdChanged(bool value) => setState(() => _valueStd = value);
+
+  Widget _showIdCheckboxes() {
+    return (_formMode == FormMode.SIGNUP) ? new Container(
+        //padding: new EdgeInsets.all(16.0),
+        child: new Center(
+          child: new Column(
+            //mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              new CheckboxListTile(value: _valueFac, onChanged: _valueFacChanged, title:Text("Faculty")),
+              new CheckboxListTile(value: _valueStd, onChanged: _valueStdChanged, title:Text("Student")),
+            ],
+          ),
+        ),
+    ) : Container();
+  }
+
   Widget _showSecondaryButton() {
     return new FlatButton(
       child: _formMode == FormMode.LOGIN
@@ -268,5 +292,40 @@ class _LoginSignUpPageState extends State<LoginSignUpPage> {
             onPressed: _validateAndSubmit,
           ),
         ));
+  }
+
+  _permissionForm() {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title:
+              new Text("You need to read and agree the following to continue"),
+          content: new Container(
+            child: new SingleChildScrollView(
+              child: new Text(
+                "Test",
+                style: new TextStyle(fontSize: 30.0),
+              ),
+            ),
+          ),
+          actions: <Widget>[
+            new FlatButton(
+              child: new Text("CONTINUE"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            new FlatButton(
+              child: new Text("QUIT"),
+              onPressed: () {
+                exit(0);
+              },
+            )
+          ],
+        );
+      },
+    );
   }
 }

@@ -278,7 +278,7 @@ class _RequestFormState extends State<RequestForm> {
     });
     _controllerMaxApp.addListener(() {
       myRequest.maximumApplicants = int.tryParse(_controllerMaxApp.text) ??
-        (_controllerMaxApp.text.isEmpty ? -1 : myRequest.maximumApplicants);
+          (_controllerMaxApp.text.isEmpty ? -1 : myRequest.maximumApplicants);
     });
     if (myRequest == null && widget.needUpdate == true) {
       return Center(
@@ -290,7 +290,9 @@ class _RequestFormState extends State<RequestForm> {
           ? AppBar(
               title: Text("Edit Post"),
             )
-          : AppBar(title: Text("New Request"),),
+          : AppBar(
+              title: Text("New Request"),
+            ),
       body: ListView(
         // mainAxisSize: MainAxisSize.max,
         // crossAxisAlignment: CrossAxisAlignment.center,
