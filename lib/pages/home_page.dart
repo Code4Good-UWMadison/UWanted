@@ -420,7 +420,7 @@ class _HomePageState extends State<HomePage> {
           BottomNavigationBarItem(
               icon: new Icon(guestType == GuestType.FAC
                   ? Icons.assignment
-                  : Icons.present_to_all),
+                  : Icons.assignment_turned_in),
               title: new Text(guestType == GuestType.FAC
                   ? _facultyPageName[1]
                   : _studentPageName[1])
