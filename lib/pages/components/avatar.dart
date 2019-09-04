@@ -63,6 +63,10 @@ class _AvatarState extends State<Avatar> {
     );
   }
 
-  String _buildInitialFromName(String name) =>
-      name.split(' ').map((String part) => part.substring(0, 1)).join();
+  String _buildInitialFromName(String name) => name.isNotEmpty
+      ? name
+          .split(' ')
+          .map((String part) => part.substring(0, 1).toUpperCase())
+          .join()
+      : '';
 }
