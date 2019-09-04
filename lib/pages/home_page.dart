@@ -44,14 +44,9 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkIdentityVerification();
-    });
-
-    _checkEmailVerification();
-    _selectedIndex = 0;
     _getUserProfileFromFirebase();
+    _selectedIndex = 0;
+
     if (Platform.isIOS) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         print(data);
@@ -146,7 +141,8 @@ class _HomePageState extends State<HomePage> {
         .collection('users')
         .document(widget.userId)
         .get()
-        .then(_initializeRemoteUserDataIfNotExist);
+        .then(_initializeRemoteUserDataIfNotExist)
+        .then(_dialogs());
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -157,7 +153,7 @@ class _HomePageState extends State<HomePage> {
           .collection('users')
           .document(widget.userId)
           .setData(User.initialUserData);
-      _initialized = true;
+      // _initialized = true;
     } else {
       _initialized = true;
     }
@@ -188,14 +184,12 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
-  bool _identityCheck = false;
-
   _checkIdentityVerification() {
     //_initialized = await
-    print("1");
+    if (_initialized == true) return null; // if the user already has a profile.
     return showDialog(
         context: context,
-        barrierDismissible: true,
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return SimpleDialog(
             title: const Text('Select role'),
@@ -223,10 +217,27 @@ class _HomePageState extends State<HomePage> {
         });
   }
 
+  _updateRoleIfNotInit() {
+    Firestore.instance.collection('users').document(widget.userId).updateData({
+      'faculty': guestType == GuestType.FAC,
+      'student': guestType == GuestType.STU,
+    });
+    // FireStore.collection('users').document(widget.userId).updateData({
+    //   'posts': _newList,
+    // });
+  }
+
   bool _isEmailVerified = false;
 
-  void _checkEmailVerification() async {
+  _dialogs() {
+    _checkEmailVerification()
+        .then((_) => _checkIdentityVerification())
+        .then((_) => _updateRoleIfNotInit());
+  }
+
+  Future<void> _checkEmailVerification() async {
     _isEmailVerified = await widget.auth.isEmailVerified();
+    print("Verified?" + _isEmailVerified.toString());
     if (!_isEmailVerified) {
       _showVerifyEmailDialog();
     }
@@ -308,9 +319,9 @@ class _HomePageState extends State<HomePage> {
     if (_disableNavi == false) {
       setState(() {
         _selectedIndex = index;
-        if (_selectedIndex == 1) {
-          _getUserProfileFromFirebase();
-        }
+        // if (_selectedIndex == 1) {
+        //   _getUserProfileFromFirebase();
+        // }
       });
     }
   }
