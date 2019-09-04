@@ -377,7 +377,9 @@ class _HomePageState extends State<HomePage> {
         auth: widget.auth,
       ),
     ];
+
     final _facultyPageName = ["Send Request", "Dashboard", "Manage Posts"];
+    
     return new Scaffold(
       key: _scaffoldKey,
       // used to add snackbar
@@ -427,7 +429,7 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
               icon: new Icon(guestType == GuestType.FAC
-                  ? Icons.settings_applications
+                  ? Icons.folder_special
                   : Icons.account_circle),
               title: new Text(guestType == GuestType.FAC
                   ? _facultyPageName[2]
