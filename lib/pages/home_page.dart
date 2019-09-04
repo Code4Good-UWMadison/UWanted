@@ -410,20 +410,29 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+              icon: new Icon(guestType == GuestType.FAC
+                  ? Icons.file_upload
+                  : Icons.assignment),
               title: new Text(guestType == GuestType.FAC
                   ? _facultyPageName[0]
-                  : _studentPageName[0])),
+                  : _studentPageName[0])
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+              icon: new Icon(guestType == GuestType.FAC
+                  ? Icons.assignment
+                  : Icons.present_to_all),
               title: new Text(guestType == GuestType.FAC
                   ? _facultyPageName[1]
-                  : _studentPageName[1])),
+                  : _studentPageName[1])
+          ),
           BottomNavigationBarItem(
-              icon: Icon(Icons.home),
+              icon: new Icon(guestType == GuestType.FAC
+                  ? Icons.settings_applications
+                  : Icons.account_circle),
               title: new Text(guestType == GuestType.FAC
                   ? _facultyPageName[2]
-                  : _studentPageName[2])),
+                  : _studentPageName[2])
+          ),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
