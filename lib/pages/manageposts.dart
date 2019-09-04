@@ -115,23 +115,25 @@ class _ManagePostsState extends State<ManagePostsPage> {
                   return new Text('Loading...');
                 default:
                   List<DocumentSnapshot> list = snapshot.data.documents;
-                  return new ListView(
-                    children: list
-                        .map((DocumentSnapshot document) {
-                          return new PostToManage(
-                            title: document['title'],
-                            taskId: document.documentID,
-                            status: document['status'],
-                            userId: widget.userId,
-                            auth: widget.auth,
-                            user: this.user,
-                            showAlertDialog: _showAlertDialog,
-                            naviDetails: _navigateToApplicationDetail,
-                          );
-                        })
-                        .where((task) => task.status != 'finished')
-                        .toList(),
-                  );
+                  return list.toList().length == 0
+                      ? Text("You haven't posted any request yet.")
+                      : new ListView(
+                          children: list
+                              .map((DocumentSnapshot document) {
+                                return new PostToManage(
+                                  title: document['title'],
+                                  taskId: document.documentID,
+                                  status: document['status'],
+                                  userId: widget.userId,
+                                  auth: widget.auth,
+                                  user: this.user,
+                                  showAlertDialog: _showAlertDialog,
+                                  naviDetails: _navigateToApplicationDetail,
+                                );
+                              })
+                              .where((task) => task.status != 'finished')
+                              .toList(),
+                        );
               }
             },
           )),
