@@ -3,15 +3,19 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import '../services/authentication.dart';
-import '../pages/profile.dart';
+// import '../pages/profile.dart';
+import 'package:thewanted/models/user.dart';
 import 'send_request_page/send_request_refactored.dart';
 import './dashboard.dart';
 import '../pages/drawer.dart';
 import '../pages/faculty_drawer.dart';
 import '../pages/manageposts.dart';
 import 'dart:async';
-
+import 'student_pages/student_applied_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'student_pages/student_profile.dart';
+
+enum GuestType { STU, FAC }
 
 class HomePage extends StatefulWidget {
   HomePage({Key key, this.auth, this.userId, this.onSignedOut})
@@ -29,17 +33,20 @@ class _HomePageState extends State<HomePage> {
   final Firestore _db = Firestore.instance;
   final FirebaseMessaging _fcm = FirebaseMessaging();
   StreamSubscription iosSubscription;
+  GuestType guestType = GuestType.STU;
 
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   int _selectedIndex;
+  bool _initialized = false;
 
   bool _disableNavi = false;
+
   @override
   void initState() {
     super.initState();
-    _checkEmailVerification();
-    _selectedIndex = 0;
     _getUserProfileFromFirebase();
+    _selectedIndex = 0;
+
     if (Platform.isIOS) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         print(data);
@@ -134,20 +141,33 @@ class _HomePageState extends State<HomePage> {
         .collection('users')
         .document(widget.userId)
         .get()
-        .then(_initializeRemoteUserDataIfNotExist);
+        .then(_initializeRemoteUserDataIfNotExist)
+        .then(_dialogs());
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
-    if (!document.exists || document.data['name'] == "") {
-      print("add Profile!");
-      setState(() {
-        _selectedIndex = 2;
-      });
-      showInSnackBar();
+    if (!document.exists) {
+      Firestore.instance
+          .collection('users')
+          .document(widget.userId)
+          .setData(User.initialUserData);
+      // _initialized = true;
+    } else {
+      _initialized = true;
     }
   }
+
+// _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
+//     if (!document.exists || document.data['name'] == "") {
+//       print("add Profile!");
+//       setState(() {
+//         _selectedIndex = 2;
+//       });
+//       showInSnackBar();
+//     }
+//   }
 
   void showInSnackBar() {
     _scaffoldKey.currentState.removeCurrentSnackBar();
@@ -164,10 +184,60 @@ class _HomePageState extends State<HomePage> {
     ));
   }
 
+  _checkIdentityVerification() {
+    //_initialized = await
+    if (_initialized == true) return null; // if the user already has a profile.
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            title: const Text('Select role'),
+            children: <Widget>[
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    guestType = GuestType.STU;
+                  });
+                },
+                child: const Text('Student'),
+              ),
+              SimpleDialogOption(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  setState(() {
+                    guestType = GuestType.FAC;
+                  });
+                },
+                child: const Text('Faculty'),
+              ),
+            ],
+          );
+        });
+  }
+
+  _updateRoleIfNotInit() {
+    Firestore.instance.collection('users').document(widget.userId).updateData({
+      'faculty': guestType == GuestType.FAC,
+      'student': guestType == GuestType.STU,
+    });
+    // FireStore.collection('users').document(widget.userId).updateData({
+    //   'posts': _newList,
+    // });
+  }
+
   bool _isEmailVerified = false;
 
-  void _checkEmailVerification() async {
+  _dialogs() {
+    _checkEmailVerification()
+        .then((_) => _checkIdentityVerification())
+        .then((_) => _updateRoleIfNotInit());
+  }
+
+  Future<void> _checkEmailVerification() async {
     _isEmailVerified = await widget.auth.isEmailVerified();
+    print("Verified?" + _isEmailVerified.toString());
     if (!_isEmailVerified) {
       _showVerifyEmailDialog();
     }
@@ -208,6 +278,7 @@ class _HomePageState extends State<HomePage> {
 
   void _showVerifyEmailSentDialog() {
     showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (BuildContext context) {
         // return object of type Dialog
@@ -248,28 +319,22 @@ class _HomePageState extends State<HomePage> {
     if (_disableNavi == false) {
       setState(() {
         _selectedIndex = index;
-        if (_selectedIndex == 1) {
-          _getUserProfileFromFirebase();
-        }
+        // if (_selectedIndex == 1) {
+        //   _getUserProfileFromFirebase();
+        // }
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final _pageOptions = [
+    final _studentPageOptions = [
       DashboardPage(userId: widget.userId, auth: widget.auth),
-      RequestForm(
+      StudentAppliedPage(
         userId: widget.userId,
         auth: widget.auth,
-        needUpdate: false,
-        goToDashBoard: () {
-          setState(() {
-            _selectedIndex = 0;
-          });
-        },
       ),
-      ProfilePage(
+      StudentProfilePage(
         userId: widget.userId,
         auth: widget.auth,
         uploading: () {
@@ -288,17 +353,39 @@ class _HomePageState extends State<HomePage> {
         //   });
         // },
       ),
-      // ManagePostsPage(
-      //   userId: widget.userId,
-      //   auth: widget.auth,
-      // ),
+      StudentAppliedPage(
+        userId: widget.userId,
+        auth: widget.auth,
+      ),
     ];
-    final _pageName = ["Dashboard", "Send Request", "Profile"];
+    final _studentPageName = ["Dashboard", "Applied Posts", "Profile"];
+
+    final _facultyPageOptions = [
+      RequestForm(
+        userId: widget.userId,
+        auth: widget.auth,
+        needUpdate: false,
+        goToDashboard: () {
+          setState(() {
+            _selectedIndex = 0;
+          });
+        },
+      ),
+      DashboardPage(userId: widget.userId, auth: widget.auth),
+      ManagePostsPage(
+        userId: widget.userId,
+        auth: widget.auth,
+      ),
+    ];
+    final _facultyPageName = ["Send Request", "Dashboard", "Manage Posts"];
     return new Scaffold(
-      key: _scaffoldKey, // used to add snackbar
+      key: _scaffoldKey,
+      // used to add snackbar
       appBar: new AppBar(
         // automaticallyImplyLeading: false,
-        title: new Text(_pageName[_selectedIndex]),
+        title: new Text(guestType == GuestType.FAC
+            ? _facultyPageName[_selectedIndex]
+            : _studentPageName[_selectedIndex]),
         actions: <Widget>[
           new FlatButton(
             child: new Text('Logout',
@@ -307,35 +394,57 @@ class _HomePageState extends State<HomePage> {
           )
         ],
       ),
-      body: _pageOptions[_selectedIndex],
+      body: guestType == GuestType.FAC
+          ? _facultyPageOptions[_selectedIndex]
+          : _studentPageOptions[_selectedIndex],
       drawer: Drawer(
-        child: DrawerPage(userId: widget.userId, auth: widget.auth),
-        // child: FacultyDrawerPage(userId: widget.userId, auth: widget.auth),
+        child: guestType == GuestType.STU
+            ? DrawerPage(userId: widget.userId, auth: widget.auth)
+            : FacultyDrawerPage(userId: widget.userId, auth: widget.auth),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _newTask, // generate a new task
-      //   tooltip: 'Request',
-      //   child: Icon(Icons.add),
-      // ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _newRequest, // generate a new task
+        tooltip: 'Request',
+        child: Icon(Icons.add),
+      ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            title: Text('Dashboard'),
-          ),
+              icon: Icon(Icons.home),
+              title: new Text(guestType == GuestType.FAC
+                  ? _facultyPageName[0]
+                  : _studentPageName[0])),
           BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            title: Text('Send Request'),
-          ),
+              icon: Icon(Icons.home),
+              title: new Text(guestType == GuestType.FAC
+                  ? _facultyPageName[1]
+                  : _studentPageName[1])),
           BottomNavigationBarItem(
-            icon: Icon(Icons.school),
-            title: Text('Profile'),
-          ),
+              icon: Icon(Icons.home),
+              title: new Text(guestType == GuestType.FAC
+                  ? _facultyPageName[2]
+                  : _studentPageName[2])),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
     );
+  }
+
+  _newRequest() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => RequestForm(
+                  auth: widget.auth,
+                  userId: widget.userId,
+                  needUpdate: false,
+//                  closeRequestForm: () {
+//                    setState(() {
+//                      Navigator.pop(context);
+//                    });
+//                  },
+                )));
   }
 }
