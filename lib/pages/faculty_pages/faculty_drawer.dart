@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import '../services/authentication.dart';
+import '../../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:thewanted/pages/components/avatar.dart';
-import '../pages/profile/faculty_edit_profile.dart';
+import './faculty_edit_profile.dart';
 
 class FacultyDrawerPage extends StatefulWidget {
   FacultyDrawerPage(
@@ -131,14 +131,14 @@ class _FacultyDrawerPageState extends State<FacultyDrawerPage> {
         title: Text(title),
         trailing: Text(trailing),
       );
-  
-  ListTile _buildButton() => ListTile(
-    title: Text("Edit Profile"),
-    trailing: Icon(Icons.edit),
-    onTap: _navigateToProfileEditingPage,
-  );
 
-    void _navigateToProfileEditingPage() {
+  ListTile _buildButton() => ListTile(
+        title: Text("Edit Profile"),
+        trailing: Icon(Icons.edit),
+        onTap: _navigateToProfileEditingPage,
+      );
+
+  void _navigateToProfileEditingPage() {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -150,8 +150,8 @@ class _FacultyDrawerPageState extends State<FacultyDrawerPage> {
 
     _getRemoteUserData(null);
   }
-        //   leading: Icon(Icons.edit),
-        // title: Text('Edit Profile'),
-        // trailing: Icon(Icons.arrow_forward),
-        // onTap: _navigateToProfileEditingPage,
+  //   leading: Icon(Icons.edit),
+  // title: Text('Edit Profile'),
+  // trailing: Icon(Icons.arrow_forward),
+  // onTap: _navigateToProfileEditingPage,
 }

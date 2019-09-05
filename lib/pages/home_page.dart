@@ -8,7 +8,7 @@ import 'package:thewanted/models/user.dart';
 import 'send_request_page/send_request_refactored.dart';
 import './dashboard.dart';
 import '../pages/drawer.dart';
-import '../pages/faculty_drawer.dart';
+import '../pages/faculty_pages/faculty_drawer.dart';
 import '../pages/manageposts.dart';
 import 'dart:async';
 import 'student_pages/student_applied_page.dart';
@@ -44,7 +44,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _getUserProfileFromFirebase();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _getUserProfileFromFirebase());
     _selectedIndex = 0;
 
     if (Platform.isIOS) {
@@ -142,12 +143,12 @@ class _HomePageState extends State<HomePage> {
         .document(widget.userId)
         .get()
         .then(_initializeRemoteUserDataIfNotExist)
-        .then(_dialogs());
+        .then(_dialogs);
   }
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
+  void _initializeRemoteUserDataIfNotExist(DocumentSnapshot document) {
     if (!document.exists) {
       Firestore.instance
           .collection('users')
@@ -155,7 +156,13 @@ class _HomePageState extends State<HomePage> {
           .setData(User.initialUserData);
       // _initialized = true;
     } else {
-      _initialized = true;
+      this._initialized = true;
+      print("Initiazlied!");
+      setState(() {
+        document.data['faculty'] == false
+            ? guestType = GuestType.STU
+            : guestType = GuestType.FAC;
+      });
     }
   }
 
@@ -186,7 +193,7 @@ class _HomePageState extends State<HomePage> {
 
   _checkIdentityVerification() {
     //_initialized = await
-    if (_initialized == true) return null; // if the user already has a profile.
+    // if the user already has a profile.
     return showDialog(
         context: context,
         barrierDismissible: false,
@@ -214,7 +221,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           );
-        });
+        }).then((_) => _updateRoleIfNotInit());
   }
 
   _updateRoleIfNotInit() {
@@ -229,10 +236,13 @@ class _HomePageState extends State<HomePage> {
 
   bool _isEmailVerified = false;
 
-  _dialogs() {
-    _checkEmailVerification()
-        .then((_) => _checkIdentityVerification())
-        .then((_) => _updateRoleIfNotInit());
+  _dialogs(_) {
+    if (this._initialized != true) {
+      _checkEmailVerification().then((_) => _checkIdentityVerification());
+    } else {
+      _checkEmailVerification();
+    }
+    // .then((_) => _updateRoleIfNotInit());
   }
 
   Future<void> _checkEmailVerification() async {
@@ -380,7 +390,7 @@ class _HomePageState extends State<HomePage> {
     ];
 
     final _facultyPageName = ["Send Request", "Dashboard", "Manage Posts"];
-    
+
     return new Scaffold(
       key: _scaffoldKey,
       // used to add snackbar
@@ -418,24 +428,21 @@ class _HomePageState extends State<HomePage> {
                   : Icons.assignment),
               title: new Text(guestType == GuestType.FAC
                   ? _facultyPageName[0]
-                  : _studentPageName[0])
-          ),
+                  : _studentPageName[0])),
           BottomNavigationBarItem(
               icon: new Icon(guestType == GuestType.FAC
                   ? Icons.assignment
                   : Icons.assignment_turned_in),
               title: new Text(guestType == GuestType.FAC
                   ? _facultyPageName[1]
-                  : _studentPageName[1])
-          ),
+                  : _studentPageName[1])),
           BottomNavigationBarItem(
               icon: new Icon(guestType == GuestType.FAC
                   ? Icons.folder_special
                   : Icons.account_circle),
               title: new Text(guestType == GuestType.FAC
                   ? _facultyPageName[2]
-                  : _studentPageName[2])
-          ),
+                  : _studentPageName[2])),
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],

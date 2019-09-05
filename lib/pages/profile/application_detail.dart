@@ -122,14 +122,14 @@ class _ApplicationDetailState extends State<ApplicationDetail> {
 
   _updateRemoteData() {
     _deleteApplicantFromFirestore()
+        .then((_) => Navigator.of(context).pop())
+        .then((_) => Navigator.of(context).pop())
         .then((_) => _deleteFromUserSide())
         .then((_) {
-          setState(() {
-            this._rejectPressed = false;
-          });
-        })
-        .then((_) => Navigator.of(context).pop())
-        .then((_) => Navigator.of(context).pop())
+      setState(() {
+        this._rejectPressed = false;
+      });
+    })
         // .then((_) => Navigator.popUntil(
         //     context, (Route<dynamic> route) => route.isFirst))
         .then((_) => print("Finish"));
