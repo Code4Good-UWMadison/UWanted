@@ -147,17 +147,18 @@ class _ApplyButtonState extends State<ApplyButton> {
         }
       }).catchError((e) {
         print(e);
-        widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e))); //TODO: showsnackbar!!!
+        widget.parentKey.currentState
+            .showSnackBar(SnackBar(content: Text(e))); //TODO: showsnackbar!!!
       });
 
   //TODO: showsnackbar!!!
   // not figure out how to display snackbar yet, none of these work
-  // Reason: After submitting the application, the details page will be redrawn, 
-  // causing the change of context and key, but the widget created before cannot know 
+  // Reason: After submitting the application, the details page will be redrawn,
+  // causing the change of context and key, but the widget created before cannot know
   // the key created now, thus cannot display snackbar on current Scaffold
   void showInSnackBar(String value) {
-    widget.parentKey.currentState
-        .showSnackBar(SnackBar(content: Text(value)));
+    // widget.parentKey.currentState
+    //     .showSnackBar(SnackBar(content: Text(value)));
     // Scaffold.of(context).showSnackBar(SnackBar(content: Text(value)));
     // Scaffold.of(widget.context).showSnackBar(SnackBar(content: Text(value)));
   }
