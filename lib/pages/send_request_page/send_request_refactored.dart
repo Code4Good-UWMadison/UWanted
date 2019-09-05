@@ -10,6 +10,7 @@ class RequestForm extends StatefulWidget {
       {Key key,
       this.auth,
       this.userId,
+      this.fromNav = false,
       this.needUpdate,
       this.postId,
       this.closeRequestForm,
@@ -17,6 +18,7 @@ class RequestForm extends StatefulWidget {
       : super(key: key);
   final BaseAuth auth;
   final String userId;
+  final bool fromNav;
   final bool
       needUpdate; //indicator of whether to update request instead of creating new one
   final String postId;
@@ -286,13 +288,15 @@ class _RequestFormState extends State<RequestForm> {
       );
     }
     return Scaffold(
-      appBar: widget.needUpdate
-          ? AppBar(
-              title: Text("Edit Post"),
-            )
-          : AppBar(
-              title: Text("New Request"),
-            ),
+      appBar: widget.fromNav == false
+          ? widget.needUpdate
+              ? AppBar(
+                  title: Text("Edit Post"),
+                )
+              : AppBar(
+                  title: Text("New Request"),
+                )
+          : null,
       body: ListView(
         // mainAxisSize: MainAxisSize.max,
         // crossAxisAlignment: CrossAxisAlignment.center,
