@@ -44,7 +44,8 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _getUserProfileFromFirebase();
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _getUserProfileFromFirebase());
     _selectedIndex = 0;
 
     if (Platform.isIOS) {
@@ -157,6 +158,11 @@ class _HomePageState extends State<HomePage> {
     } else {
       this._initialized = true;
       print("Initiazlied!");
+      setState(() {
+        document.data['faculty'] == false
+            ? guestType = GuestType.STU
+            : guestType = GuestType.FAC;
+      });
     }
   }
 

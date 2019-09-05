@@ -70,7 +70,7 @@ class User {
     'updated': Timestamp.now(),
     'applied': List<String>(),
     'numberOfRate': 0,
-    'rating': -1, // to indicate that it's not rated yet
+    'rating': 0, // to indicate that it's not rated yet
   };
 }
 
