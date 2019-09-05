@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/pages/profile/application_detail.dart';
-import 'package:thewanted/pages/components/avatar.dart';
-import 'package:thewanted/pages/profile/starRating.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:thewanted/pages/status_tag.dart';
-import 'package:thewanted/pages/components/avatar.dart';
-import 'package:thewanted/pages/details.dart';
+// import 'package:thewanted/pages/components/avatar.dart';
+// import 'package:thewanted/pages/profile/starRating.dart';
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+// import 'package:thewanted/pages/status_tag.dart';
+// import 'package:thewanted/pages/components/avatar.dart';
+// import 'package:thewanted/pages/details.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/pages/postToManage.dart';

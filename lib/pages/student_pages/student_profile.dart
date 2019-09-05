@@ -4,13 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/pages/student_pages/student_edit_profile.dart';
-import 'package:thewanted/pages/profile/my_posts.dart';
-import 'package:thewanted/pages/details.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'dart:async';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:thewanted/pages/status_tag.dart';
 import 'package:thewanted/pages/components/avatar.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();

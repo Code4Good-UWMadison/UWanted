@@ -374,84 +374,84 @@ class _DetailedPageState extends State<DetailedPage> {
   }
 }
 
-class userProfileInfoPage extends StatefulWidget {
-  User user;
-  final String userIdNum;
+// class userProfileInfoPage extends StatefulWidget {
+//   User user;
+//   final String userIdNum;
 
-  userProfileInfoPage(this.userIdNum);
+//   userProfileInfoPage(this.userIdNum);
 
-  @override
-  _userProfileInfoPageState createState() => _userProfileInfoPageState();
-}
+//   @override
+//   _userProfileInfoPageState createState() => _userProfileInfoPageState();
+// }
 
-class _userProfileInfoPageState extends State<userProfileInfoPage> {
-  @override
-  void initState() {
-    Firestore.instance
-        .collection('users')
-        .document(widget.userIdNum)
-        .get()
-        .then((DocumentSnapshot document) {
-      if (document.data == null) {
-        //TODO: add warning message
-        print("null found");
-        print("userid is " + widget.userIdNum);
-      } else {
-        var u = User(
-            userName: document['name'],
-            userRole: document['student']
-                ? UserRole.Student
-                : (document['faculty'] ? UserRole.Faculty : null),
-            lab: document['lab'],
-            major: document['major'],
-            skills: Skills(
-              backend: document['Backend'],
-              frontend: document['Frontend'],
-              aiml: document['AI&ML'],
-              data: document['Data'],
-              app: document['App'],
-              others: document['Others'],
-            ));
-        setState(() {
-          widget.user = u;
-        });
-      }
-    });
-    super.initState();
-  }
+// class _userProfileInfoPageState extends State<userProfileInfoPage> {
+//   @override
+//   void initState() {
+//     Firestore.instance
+//         .collection('users')
+//         .document(widget.userIdNum)
+//         .get()
+//         .then((DocumentSnapshot document) {
+//       if (document.data == null) {
+//         //TODO: add warning message
+//         print("null found");
+//         print("userid is " + widget.userIdNum);
+//       } else {
+//         var u = User(
+//             userName: document['name'],
+//             userRole: document['student']
+//                 ? UserRole.Student
+//                 : (document['faculty'] ? UserRole.Faculty : null),
+//             lab: document['lab'],
+//             major: document['major'],
+//             skills: Skills(
+//               backend: document['Backend'],
+//               frontend: document['Frontend'],
+//               aiml: document['AI&ML'],
+//               data: document['Data'],
+//               app: document['App'],
+//               others: document['Others'],
+//             ));
+//         setState(() {
+//           widget.user = u;
+//         });
+//       }
+//     });
+//     super.initState();
+//   }
 
-  ListTile _buildListTile(String title, String trailing) => ListTile(
-        title: Text(title),
-        trailing: Text(trailing),
-      );
+//   ListTile _buildListTile(String title, String trailing) => ListTile(
+//         title: Text(title),
+//         trailing: Text(trailing),
+//       );
 
-  @override
-  Widget build(BuildContext context) {
-    if (widget.user != null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text("User Profile"),
-        ),
-        body: ListView(
-          padding: EdgeInsets.zero,
-          children: ListTile.divideTiles(
-            context: context,
-            tiles: [
-              _buildListTile("Name", widget.user.userName),
-              _buildListTile("Role", widget.user.userRoleToString()),
-              _buildListTile("Lab", widget.user.lab),
-              _buildListTile("Major", widget.user.major),
-              _buildListTile("Technical Skills", widget.user.skills.toString()),
-            ],
-          ).toList(),
-        ),
-      );
-    } else
-      return new Center(
-        child: CircularProgressIndicator(),
-      );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     if (widget.user != null) {
+//       return Scaffold(
+//         appBar: AppBar(
+//           title: Text("User Profile"),
+//         ),
+//         body: ListView(
+//           padding: EdgeInsets.zero,
+//           children: ListTile.divideTiles(
+//             context: context,
+//             tiles: [
+//               _buildListTile("Name", widget.user.userName),
+//               _buildListTile("Role", widget.user.userRoleToString()),
+//               _buildListTile("Lab", widget.user.lab),
+//               _buildListTile("Major", widget.user.major),
+//               _buildListTile("Technical Skills", widget.user.skills.toString()),
+//             ],
+//           ).toList(),
+//         ),
+//       );
+//     } else
+//       return new Center(
+//         child: CircularProgressIndicator(),
+//       );
+//   }
+// }
 
 class LabelWidget extends StatefulWidget {
   Text label;
