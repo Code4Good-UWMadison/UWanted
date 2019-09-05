@@ -363,6 +363,7 @@ class _HomePageState extends State<HomePage> {
     final _facultyPageOptions = [
       RequestForm(
         userId: widget.userId,
+        fromNav: true,
         auth: widget.auth,
         needUpdate: false,
         goToDashboard: () {
