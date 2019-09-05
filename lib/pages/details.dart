@@ -35,7 +35,8 @@ class Request {
     this.requestTitle,
     @required this.status,
     @required this.leastRating,
-    @required this.maximumApplicants, // set to negative if don't want this limit
+    @required
+        this.maximumApplicants, // set to negative if don't want this limit
   });
 }
 
@@ -325,12 +326,12 @@ class _DetailedPageState extends State<DetailedPage> {
         ),
 
         ApplyButton(
-            taskId: widget.id,
-            status: this.request.status,
-            context: context,
-            parentKey: _scaffoldKey,
-            request: this.request,
-            )
+          taskId: widget.id,
+          status: this.request.status,
+          context: context,
+          parentKey: _scaffoldKey,
+          request: this.request,
+        )
 //        FlatButton(
 //          onPressed: () {
 //            Navigator.push(

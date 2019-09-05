@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
-import 'package:thewanted/pages/profile/edit_profile.dart';
+import 'package:thewanted/pages/student_pages/student_edit_profile.dart';
 import 'package:thewanted/pages/profile/my_posts.dart';
 import 'package:thewanted/pages/details.dart';
 import 'dart:io';
