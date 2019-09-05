@@ -1,18 +1,12 @@
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../details.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
-import 'package:thewanted/pages/profile/edit_profile.dart';
-import 'package:thewanted/pages/profile/my_posts.dart';
 import 'package:thewanted/pages/details.dart';
 import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'dart:async';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:thewanted/pages/status_tag.dart';
-import 'package:thewanted/pages/components/avatar.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 bool _isLoading = false;
@@ -161,64 +155,63 @@ class _StudentAppliedPageState extends State<StudentAppliedPage> {
 
   List<Widget> _buildAppliedList() {
     var list = List<Widget>();
-    if(user.applied == null || user.applied.length == 0){
+    if (user.applied == null || user.applied.length == 0) {
       list.add(Text("Applied list is empty."));
       return list;
-    }
-    else return user.applied
-        .map((String uid) =>
-        FutureBuilder<DocumentSnapshot>(
-          future: Firestore.instance.collection('tasks').document(uid).get(),
-          builder: (BuildContext context,
-              AsyncSnapshot<DocumentSnapshot> snapshot) {
-            if (snapshot.data != null) {
-              return ListTile(
-                leading: StatusTag.fromString(snapshot.data['status']),
-                title: Text(
-                  snapshot.data['title'],
-                  style: TextStyle(fontSize: 15),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    FlatButton(
-                      child: Icon(Icons.delete),
-                      onPressed: () {
-                        if (snapshot.data['status'] == 'closed') {
-                          _deleteAppliedTask(uid);
-                        } else {
-                          _showAlertDialog(uid);
-                        }
+    } else
+      return user.applied
+          .map((String uid) => FutureBuilder<DocumentSnapshot>(
+                future:
+                    Firestore.instance.collection('tasks').document(uid).get(),
+                builder: (BuildContext context,
+                    AsyncSnapshot<DocumentSnapshot> snapshot) {
+                  if (snapshot.data != null) {
+                    return ListTile(
+                      leading: StatusTag.fromString(snapshot.data['status']),
+                      title: Text(
+                        snapshot.data['title'],
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          FlatButton(
+                            child: Icon(Icons.delete),
+                            onPressed: () {
+                              if (snapshot.data['status'] == 'closed') {
+                                _deleteAppliedTask(uid);
+                              } else {
+                                _showAlertDialog(uid);
+                              }
+                            },
+                          ),
+                          Icon(Icons.arrow_forward),
+                        ],
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailedPage(
+                                title: snapshot.data['title'],
+                                id: uid,
+                                currUserId: widget.userId,
+                                auth: widget.auth,
+                                withdrawlButton: true,
+                              ),
+                            )).then((_) {
+                          setState(() {
+                            _getRemoteUserData(_);
+                          });
+                        });
                       },
-                    ),
-                    Icon(Icons.arrow_forward),
-                  ],
-                ),
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            DetailedPage(
-                              title: snapshot.data['title'],
-                              id: uid,
-                              currUserId: widget.userId,
-                              auth: widget.auth,
-                              withdrawlButton: true,
-                            ),
-                      )).then((_) {
-                    setState(() {
-                      _getRemoteUserData(_);
-                    });
-                  });
+                    );
+                  } else {
+                    return CircularProgressIndicator();
+                  }
                 },
-              );
-            } else {
-              return CircularProgressIndicator();
-            }
-          },
-        ))
-        .toList();
+              ))
+          .toList();
   }
 
   Future<void> _showAlertDialog(String uid) async {

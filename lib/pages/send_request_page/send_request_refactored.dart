@@ -37,6 +37,8 @@ class _RequestFormState extends State<RequestForm> {
   TextEditingController _controllerContact;
   TextEditingController _controllerMaxApp;
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   @override
   void initState() {
     _initController();
@@ -288,6 +290,7 @@ class _RequestFormState extends State<RequestForm> {
       );
     }
     return Scaffold(
+      key: _scaffoldKey,
       appBar: widget.fromNav == false
           ? widget.needUpdate
               ? AppBar(
@@ -558,11 +561,12 @@ class _RequestFormState extends State<RequestForm> {
                     Navigator.of(context).pop();
                   } else {
                     print("submitted");
-                    Scaffold.of(context).showSnackBar(
+                    _scaffoldKey.currentState.removeCurrentSnackBar();
+                    _scaffoldKey.currentState.showSnackBar(
                         _snackBar("Request submitted successfully."));
                     _clearController();
                     //widget.closeRequestForm();
-                    Navigator.pop(context);
+                    // Navigator.pop(context);
                   }
                 } else {
                   showDialog(
