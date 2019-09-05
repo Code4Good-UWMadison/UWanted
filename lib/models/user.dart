@@ -46,8 +46,9 @@ class User {
           others: document['Others'],
         ),
         posts = List.from(document['posts'], growable: true),
-        applied = document['applied'] != null ? List.from(document['applied'], growable: true) : new List();
-
+        applied = document['applied'] != null
+            ? List.from(document['applied'], growable: true)
+            : new List();
 
   // userRole could be null, that user haven't made a choice
   String userRoleToString() => userRole?.toString()?.substring(9) ?? '';
@@ -68,6 +69,8 @@ class User {
     'created': Timestamp.now(),
     'updated': Timestamp.now(),
     'applied': List<String>(),
+    'numberOfRate': 0,
+    'rating': -1, // to indicate that it's not rated yet
   };
 }
 
