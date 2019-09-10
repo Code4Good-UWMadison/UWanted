@@ -21,6 +21,7 @@ class Request {
   final String status;
   double leastRating;
   int maximumApplicants;
+  int numberOfApplicants;
 
   Request({
     this.userId,
@@ -37,6 +38,7 @@ class Request {
     @required this.leastRating,
     @required
         this.maximumApplicants, // set to negative if don't want this limit
+    this.numberOfApplicants,
   });
 }
 
@@ -59,43 +61,44 @@ class DetailedPage extends StatefulWidget {
 
 //final description;
 
-  static Request getReqInfoForUpdate(String id) {
-    Request req;
-    print("id of request: " + id);
-    Firestore.instance
-        .collection('tasks')
-        .document(id)
-        .get()
-        .then((DocumentSnapshot document) {
-      if (document.data == null) {
-        return showDialog(
-            builder: (_) => new AlertDialog(
-                  content: new Text(
-                    'Request does not exist.',
-                    textAlign: TextAlign.center,
-                  ),
-                ));
-      } else {
-        print("request is valid, retrieving info");
-        req = new Request(
-          userId: document.data['userId'],
-          contact: document.data['contact'],
-          description: document.data['description'],
-          aiml: document.data['AI&ML'],
-          backend: document.data['Backend'],
-          frontend: document.data['Frontend'],
-          data: document.data['Data'],
-          app: document.data['App'],
-          others: document.data['Other'],
-          status: document['status'],
-          requestTitle: document.data['title'],
-          leastRating: document.data['leastRating'],
-          maximumApplicants: document.data['maximumApplicants'],
-        );
-        return req;
-      }
-    });
-  }
+  // static Request getReqInfoForUpdate(String id) {
+  //   Request req;
+  //   print("id of request: " + id);
+  //   Firestore.instance
+  //       .collection('tasks')
+  //       .document(id)
+  //       .get()
+  //       .then((DocumentSnapshot document) {
+  //     if (document.data == null) {
+  //       return showDialog(
+  //           builder: (_) => new AlertDialog(
+  //                 content: new Text(
+  //                   'Request does not exist.',
+  //                   textAlign: TextAlign.center,
+  //                 ),
+  //               ));
+  //     } else {
+  //       print("request is valid, retrieving info");
+  //       req = new Request(
+  //         userId: document.data['userId'],
+  //         contact: document.data['contact'],
+  //         description: document.data['description'],
+  //         aiml: document.data['AI&ML'],
+  //         backend: document.data['Backend'],
+  //         frontend: document.data['Frontend'],
+  //         data: document.data['Data'],
+  //         app: document.data['App'],
+  //         others: document.data['Other'],
+  //         status: document['status'],
+  //         requestTitle: document.data['title'],
+  //         leastRating: document.data['leastRating'],
+  //         maximumApplicants: document.data['maximumApplicants'], 
+  //         numberOfApplicants:
+  //       );
+  //       return req;
+  //     }
+  //   });
+  // }
 }
 
 class _DetailedPageState extends State<DetailedPage> {
@@ -104,7 +107,7 @@ class _DetailedPageState extends State<DetailedPage> {
   @override
   void initState() {
     super.initState();
-    _getRequest(widget.id);
+    countDocuments(widget.id).then((_)=>_getRequest(widget.id));
   }
 
   BoxDecoration myBoxDecoration() {
@@ -146,6 +149,7 @@ class _DetailedPageState extends State<DetailedPage> {
           requestTitle: widget.title,
           leastRating: document.data['leastRating'],
           maximumApplicants: document.data['maximumApplicants'],
+          numberOfApplicants: countDocuments(id),
         );
 
         setState(() {
@@ -154,6 +158,12 @@ class _DetailedPageState extends State<DetailedPage> {
       }
     });
   }
+
+  countDocuments(id) async {
+    var size;
+    //Firestore.instance.collection('task').document(id).collection('applicants').document().get().then(onValue)();
+    return size;
+  } 
 
   @override
   Widget build(BuildContext context) {
@@ -348,6 +358,27 @@ class _DetailedPageState extends State<DetailedPage> {
       ],
     );
 
+    var rating = Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(left: 10, top: 10),
+          child: Text("Minimum Rating Required: " + this.request.leastRating.toString(),
+              style: Theme.of(context).textTheme.body2),
+        ),
+        SizedBox(height: 10.0),
+        Padding(
+          padding: EdgeInsets.only(left: 10, top: 10),
+          child: Text("Applicants Capacity: " + ((this.request.maximumApplicants != -1)
+            ? this.request.numberOfApplicants.toString()+ " / " + this.request.maximumApplicants.toString()
+            :"No limit"),
+              style: Theme.of(context).textTheme.body2),
+        ),
+        SizedBox(height: 20.0),
+      ],
+    );
+
     return Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
@@ -367,6 +398,7 @@ class _DetailedPageState extends State<DetailedPage> {
                 padding: EdgeInsets.symmetric(vertical: 20.0),
                 child: labels,
               ),
+              rating,
               contactInfo,
             ],
           ),

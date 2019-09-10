@@ -44,12 +44,12 @@ class _DashboardPageState extends State<DashboardPage> {
                   List<DocumentSnapshot> list = snapshot.data.documents;
                   if (_sortOptions != null) {
                     switch (_sortOptions) {
-                      case 'Time':
-                        list.sort(
-                            (a, b) => a['updated'].compareTo(b['updated']));
+                      case 'Remaining':
+                        //list.sort(
+                            //(a, b) => a['updated'].compareTo(b['updated']));
                         break;
-                      case 'Alphabet':
-                        list.sort((a, b) => a['title'].compareTo(b['title']));
+                      case 'Request':
+                        list.sort((a, b) => a['leastRating'].compareTo(b['leastRating']));
                         break;
                       default:
                     }
@@ -66,6 +66,8 @@ class _DashboardPageState extends State<DashboardPage> {
                         ot: document['Other'],
                         id: document.documentID,
                         status: document['status'],
+                        request: document['leastRating'],
+                        remain: document['maximumApplicants'],
                         userId: widget.userId,
                         auth: widget.auth,
                       );
@@ -114,17 +116,17 @@ class _DashboardPageState extends State<DashboardPage> {
               onChanged: (String newValue) {
                 setState(() {
                   switch (newValue) {
-                    case 'Time':
-                      _sortOptions = 'Time';
+                    case 'Remaining':
+                      _sortOptions = 'Remaining';
                       break;
-                    case 'Alphabet':
-                      _sortOptions = 'Alphabet';
+                    case 'Request':
+                      _sortOptions = 'Request';
                       break;
                     default:
                   }
                 });
               },
-              items: <String>['Time', 'Alphabet']
+              items: <String>['Remaining capacity', 'Minimum Rating required']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
