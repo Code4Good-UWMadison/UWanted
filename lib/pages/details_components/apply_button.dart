@@ -272,7 +272,10 @@ class _ApplyButtonState extends State<ApplyButton> {
     );
   }
 
-  Future _updateTaskApplicants(String uid, String msg) => Firestore.instance
+  Future _updateTaskApplicants(String uid, String msg) { 
+
+    
+    return Firestore.instance
           .collection('tasks')
           .document(widget.taskId)
           .collection('applicants')
@@ -283,6 +286,7 @@ class _ApplyButtonState extends State<ApplyButton> {
         'updated': Timestamp.now(),
         'accepted': false,
       }, merge: true);
+  }
 
   Future<void> _updateProfileApplied(String uid) =>
       Firestore.instance.collection('users').document(uid).updateData({
@@ -336,6 +340,7 @@ class _ApplyButtonState extends State<ApplyButton> {
           .collection('applicants')
           .document(uid)
           .delete();
+
       Firestore.instance.collection('users').document(uid).updateData({
         'applied': FieldValue.arrayRemove([
           widget.taskId,

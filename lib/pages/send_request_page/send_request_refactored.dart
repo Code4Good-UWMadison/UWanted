@@ -89,6 +89,7 @@ class _RequestFormState extends State<RequestForm> {
       requestTitle: "",
       leastRating: 0.0,
       maximumApplicants: -1,
+      numberOfApplicants: 0,
     );
   }
 
@@ -111,6 +112,7 @@ class _RequestFormState extends State<RequestForm> {
         'updated': DateTime.now(),
         'leastRating': myRequest.leastRating,
         'maximumApplicants': myRequest.maximumApplicants,
+        'numberOfApplicants': myRequest.numberOfApplicants,
       })
             ..then((_) {
               showDialog(
@@ -154,6 +156,7 @@ class _RequestFormState extends State<RequestForm> {
         'reviewed': 'false',
         'leastRating': myRequest.leastRating,
         'maximumApplicants': myRequest.maximumApplicants,
+        'numberOfApplicants': myRequest.numberOfApplicants,
       }).then((foo) {
         Firestore.instance
             .collection('users')
@@ -239,6 +242,7 @@ class _RequestFormState extends State<RequestForm> {
           requestTitle: document.data["title"],
           leastRating: document.data['leastRating'],
           maximumApplicants: document.data['maximumApplicants'],
+          numberOfApplicants: document.data['numberOfApplicants']
         );
         setState(() {
           myRequest = req;

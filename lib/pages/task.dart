@@ -17,6 +17,7 @@ class Task extends StatelessWidget {
     this.id,
     this.request,
     this.remain,
+    this.already,
     @required this.status,
     @required this.userId,
     @required this.auth,
@@ -31,6 +32,7 @@ class Task extends StatelessWidget {
   final id;
   final request;
   final remain;
+  final already;
   final String status;
   final String userId;
   final BaseAuth auth;
@@ -121,7 +123,7 @@ class Task extends StatelessWidget {
                       child: Text(
                           "Applicants Capacity: " +
                               ((this.remain != -1)
-                                  ? 
+                                  ?  this.already.toString() +
                                       " / " +
                                       this.remain.toString()
                                   : "No limit"),

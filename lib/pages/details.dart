@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:thewanted/pages/status_tag.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
 import 'package:thewanted/pages/details_components/apply_button.dart';
+import 'dart:async';
 
 class Request {
   //String userName;
@@ -103,11 +105,10 @@ class DetailedPage extends StatefulWidget {
 
 class _DetailedPageState extends State<DetailedPage> {
   Request request;
-
   @override
   void initState() {
     super.initState();
-    countDocuments(widget.id).then((_)=>_getRequest(widget.id));
+    _getRequest(widget.id);
   }
 
   BoxDecoration myBoxDecoration() {
@@ -118,11 +119,12 @@ class _DetailedPageState extends State<DetailedPage> {
         ));
   }
 
-  void _getRequest(String id) {
+  void _getRequest(size) {
+    print("current size get request: "+ size.toString());
     Request req;
     Firestore.instance
         .collection('tasks')
-        .document(id)
+        .document(widget.id)
         .get()
         .then((DocumentSnapshot document) {
       if (document.data == null) {
@@ -149,7 +151,7 @@ class _DetailedPageState extends State<DetailedPage> {
           requestTitle: widget.title,
           leastRating: document.data['leastRating'],
           maximumApplicants: document.data['maximumApplicants'],
-          numberOfApplicants: countDocuments(id),
+          numberOfApplicants: document.data['numberOfApplicants'],
         );
 
         setState(() {
@@ -159,11 +161,28 @@ class _DetailedPageState extends State<DetailedPage> {
     });
   }
 
-  countDocuments(id) async {
-    var size;
-    //Firestore.instance.collection('task').document(id).collection('applicants').document().get().then(onValue)();
-    return size;
-  } 
+  // Future<int> countDocuments(id) async {
+  //   // var size;
+  //   // QuerySnapshot querySnapshot = await Firestore.instance.collection('task').document(id).collection('applicants').getDocuments();
+  //   // List<DocumentSnapshot> list = querySnapshot.documents;
+  //   //print(id);
+  //   int size = 0;
+  //   await Firestore.instance
+  //         .collection('tasks')
+  //         .document(id)
+  //         .collection('applicants')
+  //         .getDocuments()
+  //         .then((QuerySnapshot snapshot) {
+  //             size = snapshot.documents.length;
+  //         });
+  //   //print("doc size" + size.toString());
+  //   return size;
+  // } 
+
+  // checkCount(id) async {
+  //   int val = await countDocuments(id);
+  //   return val;
+  // }
 
   @override
   Widget build(BuildContext context) {

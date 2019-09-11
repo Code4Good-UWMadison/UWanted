@@ -42,6 +42,8 @@ class _DashboardPageState extends State<DashboardPage> {
                   return new Text('Loading...');
                 default:
                   List<DocumentSnapshot> list = snapshot.data.documents;
+                  print(snapshot);
+                  //print(list.length);
                   if (_sortOptions != null) {
                     switch (_sortOptions) {
                       case 'Remaining':
@@ -54,6 +56,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       default:
                     }
                   }
+                  //snapshot.
                   return new ListView(
                     children: list.map((DocumentSnapshot document) {
                       return new Task(
@@ -68,6 +71,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         status: document['status'],
                         request: document['leastRating'],
                         remain: document['maximumApplicants'],
+                        already: document['numberOfApplicants'],
                         userId: widget.userId,
                         auth: widget.auth,
                       );
@@ -79,6 +83,24 @@ class _DashboardPageState extends State<DashboardPage> {
           )),
     );
   }
+
+  Future<int> countDocuments(id) async {
+    // var size;
+    // QuerySnapshot querySnapshot = await Firestore.instance.collection('task').document(id).collection('applicants').getDocuments();
+    // List<DocumentSnapshot> list = querySnapshot.documents;
+    //print(id);
+    int size = 0;
+    await Firestore.instance
+          .collection('tasks')
+          .document(id)
+          .collection('applicants')
+          .getDocuments()
+          .then((QuerySnapshot snapshot) {
+              size = snapshot.documents.length;
+          });
+    //print("doc size" + size.toString());
+    return size;
+  } 
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +148,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   }
                 });
               },
-              items: <String>['Remaining capacity', 'Minimum Rating required']
+              items: <String>['Remaining capacity', 'Min. Rating required']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
