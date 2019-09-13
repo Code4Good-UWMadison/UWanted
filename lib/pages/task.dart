@@ -6,19 +6,22 @@ import 'package:thewanted/pages/status_tag.dart';
 
 class Task extends StatelessWidget {
   // Task({@required this.title, this.description});
-  Task(
-      {@required this.title,
-      this.ai,
-      this.app,
-      this.be,
-      this.data,
-      this.fe,
-      this.ot,
-      this.id,
-      @required this.status,
-      @required this.userId,
-      @required this.auth,
-      });
+  Task({
+    @required this.title,
+    this.ai,
+    this.app,
+    this.be,
+    this.data,
+    this.fe,
+    this.ot,
+    this.id,
+    this.request,
+    this.remain,
+    this.already,
+    @required this.status,
+    @required this.userId,
+    @required this.auth,
+  });
   final title;
   final ai;
   final app;
@@ -27,6 +30,9 @@ class Task extends StatelessWidget {
   final fe;
   final ot;
   final id;
+  final request;
+  final remain;
+  final already;
   final String status;
   final String userId;
   final BaseAuth auth;
@@ -100,6 +106,31 @@ class Task extends StatelessWidget {
                     }).toList(),
                   ),
                 ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(left: 10, top: 10),
+                      child: Text(
+                          "Minimum Rating Required: " +
+                              this.request.toString(),
+                          style: Theme.of(context).textTheme.body2),
+                    ),
+                    //SizedBox(height: 5.0),
+                    Padding(
+                      padding: EdgeInsets.only(left: 10, top: 10),
+                      child: Text(
+                          "Applicants Capacity: " +
+                              ((this.remain != -1)
+                                  ?  this.already.toString() +
+                                      " / " +
+                                      this.remain.toString()
+                                  : "No limit"),
+                          style: Theme.of(context).textTheme.body2),
+                    ),
+                  ],
+                ),
                 FlatButton(
                     child: Text("See More"),
                     onPressed: () {
@@ -111,7 +142,7 @@ class Task extends StatelessWidget {
                                     id: id,
                                     currUserId: userId,
                                     auth: auth,
-                                withdrawlButton: false,
+                                    withdrawlButton: false,
                                   )));
                     }),
               ],

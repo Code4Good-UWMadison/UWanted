@@ -272,7 +272,19 @@ class _ApplyButtonState extends State<ApplyButton> {
     );
   }
 
-  Future _updateTaskApplicants(String uid, String msg) => Firestore.instance
+  Future _updateTaskApplicants(String uid, String msg) { 
+    Firestore.instance
+        .collection('tasks')
+        .document(widget.taskId)
+        .get()
+        .then((DocumentSnapshot doc) {
+          number = doc['numberOfApplicants'] + 1;
+        });
+      Firestore.instance.collection('tasks').document(widget.taskId).updateData({
+        "numberOfApplicants": number
+      });
+    
+    return Firestore.instance
           .collection('tasks')
           .document(widget.taskId)
           .collection('applicants')
@@ -283,6 +295,7 @@ class _ApplyButtonState extends State<ApplyButton> {
         'updated': Timestamp.now(),
         'accepted': false,
       }, merge: true);
+  }
 
   Future<void> _updateProfileApplied(String uid) =>
       Firestore.instance.collection('users').document(uid).updateData({
@@ -328,6 +341,8 @@ class _ApplyButtonState extends State<ApplyButton> {
     );
   }
 
+  int number = 0;
+
   _withdrawApplication(BuildContext context) {
     widget.userId.then((String uid) async {
       Firestore.instance
@@ -336,6 +351,16 @@ class _ApplyButtonState extends State<ApplyButton> {
           .collection('applicants')
           .document(uid)
           .delete();
+      Firestore.instance
+        .collection('tasks')
+        .document(widget.taskId)
+        .get()
+        .then((DocumentSnapshot doc) {
+          number = doc['numberOfApplicants'] - 1;
+        });
+      Firestore.instance.collection('tasks').document(widget.taskId).updateData({
+        "numberOfApplicants": number
+      });
       Firestore.instance.collection('users').document(uid).updateData({
         'applied': FieldValue.arrayRemove([
           widget.taskId,
