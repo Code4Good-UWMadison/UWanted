@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thewanted/pages/details.dart';
+import 'package:thewanted/pages/components/details.dart';
 import 'package:flutter/services.dart';
 
 class Filter extends StatefulWidget {

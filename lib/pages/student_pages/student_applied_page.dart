@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../details.dart';
+import '../components/details.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
-import 'package:thewanted/pages/details.dart';
+import 'package:thewanted/pages/components/details.dart';
 import 'dart:io';
 import 'dart:async';
-import 'package:thewanted/pages/status_tag.dart';
+import 'package:thewanted/pages//components/status_tag.dart';
 
 final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 bool _isLoading = false;
@@ -29,9 +29,9 @@ class StudentAppliedPage extends StatefulWidget {
 class _StudentAppliedPageState extends State<StudentAppliedPage> {
   List<bool> _expansionStatus = [true, false, false];
   User user;
-  File _image;
-  String _imageUrl;
-  bool _confirmed;
+  // File _image;
+  // String _imageUrl;
+  // bool _confirmed;
 
   @override
   Widget build(BuildContext context) {
@@ -114,8 +114,8 @@ class _StudentAppliedPageState extends State<StudentAppliedPage> {
   @override
   void initState() {
     super.initState();
-    _image = null;
-    _imageUrl = null;
+    // _image = null;
+    // _imageUrl = null;
     _getUserProfileFromFirebase();
   }
 

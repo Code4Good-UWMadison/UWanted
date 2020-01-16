@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/authentication.dart';
-import '../pages/task.dart';
+import '../pages/components/task.dart';
 import 'dart:async';
 
 class DashboardPage extends StatefulWidget {

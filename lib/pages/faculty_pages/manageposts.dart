@@ -9,7 +9,7 @@ import 'package:thewanted/pages/profile/application_detail.dart';
 // import 'package:thewanted/pages/details.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
-import 'package:thewanted/pages/postToManage.dart';
+import 'postToManage.dart';
 
 class ManagePostsPage extends StatefulWidget {
   ManagePostsPage({
@@ -131,7 +131,7 @@ class _ManagePostsState extends State<ManagePostsPage> {
                                   naviDetails: _navigateToApplicationDetail,
                                 );
                               })
-                              .where((task) => task.status != 'finished')
+                              // .where((task) => task.status != 'finished')
                               .toList(),
                         );
               }

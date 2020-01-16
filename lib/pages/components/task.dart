@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thewanted/services/authentication.dart';
 import './details.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thewanted/pages/status_tag.dart';
+import 'status_tag.dart';
 
 class Task extends StatelessWidget {
   // Task({@required this.title, this.description});

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../services/authentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../details.dart';
+import '../components/details.dart';
 import 'requestLabel.dart';
-import 'package:thewanted/pages/send_request_page/filter.dart';
+import 'filter.dart';
 
 class RequestForm extends StatefulWidget {
   RequestForm(

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:thewanted/pages/status_tag.dart';
+import 'package:thewanted/pages/components/status_tag.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:thewanted/pages/details.dart';
+import 'package:thewanted/pages/components/details.dart';
 
 class ApplyButton extends StatefulWidget {
-  ApplyButton({
-    @required this.taskId,
-    @required String status,
-    @required this.context,
-    @required this.parentKey,
-    @required this.request,
-  })  : status = StatusTag.getStatusFromString(status),
+  ApplyButton(
+      {@required this.taskId,
+      @required String status,
+      @required this.context,
+      @required this.parentKey,
+      @required this.request,
+      @required this.notifyParent})
+      : status = StatusTag.getStatusFromString(status),
         userId = FirebaseAuth.instance
             .currentUser()
             .then((FirebaseUser user) => user.uid);
@@ -22,6 +23,8 @@ class ApplyButton extends StatefulWidget {
   final BuildContext context;
   final GlobalKey<ScaffoldState> parentKey;
   final Request request;
+
+  final Function(bool apply) notifyParent;
 
   @override
   _ApplyButtonState createState() => _ApplyButtonState();
@@ -40,9 +43,11 @@ class _ApplyButtonState extends State<ApplyButton> {
   Future _updateButton() async {
     widget.userId.then((String uid) {
       _checkIfApplied(uid).then((applied) {
-        setState(() {
-          this._applied = applied;
-        });
+        if (this.mounted) {
+          setState(() {
+            this._applied = applied;
+          });
+        }
       });
     });
   }
@@ -117,14 +122,16 @@ class _ApplyButtonState extends State<ApplyButton> {
   }
 
   void _apply() {
-    setState(() {
-      this._pressed = true;
-    });
-    _updateTaskdataAndProfiledata().then((_) {
+    if (this.mounted) {
       setState(() {
-        this._pressed = false;
+        this._pressed = true;
       });
-    });
+      _updateTaskdataAndProfiledata().then((_) {
+        setState(() {
+          this._pressed = false;
+        });
+      });
+    }
   }
 
   Future<void> _updateTaskdataAndProfiledata() =>
@@ -135,6 +142,8 @@ class _ApplyButtonState extends State<ApplyButton> {
           _showRatingNotEnoughDialog();
         } else if (!await _checkIfNotFull()) {
           _showFullDialog();
+        } else if (!await _checkProfileFullfilled(uid)) {
+          _showFullfillProfile();
         } else {
           _showAppMsgDialog().then((String appMsg) {
             if (appMsg != null) {
@@ -142,26 +151,34 @@ class _ApplyButtonState extends State<ApplyButton> {
               _updateProfileApplied(uid);
             }
           }).then((_) {
-            showInSnackBar('Success!'); //TODO: showsnackbar!!!
+            _updateButton();
           });
         }
       }).catchError((e) {
-        print(e);
-        widget.parentKey.currentState
-            .showSnackBar(SnackBar(content: Text(e))); //TODO: showsnackbar!!!
+        widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e)));
       });
+
+  //     }).then((_) {
+  //       // showInSnackBar('Success!'); //TODO: showsnackbar!!!
+  //     });
+  //   }
+  // }).catchError((e) {
+  //   print(e);
+  //   // widget.parentKey.currentState
+  //   //     .showSnackBar(SnackBar(content: Text(e))); //TODO: showsnackbar!!!
+  // });
 
   //TODO: showsnackbar!!!
   // not figure out how to display snackbar yet, none of these work
   // Reason: After submitting the application, the details page will be redrawn,
   // causing the change of context and key, but the widget created before cannot know
   // the key created now, thus cannot display snackbar on current Scaffold
-  void showInSnackBar(String value) {
-    // widget.parentKey.currentState
-    //     .showSnackBar(SnackBar(content: Text(value)));
-    // Scaffold.of(context).showSnackBar(SnackBar(content: Text(value)));
-    // Scaffold.of(widget.context).showSnackBar(SnackBar(content: Text(value)));
-  }
+  // void showInSnackBar(String value) {
+  //   // widget.parentKey.currentState
+  //   //     .showSnackBar(SnackBar(content: Text(value)));
+  //   // Scaffold.of(context).showSnackBar(SnackBar(content: Text(value)));
+  //   // Scaffold.of(widget.context).showSnackBar(SnackBar(content: Text(value)));
+  // }
 
   Future<bool> _checkIfApplied(String uid) async =>
       await _checkIfAppliedInTask(uid) && await _checkIfAppliedInUser(uid);
@@ -187,6 +204,13 @@ class _ApplyButtonState extends State<ApplyButton> {
       .get()
       .then((DocumentSnapshot document) =>
           document['rating'] >= widget.request.leastRating);
+
+  Future<bool> _checkProfileFullfilled(String uid) => Firestore.instance
+      .collection('users')
+      .document(uid)
+      .get()
+      .then((DocumentSnapshot document) =>
+          document['name'] != "");
 
   Future<bool> _checkIfNotFull() => widget.request.maximumApplicants < 0
       ? Future(() => true)
@@ -237,6 +261,25 @@ class _ApplyButtonState extends State<ApplyButton> {
         },
       );
 
+    Future<String> _showFullfillProfile() async => showDialog<String>(
+        context: widget.context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Haven\'t fullfilled your profile yet!'),
+            content: Text(
+                "Please fullfill your profile before applying!"),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+
   Future<String> _showAppMsgDialog() async {
     TextEditingController _controller = TextEditingController();
     return showDialog<String>(
@@ -272,29 +315,38 @@ class _ApplyButtonState extends State<ApplyButton> {
     );
   }
 
-  Future _updateTaskApplicants(String uid, String msg) { 
-    Firestore.instance
+  Future _updateTaskApplicants(String uid, String msg) {
+    _addApplicants(uid);
+    return Firestore.instance
+        .collection('tasks')
+        .document(widget.taskId)
+        .collection('applicants')
+        .document(uid)
+        .setData({
+      'msg': msg,
+      'created': Timestamp.now(),
+      'updated': Timestamp.now(),
+      'accepted': false,
+    }, merge: true).then((_) {
+      widget.notifyParent(true);
+      widget.parentKey.currentState
+          .showSnackBar(SnackBar(content: Text("Successfully Applied!")));
+    });
+  }
+
+  _addApplicants(String uid) async {
+    int number = 0;
+    await Firestore.instance
         .collection('tasks')
         .document(widget.taskId)
         .get()
         .then((DocumentSnapshot doc) {
-          number = doc['numberOfApplicants'] + 1;
-        });
-      Firestore.instance.collection('tasks').document(widget.taskId).updateData({
-        "numberOfApplicants": number
-      });
-    
-    return Firestore.instance
-          .collection('tasks')
-          .document(widget.taskId)
-          .collection('applicants')
-          .document(uid)
-          .setData({
-        'msg': msg,
-        'created': Timestamp.now(),
-        'updated': Timestamp.now(),
-        'accepted': false,
-      }, merge: true);
+      number = doc['numberOfApplicants'] + 1;
+    });
+    Firestore.instance
+        .collection('tasks')
+        .document(widget.taskId)
+        .updateData({"numberOfApplicants": number});
   }
 
   Future<void> _updateProfileApplied(String uid) =>
@@ -341,26 +393,30 @@ class _ApplyButtonState extends State<ApplyButton> {
     );
   }
 
-  int number = 0;
+  // int number = 0;
 
   _withdrawApplication(BuildContext context) {
     widget.userId.then((String uid) async {
+      int number = 0;
       Firestore.instance
           .collection('tasks')
           .document(widget.taskId)
           .collection('applicants')
           .document(uid)
           .delete();
-      Firestore.instance
-        .collection('tasks')
-        .document(widget.taskId)
-        .get()
-        .then((DocumentSnapshot doc) {
-          number = doc['numberOfApplicants'] - 1;
-        });
-      Firestore.instance.collection('tasks').document(widget.taskId).updateData({
-        "numberOfApplicants": number
+
+      await Firestore.instance
+          .collection('tasks')
+          .document(widget.taskId)
+          .get()
+          .then((DocumentSnapshot doc) {
+        number = doc['numberOfApplicants'] - 1;
       });
+
+      Firestore.instance
+          .collection('tasks')
+          .document(widget.taskId)
+          .updateData({"numberOfApplicants": number});
       Firestore.instance.collection('users').document(uid).updateData({
         'applied': FieldValue.arrayRemove([
           widget.taskId,
@@ -368,7 +424,11 @@ class _ApplyButtonState extends State<ApplyButton> {
       });
     }).then((_) {
       Navigator.of(context).pop();
+
       _updateButton();
+      widget.notifyParent(false);
+      widget.parentKey.currentState
+          .showSnackBar(SnackBar(content: Text("Withdraw Successfully.")));
     }).catchError((e) {
       widget.parentKey.currentState.showSnackBar(SnackBar(content: Text(e)));
     });

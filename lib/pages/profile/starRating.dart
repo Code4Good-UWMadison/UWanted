@@ -1,3 +1,4 @@
+// source: https://gist.github.com/sma/1f22ef926ef878f10915aa9e00bc9eaa
 import 'package:flutter/material.dart';
 
 class StarDisplayWidget extends StatelessWidget {

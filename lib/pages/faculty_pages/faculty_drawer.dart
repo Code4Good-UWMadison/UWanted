@@ -24,7 +24,7 @@ class FacultyDrawerPage extends StatefulWidget {
 
 class _FacultyDrawerPageState extends State<FacultyDrawerPage> {
   User user;
-  String _imageUrl;
+  // String _imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -53,12 +53,12 @@ class _FacultyDrawerPageState extends State<FacultyDrawerPage> {
   void initState() {
     super.initState();
     // init profile's url
-    var ref = FirebaseStorage.instance
-        .ref()
-        .child('user')
-        .child(widget.userId)
-        .child('profile.jpg');
-    ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
+    // var ref = FirebaseStorage.instance
+    //     .ref()
+    //     .child('user')
+    //     .child(widget.userId)
+    //     .child('profile.jpg');
+    // ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
     _getUserProfileFromFirebase();
   }
 
@@ -111,7 +111,7 @@ class _FacultyDrawerPageState extends State<FacultyDrawerPage> {
         ),
       ),
       accountEmail: new Container(child: new Text("Enjoy your day~ ")),
-      currentAccountPicture: Avatar(userId: widget.userId, radius: 30),
+      // currentAccountPicture: Avatar(userId: widget.userId, radius: 30),
       // onDetailsPressed: () {},
     );
   }

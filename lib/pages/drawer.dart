@@ -23,7 +23,7 @@ class DrawerPage extends StatefulWidget {
 
 class _DrawerPageState extends State<DrawerPage> {
   User user;
-  String _imageUrl;
+  // String _imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class _DrawerPageState extends State<DrawerPage> {
           tiles: [
             _buildDrawerHeader(),
             _buildListTile("Role", this.user.userRoleToString()),
-            _buildListTile("Lab", this.user.lab),
+            // _buildListTile("Lab", this.user.lab),
             _buildListTile("Major", this.user.major),
             _buildListTile("Technical Skills", this.user.skills.toString()),
             AboutListTile(icon: null),
@@ -53,12 +53,12 @@ class _DrawerPageState extends State<DrawerPage> {
   void initState() {
     super.initState();
     // init profile's url
-    var ref = FirebaseStorage.instance
-        .ref()
-        .child('user')
-        .child(widget.userId)
-        .child('profile.jpg');
-    ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
+    // var ref = FirebaseStorage.instance
+    //     .ref()
+    //     .child('user')
+    //     .child(widget.userId)
+    //     .child('profile.jpg');
+    // ref.getDownloadURL().then((loc) => setState(() => _imageUrl = loc));
     _getUserProfileFromFirebase();
   }
 

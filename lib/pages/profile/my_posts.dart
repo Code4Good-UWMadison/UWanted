@@ -2,9 +2,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thewanted/services/authentication.dart';
-import 'package:thewanted/pages/details.dart';
-import 'package:thewanted/pages/status_tag.dart';
-import '../send_request_page/send_request_refactored.dart';
+import 'package:thewanted/pages/components/details.dart';
+import 'package:thewanted/pages/components/status_tag.dart';
+import '../request/send_request_refactored.dart';
 import 'package:thewanted/pages/profile/applicants_list.dart';
 
 class MyPostsPage extends StatefulWidget {

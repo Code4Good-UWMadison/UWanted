@@ -2,13 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:thewanted/pages/profile/starRating.dart';
 import 'package:thewanted/services/authentication.dart';
-import './details.dart';
+import '../components/details.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:thewanted/pages/status_tag.dart';
+import 'package:thewanted/pages/components/status_tag.dart';
 
-import 'components/avatar.dart';
+import '../components/avatar.dart';
 import 'package:thewanted/models/user.dart';
-import 'package:thewanted/pages/send_request_page/send_request_refactored.dart';
+import 'package:thewanted/pages/request/send_request_refactored.dart';
 
 class PostToManage extends StatelessWidget {
   // Task({@required this.title, this.description});

@@ -58,7 +58,7 @@ class _FacultyEditProfilePageState extends State<FacultyEditProfilePage> {
         child: ListView(
           children: <Widget>[
             _buildNameForm(),
-            _buildRoleCheckboxs(),
+            // _buildRoleCheckboxs(),
             _buildLabForm(),
             // _buildMajorForm(),
             // _buildSkillsCheckboxs(),
@@ -159,41 +159,41 @@ class _FacultyEditProfilePageState extends State<FacultyEditProfilePage> {
   //       ),
   //     );
 
-  Row _buildRoleCheckboxs() => Row(
-        children: <Widget>[
-          Container(
-            margin: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-            child: Text(
-              'Role',
-              style: TextStyle(fontSize: 17),
-            ),
-          ),
-          Flexible(
-            child: RadioListTile<UserRole>(
-              value: UserRole.Student,
-              title: Text('Student'),
-              groupValue: widget.user.userRole,
-              onChanged: (value) {
-                setState(() {
-                  widget.user.userRole = value;
-                });
-              },
-            ),
-          ),
-          Flexible(
-            child: RadioListTile<UserRole>(
-              value: UserRole.Faculty,
-              title: Text('Faculty'),
-              groupValue: widget.user.userRole,
-              onChanged: (value) {
-                setState(() {
-                  widget.user.userRole = value;
-                });
-              },
-            ),
-          ),
-        ],
-      );
+  // Row _buildRoleCheckboxs() => Row(
+  //       children: <Widget>[
+  //         Container(
+  //           margin: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+  //           child: Text(
+  //             'Role',
+  //             style: TextStyle(fontSize: 17),
+  //           ),
+  //         ),
+  //         Flexible(
+  //           child: RadioListTile<UserRole>(
+  //             value: UserRole.Student,
+  //             title: Text('Student'),
+  //             groupValue: widget.user.userRole,
+  //             onChanged: (value) {
+  //               setState(() {
+  //                 widget.user.userRole = value;
+  //               });
+  //             },
+  //           ),
+  //         ),
+  //         Flexible(
+  //           child: RadioListTile<UserRole>(
+  //             value: UserRole.Faculty,
+  //             title: Text('Faculty'),
+  //             groupValue: widget.user.userRole,
+  //             onChanged: (value) {
+  //               setState(() {
+  //                 widget.user.userRole = value;
+  //               });
+  //             },
+  //           ),
+  //         ),
+  //       ],
+  //     );
 
   bool _isSubmitting = false;
 

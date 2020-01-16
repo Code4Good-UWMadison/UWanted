@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:thewanted/pages/status_tag.dart';
+import 'status_tag.dart';
 import 'package:thewanted/services/authentication.dart';
 import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
-import 'package:thewanted/pages/details_components/apply_button.dart';
+import 'apply_button.dart';
 import 'dart:async';
 
 class Request {
@@ -94,7 +94,7 @@ class DetailedPage extends StatefulWidget {
   //         status: document['status'],
   //         requestTitle: document.data['title'],
   //         leastRating: document.data['leastRating'],
-  //         maximumApplicants: document.data['maximumApplicants'], 
+  //         maximumApplicants: document.data['maximumApplicants'],
   //         numberOfApplicants:
   //       );
   //       return req;
@@ -105,6 +105,7 @@ class DetailedPage extends StatefulWidget {
 
 class _DetailedPageState extends State<DetailedPage> {
   Request request;
+  num numOfApplicants = 0;
   @override
   void initState() {
     super.initState();
@@ -119,8 +120,20 @@ class _DetailedPageState extends State<DetailedPage> {
         ));
   }
 
-  void _getRequest(size) {
-    print("current size get request: "+ size.toString());
+  refresh(bool apply) {
+    if (this.mounted){
+      setState(() {
+        if (apply) {
+          this.numOfApplicants++;
+        } else { // withdraw
+          this.numOfApplicants--;
+        }
+      });
+    }
+  }
+
+  void _getRequest(rid) {
+    print("current size get request: " + rid.toString());
     Request req;
     Firestore.instance
         .collection('tasks')
@@ -128,14 +141,15 @@ class _DetailedPageState extends State<DetailedPage> {
         .get()
         .then((DocumentSnapshot document) {
       if (document.data == null) {
-        return showDialog(
-            context: context,
-            builder: (_) => new AlertDialog(
-                  content: new Text(
-                    'Request does not exist.',
-                    textAlign: TextAlign.center,
-                  ),
-                ));
+        // return showDialog(
+        //     context: context,
+        //     builder: (_) => new AlertDialog(
+        //           content: new Text(
+        //             'Request does not exist.',
+        //             textAlign: TextAlign.center,
+        //           ),
+        //         ));
+        print("ERROR*********************\n");
       } else {
         req = new Request(
           userId: document.data['userId'],
@@ -155,6 +169,7 @@ class _DetailedPageState extends State<DetailedPage> {
         );
 
         setState(() {
+          this.numOfApplicants = req.numberOfApplicants;
           this.request = req;
         });
       }
@@ -177,7 +192,7 @@ class _DetailedPageState extends State<DetailedPage> {
   //         });
   //   //print("doc size" + size.toString());
   //   return size;
-  // } 
+  // }
 
   // checkCount(id) async {
   //   int val = await countDocuments(id);
@@ -360,6 +375,7 @@ class _DetailedPageState extends State<DetailedPage> {
           context: context,
           parentKey: _scaffoldKey,
           request: this.request,
+          notifyParent: refresh,
         )
 //        FlatButton(
 //          onPressed: () {
@@ -383,15 +399,20 @@ class _DetailedPageState extends State<DetailedPage> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: 10, top: 10),
-          child: Text("Minimum Rating Required: " + this.request.leastRating.toString(),
+          child: Text(
+              "Minimum Rating Required: " + this.request.leastRating.toString(),
               style: Theme.of(context).textTheme.body2),
         ),
         SizedBox(height: 10.0),
         Padding(
           padding: EdgeInsets.only(left: 10, top: 10),
-          child: Text("Applicants Capacity: " + ((this.request.maximumApplicants != -1)
-            ? this.request.numberOfApplicants.toString()+ " / " + this.request.maximumApplicants.toString()
-            :"No limit"),
+          child: Text(
+              "Applicants Capacity: " +
+                  ((this.request.maximumApplicants != -1)
+                      ? this.numOfApplicants.toString() +
+                          " / " +
+                          this.request.maximumApplicants.toString()
+                      : "No limit"),
               style: Theme.of(context).textTheme.body2),
         ),
         SizedBox(height: 20.0),

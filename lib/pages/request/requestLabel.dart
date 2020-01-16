@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../details.dart';
+import '../components/details.dart';
 
 class RequestLabel extends StatefulWidget {
   final Text label;
