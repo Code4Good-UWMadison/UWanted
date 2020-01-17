@@ -15,7 +15,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   var _sortOptions;
-  final CollectionReference originList =
+  CollectionReference originList =
       Firestore.instance.collection('tasks'); // Search from origin
   Stream<QuerySnapshot> currList = Firestore.instance
       .collection('tasks')
@@ -32,75 +32,86 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Container(
           padding: const EdgeInsets.all(10.0),
           child: StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance.collection('tasks').snapshots(),
+            stream: currList,
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError)
-                return new Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return new Text('Loading...');
-                default:
-                  List<DocumentSnapshot> list = snapshot.data.documents;
-                  print(snapshot);
-                  //print(list.length);
-                  if (_sortOptions != null) {
-                    switch (_sortOptions) {
-                      case 'Remaining':
-                        //list.sort(
-                            //(a, b) => a['updated'].compareTo(b['updated']));
-                        break;
-                      case 'Request':
-                        list.sort((a, b) => a['leastRating'].compareTo(b['leastRating']));
-                        break;
-                      default:
-                    }
+              if (snapshot.data != null) {
+                print("NOT NULL??????");
+                if (snapshot.hasError)
+                  return new Text('Error: ${snapshot.error}');
+                // switch (snapshot.connectionState) {
+                //   case ConnectionState.waiting:
+                //     return new Text('Loading...');
+                //   default:
+                List<DocumentSnapshot> list = snapshot.data.documents;
+                //print(list.length);
+                if (_sortOptions != null) {
+                  switch (_sortOptions) {
+                    case 'Remaining':
+                      list.sort((a, b) =>
+                          (a['maximumApplicants'] - a['numberOfApplicants'])
+                              .compareTo((b['maximumApplicants'] -
+                                  b['numberOfApplicants'])));
+                      break;
+                    case 'Request':
+                      list.sort((a, b) =>
+                          a['leastRating'].compareTo(b['leastRating']));
+                      break;
+                    default:
                   }
-                  //snapshot.
-                  return new ListView(
-                    children: list.map((DocumentSnapshot document) {
-                      return new Task(
-                        title: document['title'],
-                        ai: document['AI&ML'],
-                        app: document['App'],
-                        be: document['Backend'],
-                        data: document['Data'],
-                        fe: document['Frontend'],
-                        ot: document['Other'],
-                        id: document.documentID,
-                        status: document['status'],
-                        request: document['leastRating'],
-                        remain: document['maximumApplicants'],
-                        already: document['numberOfApplicants'],
-                        userId: widget.userId,
-                        auth: widget.auth,
-                      );
-                    }).where((task) => task.status != 'finished').toList(),
-                  );
+                } else {
+                  list = snapshot.data.documents;
+                }
+                //snapshot.
+                return new ListView(
+                  children: list
+                      .map((DocumentSnapshot document) {
+                        return new Task(
+                          title: document['title'],
+                          ai: document['AI&ML'],
+                          app: document['App'],
+                          be: document['Backend'],
+                          data: document['Data'],
+                          fe: document['Frontend'],
+                          ot: document['Other'],
+                          id: document.documentID,
+                          status: document['status'],
+                          request: document['leastRating'],
+                          max: document['maximumApplicants'],
+                          already: document['numberOfApplicants'],
+                          userId: widget.userId,
+                          auth: widget.auth,
+                        );
+                      })
+                      .where((task) => task.status != 'finished')
+                      .toList(),
+                );
                 // return new Text(widget.userId);
+                // }
               }
+              return new Text("No available tasks right now");
             },
           )),
     );
   }
 
-  Future<int> countDocuments(id) async {
-    // var size;
-    // QuerySnapshot querySnapshot = await Firestore.instance.collection('task').document(id).collection('applicants').getDocuments();
-    // List<DocumentSnapshot> list = querySnapshot.documents;
-    //print(id);
-    int size = 0;
-    await Firestore.instance
-          .collection('tasks')
-          .document(id)
-          .collection('applicants')
-          .getDocuments()
-          .then((QuerySnapshot snapshot) {
-              size = snapshot.documents.length;
-          });
-    //print("doc size" + size.toString());
-    return size;
-  } 
+  // Future<int> countDocuments(id) async {
+  //   // var size;
+  //   // QuerySnapshot querySnapshot = await Firestore.instance.collection('task').document(id).collection('applicants').getDocuments();
+  //   // List<DocumentSnapshot> list = querySnapshot.documents;
+  //   //print(id);
+  //   int size = 0;
+  //   await Firestore.instance
+  //         .collection('tasks')
+  //         .document(id)
+  //         .collection('applicants')
+  //         .getDocuments()
+  //         .then((QuerySnapshot snapshot) {
+  //             size = snapshot.documents.length;
+  //         });
+  //   //print("doc size" + size.toString());
+  //   return size;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -108,60 +119,62 @@ class _DashboardPageState extends State<DashboardPage> {
         body: Container(
             padding: const EdgeInsets.all(10.0),
             child: Column(children: <Widget>[
-      Row(
-        children: <Widget>[
-          Expanded(
-            child: TextField(
-              onChanged: (val) {
-                var search = val;
-                setState(() {
-                  print("start");
-                  currList = originList
-                      .where('title', isGreaterThanOrEqualTo: search)
-                      .where('title', isLessThan: search + 'z')
-                      .snapshots();
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'Search by name',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10.0)),
+              Row(
+                children: <Widget>[
+                  Expanded(
+                    child: TextField(
+                      onChanged: (val) {
+                        var search = val;
+                        setState(() {
+                          _sortOptions = null;
+                          currList = originList
+                              .where('title', isGreaterThanOrEqualTo: search)
+                              .where('title', isLessThan: search + 'z')
+                              .snapshots();
+                        });
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search by name',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0)),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    child: DropdownButton<String>(
+                      // value: 'Sort',
+
+                      icon: Icon(Icons.sort),
+                      onChanged: (String newValue) {
+                        setState(() {
+                          switch (newValue) {
+                            case 'Sorted by Availbility':
+                              _sortOptions = 'Remaining';
+                              break;
+                            case 'Min. Rating satisfied':
+                              _sortOptions = 'Request';
+                              break;
+                            default:
+                          }
+                        });
+                      },
+                      items: <String>[
+                        'Sorted by Availbility',
+                        'Min. Rating satisfied'
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ),
-          Container(
-            alignment: Alignment.center,
-            child: DropdownButton<String>(
-              // value: 'Sort',
-              
-              icon: Icon(Icons.sort),
-              onChanged: (String newValue) {
-                setState(() {
-                  switch (newValue) {
-                    case 'Remaining':
-                      _sortOptions = 'Remaining';
-                      break;
-                    case 'Request':
-                      _sortOptions = 'Request';
-                      break;
-                    default:
-                  }
-                });
-              },
-              items: <String>['Remaining capacity', 'Min. Rating required']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
-      Expanded(
-        child: _show(),
-      ),
-    ])));
+              Expanded(
+                child: _show(),
+              ),
+            ])));
   }
 }
