@@ -36,7 +36,7 @@ class _DashboardPageState extends State<DashboardPage> {
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.data != null) {
-                print("NOT NULL??????");
+                // print("NOT NULL??????");
                 if (snapshot.hasError)
                   return new Text('Error: ${snapshot.error}');
                 // switch (snapshot.connectionState) {

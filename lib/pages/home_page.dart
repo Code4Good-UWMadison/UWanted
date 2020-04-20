@@ -415,11 +415,11 @@ class _HomePageState extends State<HomePage> {
             ? DrawerPage(userId: widget.userId, auth: widget.auth)
             : FacultyDrawerPage(userId: widget.userId, auth: widget.auth),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: guestType == GuestType.FAC?FloatingActionButton(
         onPressed: _newRequest, // generate a new task
         tooltip: 'Request',
         child: Icon(Icons.add),
-      ),
+      ) : null,
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(

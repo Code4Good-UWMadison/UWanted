@@ -7,6 +7,7 @@ import 'package:thewanted/models/user.dart';
 import 'package:thewanted/models/skills.dart';
 import 'apply_button.dart';
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Request {
   //String userName;
@@ -51,7 +52,11 @@ class DetailedPage extends StatefulWidget {
       @required this.currUserId,
       @required this.auth,
       @required this.withdrawlButton});
+  // userId = FirebaseAuth.instance
+  //       .currentUser()
+  //       .then((FirebaseUser user) => user.uid);
 
+  // final Future<String> userId;
   final title;
   final id;
   final String currUserId;
@@ -121,11 +126,12 @@ class _DetailedPageState extends State<DetailedPage> {
   }
 
   refresh(bool apply) {
-    if (this.mounted){
+    if (this.mounted) {
       setState(() {
         if (apply) {
           this.numOfApplicants++;
-        } else { // withdraw
+        } else {
+          // withdraw
           this.numOfApplicants--;
         }
       });
@@ -242,7 +248,7 @@ class _DetailedPageState extends State<DetailedPage> {
         Padding(
           padding: EdgeInsets.only(left: 10, top: 10),
           child: Text('Request Details',
-              style: Theme.of(context).textTheme.subtitle),
+              style: Theme.of(context).textTheme.subtitle2),
         ),
         SizedBox(height: 10.0),
         Padding(
@@ -345,8 +351,8 @@ class _DetailedPageState extends State<DetailedPage> {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(left: 10, bottom: 10),
-          child:
-              Text('Contact Info', style: Theme.of(context).textTheme.subtitle),
+          child: Text('Contact Info',
+              style: Theme.of(context).textTheme.subtitle2),
         ),
 
         Material(
@@ -364,19 +370,21 @@ class _DetailedPageState extends State<DetailedPage> {
             height: 45,
             child: Text(
               this.request.contact,
-              style: Theme.of(context).textTheme.body2,
+              style: Theme.of(context).textTheme.bodyText1,
             ),
           ),
         ),
 
-        ApplyButton(
-          taskId: widget.id,
-          status: this.request.status,
-          context: context,
-          parentKey: _scaffoldKey,
-          request: this.request,
-          notifyParent: refresh,
-        )
+          widget.currUserId == this.request.userId
+            ? Text("")
+            : ApplyButton(
+                taskId: widget.id,
+                status: this.request.status,
+                context: context,
+                parentKey: _scaffoldKey,
+                request: this.request,
+                notifyParent: refresh,
+              )
 //        FlatButton(
 //          onPressed: () {
 //            Navigator.push(
@@ -401,7 +409,7 @@ class _DetailedPageState extends State<DetailedPage> {
           padding: EdgeInsets.only(left: 10, top: 10),
           child: Text(
               "Minimum Rating Required: " + this.request.leastRating.toString(),
-              style: Theme.of(context).textTheme.body2),
+              style: Theme.of(context).textTheme.bodyText1),
         ),
         SizedBox(height: 10.0),
         Padding(
@@ -413,7 +421,7 @@ class _DetailedPageState extends State<DetailedPage> {
                           " / " +
                           this.request.maximumApplicants.toString()
                       : "No limit"),
-              style: Theme.of(context).textTheme.body2),
+              style: Theme.of(context).textTheme.bodyText1),
         ),
         SizedBox(height: 20.0),
       ],
@@ -445,85 +453,6 @@ class _DetailedPageState extends State<DetailedPage> {
         ));
   }
 }
-
-// class userProfileInfoPage extends StatefulWidget {
-//   User user;
-//   final String userIdNum;
-
-//   userProfileInfoPage(this.userIdNum);
-
-//   @override
-//   _userProfileInfoPageState createState() => _userProfileInfoPageState();
-// }
-
-// class _userProfileInfoPageState extends State<userProfileInfoPage> {
-//   @override
-//   void initState() {
-//     Firestore.instance
-//         .collection('users')
-//         .document(widget.userIdNum)
-//         .get()
-//         .then((DocumentSnapshot document) {
-//       if (document.data == null) {
-//         //TODO: add warning message
-//         print("null found");
-//         print("userid is " + widget.userIdNum);
-//       } else {
-//         var u = User(
-//             userName: document['name'],
-//             userRole: document['student']
-//                 ? UserRole.Student
-//                 : (document['faculty'] ? UserRole.Faculty : null),
-//             lab: document['lab'],
-//             major: document['major'],
-//             skills: Skills(
-//               backend: document['Backend'],
-//               frontend: document['Frontend'],
-//               aiml: document['AI&ML'],
-//               data: document['Data'],
-//               app: document['App'],
-//               others: document['Others'],
-//             ));
-//         setState(() {
-//           widget.user = u;
-//         });
-//       }
-//     });
-//     super.initState();
-//   }
-
-//   ListTile _buildListTile(String title, String trailing) => ListTile(
-//         title: Text(title),
-//         trailing: Text(trailing),
-//       );
-
-//   @override
-//   Widget build(BuildContext context) {
-//     if (widget.user != null) {
-//       return Scaffold(
-//         appBar: AppBar(
-//           title: Text("User Profile"),
-//         ),
-//         body: ListView(
-//           padding: EdgeInsets.zero,
-//           children: ListTile.divideTiles(
-//             context: context,
-//             tiles: [
-//               _buildListTile("Name", widget.user.userName),
-//               _buildListTile("Role", widget.user.userRoleToString()),
-//               _buildListTile("Lab", widget.user.lab),
-//               _buildListTile("Major", widget.user.major),
-//               _buildListTile("Technical Skills", widget.user.skills.toString()),
-//             ],
-//           ).toList(),
-//         ),
-//       );
-//     } else
-//       return new Center(
-//         child: CircularProgressIndicator(),
-//       );
-//   }
-// }
 
 class LabelWidget extends StatefulWidget {
   Text label;

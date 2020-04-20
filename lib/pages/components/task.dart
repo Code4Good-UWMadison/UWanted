@@ -115,7 +115,7 @@ class Task extends StatelessWidget {
                       child: Text(
                           "Minimum Rating Required: " +
                               this.request.toString(),
-                          style: Theme.of(context).textTheme.body2),
+                          style: Theme.of(context).textTheme.bodyText1),
                     ),
                     //SizedBox(height: 5.0),
                     Padding(
@@ -127,7 +127,7 @@ class Task extends StatelessWidget {
                                       " / " +
                                       this.max.toString()
                                   : "No limit"),
-                          style: Theme.of(context).textTheme.body2),
+                          style: Theme.of(context).textTheme.bodyText1),
                     ),
                   ],
                 ),
