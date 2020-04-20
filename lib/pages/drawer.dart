@@ -41,7 +41,7 @@ class _DrawerPageState extends State<DrawerPage> {
             _buildListTile("Role", this.user.userRoleToString()),
             // _buildListTile("Lab", this.user.lab),
             _buildListTile("Major", this.user.major),
-            _buildListTile("Technical Skills", this.user.skills.toString()),
+            _buildListTile("Skills", this.user.skills.toString()),
             AboutListTile(icon: null),
           ],
         ).toList(),
